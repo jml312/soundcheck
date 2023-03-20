@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 export default {
   name: 'like',
   title: 'Like',
@@ -18,7 +20,7 @@ export default {
       name: 'createdAt',
       title: 'Created At',
       type: 'datetime',
-      initialValue: new Date().toISOString(),
+      initialValue: dayjs().toISOString(),
     },
   ],
 }

@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 import client from "@/lib/sanity";
 import axios from "axios";
+import dayjs from "dayjs";
 
 export default NextAuth({
   session: {
@@ -11,7 +12,6 @@ export default NextAuth({
   callbacks: {
     async signIn({ account, user }) {
       if (account.provider !== "spotify") return false;
-
       try {
         const { name, email, image } = user;
         const { playlistID } = await client.createIfNotExists({
@@ -21,7 +21,7 @@ export default NextAuth({
           email,
           image,
           postStreak: 0,
-          createdAt: new Date().toISOString(),
+          createdAt: dayjs().toISOString(),
           posts: [],
           likes: [],
           comments: [],
@@ -29,7 +29,7 @@ export default NextAuth({
           followers: [],
         });
 
-        let followsSoundcheck;
+        let followsSoundcheck = false;
         try {
           const { data } = await axios.get(
             `https://api.spotify.com/v1/playlists/${playlistID}/followers/contains?ids=${name}`,
@@ -40,9 +40,7 @@ export default NextAuth({
             }
           );
           followsSoundcheck = data[0];
-        } catch {
-          followsSoundcheck = false;
-        }
+        } catch {}
 
         if (followsSoundcheck) {
           user.playlistID = playlistID;
@@ -63,6 +61,7 @@ export default NextAuth({
               },
             }
           );
+
           await client.patch(name).set({ playlistID: id }).commit();
           user.playlistID = id;
         }

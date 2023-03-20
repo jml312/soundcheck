@@ -1,6 +1,13 @@
+a {
+  text-decoration: none;
+}
+
 div[data-orientation="horizontal"], div[data-orientation="horizontal"]:hover {
   background-color: transparent;
 }
 
-
-
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

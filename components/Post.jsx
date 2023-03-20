@@ -15,6 +15,7 @@ import {
   Button,
   TextInput,
   Textarea,
+  HoverCard,
   Group,
 } from "@mantine/core";
 import Link from "next/link";
@@ -28,343 +29,113 @@ import {
 } from "react-icons/bs";
 import { useRef, useEffect, useState } from "react";
 import { truncateText } from "@/utils/truncateText";
-import { pluralize } from "@/utils/pluralize";
 import PostModal from "./modals/PostModal";
-import { useSession } from "next-auth/react";
-import axios from "axios";
-import { AiOutlineComment, AiFillDelete, AiFillEdit } from "react-icons/ai";
+import { AiOutlineComment } from "react-icons/ai";
+import { useDisclosure, useHover } from "@mantine/hooks";
+import CommentCard from "./CommentCard";
 import EmojiPicker from "./EmojiPicker";
-import { useDisclosure } from "@mantine/hooks";
-
-const CommentCard = ({
-  text,
-  username,
-  userImage,
-  createdAt,
-  formattedCreatedAt,
-  isUser,
-  post,
-  setPost,
-  setComment,
-  setCommentEditing,
-  setIsEditType,
-  setOriginalComment,
-  setEditCommentCreatedAt,
-  setIsDeleteLoading,
-}) => {
-  return (
-    <Stack
-      w={"100%"}
-      maw={375}
-      p={"xs"}
-      sx={{
-        borderRadius: "0.25rem",
-        border: "0.75px solid rgba(201, 201, 201, 0.25)",
-        backgroundColor: "rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      <Flex
-        w={"100%"}
-        justify={"space-between"}
-        align={"center"}
-        sx={{
-          borderBottom: "1px solid rgba(201, 201, 201, 0.5)",
-        }}
-      >
-        <Flex align={"center"} gap={"xs"} pb={4}>
-          <Link passHref href={isUser ? "/my-profile" : `/profile/${username}`}>
-            <UnstyledButton>
-              <Flex
-                gap={"xs"}
-                title={isUser ? "Your profile" : `${username}'s profile`}
-                styles={{
-                  cursor: "pointer !important",
-                }}
-                align="center"
-                mb={-1}
-              >
-                <Avatar
-                  size={32}
-                  src={userImage}
-                  alt={`${username}'s profile`}
-                  radius={"xl"}
-                  style={{
-                    border: "1px solid #c0c1c4",
-                  }}
-                />
-                <Title
-                  order={6}
-                  fw={500}
-                  sx={{
-                    color: "#e7e7e7",
-                    cursor: "default",
-                  }}
-                >
-                  {truncateText(username, 16)}
-                </Title>
-              </Flex>
-            </UnstyledButton>
-          </Link>
-        </Flex>
-        <Text
-          sx={{
-            color: "rgba(201, 201, 201, 0.75)",
-            cursor: "default",
-            transform: "translateY(-0.35rem)",
-          }}
-        >
-          {formattedCreatedAt}
-        </Text>
-      </Flex>
-      <Flex mt={-6} mb={4} maw={375} w={"100%"}>
-        <Text
-          sx={{
-            color: "#c9c9c9",
-            cursor: "default",
-            wordBreak: "break-word",
-            transform: "translateX(0.25rem)",
-          }}
-        >
-          {text}
-        </Text>
-      </Flex>
-      {isUser && (
-        <Group grow spacing={0} w={"100%"} mt={"-.5rem"} position="center">
-          <Button
-            fullWidth
-            size={"xs"}
-            title="Edit comment"
-            variant={"default"}
-            // variant={"light"}
-            color="blue"
-            sx={{
-              borderTopRightRadius: "0rem",
-              borderBottomRightRadius: "0rem",
-              borderBottomLeftRadius: "0.25rem",
-              borderTopLeftRadius: "0.25rem",
-              "&:hover": {
-                backgroundColor: "rgba(25, 113, 194, 0.2) !important",
-              },
-            }}
-            leftIcon={<AiFillEdit />}
-            onClick={() => {
-              setCommentEditing(true);
-              setIsEditType(true);
-              setOriginalComment(text);
-              setEditCommentCreatedAt(createdAt);
-              setTimeout(() => {
-                setComment(text);
-              }, 0);
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            fullWidth
-            title="Delete comment"
-            size={"xs"}
-            variant={"default"}
-            // variant={"light"}
-            color="red"
-            sx={{
-              borderTopRightRadius: "0.25rem",
-              borderBottomRightRadius: "0.25rem",
-              borderBottomLeftRadius: "0rem",
-              borderTopLeftRadius: "0rem",
-              "&:hover": {
-                backgroundColor: "#4b272b !important",
-              },
-            }}
-            leftIcon={<AiFillDelete />}
-            onClick={async () => {
-              setIsDeleteLoading(true);
-              const originalPost = post;
-              try {
-                setPost({
-                  ...post,
-                  comments: post?.comments?.filter(
-                    (comment) => comment.createdAt !== createdAt
-                  ),
-                });
-                await axios.delete("/api/protected/delete-comment", {
-                  data: {
-                    postID: post?._id,
-                    key: createdAt,
-                    name: username,
-                  },
-                });
-                setIsDeleteLoading(false);
-              } catch {
-                setIsDeleteLoading(false);
-                setPost({
-                  ...originalPost,
-                });
-              }
-            }}
-          >
-            Delete
-          </Button>
-        </Group>
-      )}
-    </Stack>
-  );
-};
+import { likePost, followUser, captionPost, postComment } from "@/actions";
+import dayjs from "dayjs";
 
 function Post({
   post,
   setPost,
-  currentlyPlaying,
-  setCurrentlyPlaying,
   isUser = false,
   isPostModal = false,
-  isSelect = false,
-  originalCaption,
-  setOriginalCaption,
-  editingCaption,
-  setEditingCaption,
-  timeAgo,
   isRightbar = false,
-  setParentCaption = () => {},
-  setParentEditingCaption = () => {},
-  isCommentLoading,
-  setIsCommentLoading,
-  isDeleteLoading,
-  setIsDeleteLoading,
-  following,
-  setFollowing,
+  isSelect = false,
+  currentlyPlaying,
+  setCurrentlyPlaying,
+  selectedSong,
+  setSelectedSong,
+  session,
+  comment,
+  setComment,
+  caption,
+  setCaption,
+  badWordsFilter,
 }) {
-  const theme = useMantineTheme();
-  const [caption, setCaption] = useState(post?.caption || "");
-  const [isCaptionLoading, setIsCaptionLoading] = useState(false);
-  const [comment, setComment] = useState("");
-  const [imageHovered, setImageHovered] = useState(false);
-  const [songProgress, setSongProgress] = useState(0);
-  const { data: session } = useSession();
   const audioRef = useRef(null);
-  const captionRef = useRef(null);
-  const commentRef = useRef(null);
-  const isCurrent = currentlyPlaying === post?._id;
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const { hovered: imageHovered, ref: imageRef } = useHover();
   const [isLikeLoading, setIsLikeLoading] = useState(false);
-  const [isFollowLoading, setIsFollowLoading] = useState(false);
-  const numComments = post?.comments?.length || 0;
-  const numLikes = post?.likes?.length || 0;
-  const [commentEditing, setCommentEditing] = useState(false);
-  const [isEditType, setIsEditType] = useState(false);
-  const emojis = ["🔥", "❤️", "👍", "😂", "😍", "🤩", "😭", "🤔"];
-  const [addedEmoji, setAddedEmoji] = useState(false);
-  const [originalComment, setOriginalComment] = useState("");
-  const [editCommentCreatedAt, setEditCommentCreatedAt] = useState("");
   const [commentOpen, { open: openComment, close: closeComment }] =
     useDisclosure(false);
-  const isFollowing = following?.includes(post?.username);
-  const isLiked = !!post?.likes?.find(
-    (like) => like.username === session?.user?.name
-  );
-
-  const likePost = async () => {
-    setIsLikeLoading(true);
-    const now = new Date().toISOString();
-    const oldLikes = post?.likes || [];
-    if (isLiked) {
-      setPost({
-        ...post,
-        likes: oldLikes.filter((like) => like.username !== session?.user?.name),
-      });
-    } else {
-      setPost({
-        ...post,
-        likes: [
-          ...oldLikes,
-          {
-            username: session?.user?.name,
-            userImage: session?.user?.image,
-            createdAt: now,
-          },
-        ],
-      });
-    }
-    try {
-      await axios.post("/api/protected/like", {
-        postID: post?._id,
-        name: session?.user?.name,
-        type: isLiked ? "unlike" : "like",
-        createdAt: now,
-        playlistID: session?.user?.playlistID,
-        songID: post?.songID,
-        accessToken: session?.user?.access_token,
-      });
-      setIsLikeLoading(false);
-    } catch {
-      setIsLikeLoading(false);
-      setPost({
-        ...post,
-        likes: [...oldLikes],
-      });
-    }
-  };
+  const numComments = post?.comments?.length || 0;
+  const commentRef = useRef(null);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
+  const captionRef = useRef(null);
+  const theme = useMantineTheme();
+  const isToday = dayjs(post?.createdAt).isSame(dayjs().toDate(), "day");
+  const [showUserDetails, setShowUserDetails] = useState(true);
+  const [hasBlurredCaptionError, setHasBlurredCaptionError] = useState(false);
 
   useEffect(() => {
     audioRef.current.addEventListener("play", () => {
       setCurrentlyPlaying(post?._id);
-      setIsPlaying(true);
+      setIsAudioPlaying(true);
     });
     audioRef.current.addEventListener("pause", () => {
       if (audioRef?.current?.currentTime) {
         audioRef.current.currentTime = 0;
       }
-      setIsPlaying(false);
+      setIsAudioPlaying(false);
     });
     audioRef.current.addEventListener("timeupdate", () => {
       if (!audioRef.current) return;
       const percent =
         (audioRef?.current?.currentTime / audioRef?.current?.duration) * 100;
-      setSongProgress(percent);
+      setAudioProgress(percent);
     });
-    audioRef.current.addEventListener("ended", () => setSongProgress(0));
+    audioRef.current.addEventListener("ended", () => setAudioProgress(0));
   }, []);
-
   useEffect(() => {
-    if (!isCurrent) {
+    if (!(currentlyPlaying === post?._id)) {
       audioRef.current.pause();
     }
   }, [currentlyPlaying]);
-
-  useEffect(() => {
-    if (editingCaption && caption.length !== 0) {
-      captionRef.current.focus();
-    }
-  }, [editingCaption]);
-
   useEffect(() => {
     if (commentRef?.current) {
       commentRef.current.focus();
     }
-  }, [commentEditing]);
+  }, [comment?.type]);
+  useEffect(() => {
+    if (selectedSong?.isChanged) {
+      setSelectedSong({
+        ...selectedSong,
+        isChanged: false,
+      });
+      setCaption({
+        ...caption,
+        text: "",
+        originalText: "",
+        isEditing: true,
+      });
+      setTimeout(() => {
+        captionRef?.current?.focus();
+        setIsAudioPlaying(false);
+        setAudioProgress(0);
+      }, 0);
+    }
+  }, [selectedSong?.isChanged]);
 
   return (
     <>
       <PostModal
-        post={post}
-        setPost={setPost}
         opened={commentOpen}
         close={closeComment}
+        post={post}
+        setPost={setPost}
+        isUser={isUser}
+        isSelect={isSelect}
+        session={session}
         currentlyPlaying={currentlyPlaying}
         setCurrentlyPlaying={setCurrentlyPlaying}
-        session={session}
-        isUser={isUser}
-        originalCaption={originalCaption}
-        setOriginalCaption={setOriginalCaption}
-        setEditingCaption={setEditingCaption}
-        timeAgo={timeAgo}
+        caption={caption}
         setCaption={setCaption}
-        isSelect={isSelect}
-        isRightbar={isRightbar}
-        isCaptionLoading={isCaptionLoading}
-        isCommentLoading={isCommentLoading}
-        isDeleteLoading={isDeleteLoading}
-        following={following}
-        setFollowing={setFollowing}
+        numComments={numComments}
+        badWordsFilter={badWordsFilter}
       />
 
       <Flex
@@ -373,101 +144,224 @@ function Post({
         align={"center"}
         direction={"column"}
         px={"1.5rem"}
-        pt={isUser && "0.75rem"}
+        pt=".85rem"
         maw={425}
         mah={"100%"}
         pb={
-          isPostModal && numComments > 0 && !commentEditing ? ".75rem" : "0rem"
+          isPostModal && numComments > 0 && !comment.type
+            ? ".75rem"
+            : isSelect
+            ? "0.25rem"
+            : "0rem"
         }
         sx={{
           borderRadius: "0.5rem !important",
           overflowY: "hidden !important",
           overflowX: isSelect && "hidden !important",
+          // border: `0.75px solid ${
+          //   isUser ? theme.colors.spotify[7] : theme.colors.lightWhite[7]
+          // }`,
+          // border: isUser && `0.75px solid ${theme.colors.lightWhite[7]}`,
+          // border: isUser && `0.75px solid ${theme.colors.spotify[7]}`,
+          border: `0.75px solid ${theme.colors.lightWhite[7]}`,
         }}
       >
-        {!isUser && (
-          <Flex
-            w={isPostModal ? "100%" : "275px"}
-            justify={"space-between"}
-            mt="-0.5rem"
-            pb="0.25rem"
-            mb={"0.75rem"}
-            sx={(theme) => ({
-              borderBottom: `1px solid ${theme.colors.lightWhite[7]}`,
-            })}
+        {/* like + follow */}
+        <Flex
+          w={isPostModal ? "100%" : "275px"}
+          justify={"space-between"}
+          mt="-0.5rem"
+          pb="0.25rem"
+          mb={"0.75rem"}
+          sx={(theme) => ({
+            borderBottom: `1px solid ${theme.colors.lightWhite[7]}`,
+          })}
+        >
+          <HoverCard
+            onMouseOver={() => setShowUserDetails(true)}
+            onOpen={() => setShowUserDetails(true)}
+            disabled={!showUserDetails}
+            withinPortal
+            shadow="md"
+            offset={4}
+            position="bottom-start"
+            styles={{
+              dropdown: {
+                zIndex: 1000,
+                maxWidth: "300px",
+                backgroundColor: theme.colors.dark[7],
+                border: "none",
+                outline: "1px solid rgba(255, 255, 255, 0.25)",
+                "&:focus": {
+                  border: "none",
+                  outline: "1px solid rgba(255, 255, 255, 0.25)",
+                },
+              },
+            }}
           >
-            <Link href={`/profile/${post?.username}`} passHref>
-              <Button
-                ml={isPostModal ? "-.5rem" : "-.3rem"}
-                title={`${post?.username}'s profile`}
-                compact
-                size={isPostModal ? "md" : "sm"}
-                sx={{
-                  zIndex: 1,
-                  fontSize: isPostModal ? "0.85rem" : "0.75rem",
-                  color: "rgba(255, 255, 255, 0.75)",
-                  backgroundColor: "transparent !important",
-                  cursor: "pointer",
-                }}
-                component="a"
-                leftIcon={
-                  <Avatar
-                    size={isPostModal ? 24 : 20}
-                    src={post?.userImage}
-                    alt={`${post?.username}'s profile`}
-                    radius={"xl"}
-                    style={{
-                      border: "1px solid #c0c1c4",
+            <HoverCard.Target>
+              {isSelect ? (
+                <Button
+                  ml={isPostModal ? "-.5rem" : "-.3rem"}
+                  compact
+                  size={isPostModal ? "md" : "sm"}
+                  sx={{
+                    cursor: "default",
+                    zIndex: 1,
+                    fontSize: isPostModal ? "0.85rem" : "0.75rem",
+                    color: "rgba(255, 255, 255, 0.75)",
+                    backgroundColor: "transparent !important",
+                    "&:active": {
+                      transform: "none",
+                    },
+                  }}
+                  component="div"
+                  leftIcon={
+                    <Avatar
+                      size={isPostModal ? 24 : 20}
+                      src={post?.userImage}
+                      alt={`${post?.username}'s profile`}
+                      radius={"xl"}
+                      style={{
+                        border: "1px solid #c0c1c4",
+                      }}
+                    />
+                  }
+                >
+                  {truncateText(post?.username, 18)}
+                  {isUser ? " (you)" : ""}
+                </Button>
+              ) : (
+                <Link
+                  href={isUser ? "/my-profile" : `/profile/${post?.username}`}
+                  passHref
+                >
+                  <Button
+                    ml={isPostModal ? "-.5rem" : "-.3rem"}
+                    compact
+                    size={isPostModal ? "md" : "sm"}
+                    sx={{
+                      zIndex: 1,
+                      fontSize: isPostModal ? "0.85rem" : "0.75rem",
+                      color: "rgba(255, 255, 255, 0.75)",
+                      backgroundColor: "transparent !important",
+                      cursor: "pointer",
                     }}
-                  />
-                }
-              >
-                {truncateText(post?.username, isPostModal ? 32 : 22)}
-              </Button>
-            </Link>
+                    component="a"
+                    leftIcon={
+                      <Avatar
+                        size={isPostModal ? 24 : 20}
+                        src={post?.userImage}
+                        alt={`${post?.username}'s profile`}
+                        radius={"xl"}
+                        style={{
+                          border: "1px solid #c0c1c4",
+                        }}
+                      />
+                    }
+                  >
+                    {truncateText(post?.username, 18)}
+                    {isUser ? " (you)" : ""}
+                  </Button>
+                </Link>
+              )}
+            </HoverCard.Target>
+            <HoverCard.Dropdown onMouseEnter={() => setShowUserDetails(false)}>
+              <Group>
+                <Avatar
+                  src={post?.userImage}
+                  alt={`${post?.username}'s profile`}
+                  radius="xl"
+                  style={{
+                    border: "1px solid #c0c1c4",
+                  }}
+                />
+                <Stack spacing={5}>
+                  <Text
+                    size="sm"
+                    weight={700}
+                    sx={{ lineHeight: 1, cursor: "default" }}
+                  >
+                    {truncateText(post?.username, 18)}
+                    {isUser ? " (you)" : ""}
+                  </Text>
+                  <Group>
+                    <Text
+                      color="dimmed"
+                      size="xs"
+                      sx={{ lineHeight: 1, cursor: "default" }}
+                    >
+                      {dayjs(post?.joined).format("MMM D, YYYY")}
+                    </Text>
+                  </Group>
+                </Stack>
+              </Group>
+              <Group mt="sm" spacing="sm">
+                <Text
+                  size="sm"
+                  sx={{
+                    cursor: "default",
+                  }}
+                >
+                  <b>{post?.numFollowing || 0}</b> Following
+                </Text>
+                <Text
+                  size="sm"
+                  sx={{
+                    cursor: "default",
+                  }}
+                >
+                  <b>{post?.numFollowers || 0}</b> Follower
+                  {post?.numFollowers !== 1 && "s"}
+                </Text>
+              </Group>
+            </HoverCard.Dropdown>
+          </HoverCard>
+
+          {!isUser && (
             <Flex justify={"center"} align="center">
               <Tooltip
+                color="dark.7"
                 label={
-                  isFollowing
+                  post?.isFollowing
                     ? `Unfollow ${post?.username}`
                     : `Follow ${post?.username}`
                 }
                 position="bottom-end"
+                disabled={isFollowLoading}
+                styles={{
+                  tooltip: {
+                    border: "none",
+                    outline: "1px solid rgba(192, 193, 196, 0.25)",
+                  },
+                }}
               >
                 <ActionIcon
-                  sx={{
-                    color: isFollowing ? "rgba(29, 185, 84, .75)" : "#c1c2c5",
+                  sx={(theme) => ({
+                    transform: "translateX(.1rem)",
+                    color: post?.isFollowing
+                      ? theme.colors.green[6]
+                      : "#c1c2c5",
                     "&[data-disabled]": {
-                      color: "rgba(29, 185, 84, .75) !important",
+                      color: post?.isFollowing
+                        ? theme.colors.green[6]
+                        : "#c1c2c5",
                     },
-                  }}
+                  })}
                   variant={"transparent"}
                   radius="xl"
-                  disabled={isFollowLoading}
-                  onClick={async () => {
-                    setIsFollowLoading(true);
-                    const originalFollowing = following || [];
-                    try {
-                      setFollowing(
-                        isFollowing
-                          ? originalFollowing.filter(
-                              (user) => user !== post?.username
-                            )
-                          : [...originalFollowing, post?.username]
-                      );
-                      await axios.post("/api/protected/follow", {
-                        name: session?.user?.name,
-                        toFollowName: post?.username,
-                        type: isFollowing ? "unfollow" : "follow",
-                      });
-                      setIsFollowLoading(false);
-                    } catch {
-                      setIsFollowLoading(false);
-                      setFollowing(originalFollowing);
-                    }
-                  }}
+                  disabled={isFollowLoading || isUser}
+                  onClick={() =>
+                    followUser({
+                      isFollowing: post?.isFollowing,
+                      setIsFollowLoading,
+                      post,
+                      setPost,
+                      session,
+                    })
+                  }
                 >
-                  {isFollowing ? (
+                  {post?.isFollowing ? (
                     <FaUserCheck fontSize="1.175rem" />
                   ) : (
                     <FaUserPlus fontSize="1.175rem" />
@@ -475,199 +369,207 @@ function Post({
                 </ActionIcon>
               </Tooltip>
               <Tooltip
-                label={`${numLikes} ${pluralize("like", numLikes)}`}
+                color="dark.7"
+                label={post?.isLiked ? "Unlike post" : "Like post"}
                 position="bottom-end"
                 zIndex={2}
+                styles={{
+                  tooltip: {
+                    border: "none",
+                    outline: "1px solid rgba(192, 193, 196, 0.25)",
+                  },
+                }}
               >
                 <ActionIcon
                   variant={"transparent"}
                   radius="xl"
-                  onClick={likePost}
-                  disabled={isLikeLoading}
-                  sx={{
-                    color: isLiked ? "#f87171" : "#c1c2c5",
+                  onClick={() =>
+                    likePost({
+                      isLiked: post?.isLiked,
+                      setIsLikeLoading,
+                      post,
+                      setPost,
+                      session,
+                    })
+                  }
+                  disabled={isLikeLoading || isUser}
+                  sx={(theme) => ({
+                    color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
                     "&[data-disabled]": {
-                      color: "#f87171 !important",
+                      color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
                     },
-                  }}
+                  })}
                 >
                   <FaHeart />
                 </ActionIcon>
               </Tooltip>
             </Flex>
-          </Flex>
-        )}
+          )}
+        </Flex>
 
+        {/* caption */}
         <Flex align="center" justify={"center"} direction={"column"}>
           {isUser &&
-            (!editingCaption ? (
+            (!caption.isEditing && !caption.isModalEditing ? (
               <Flex w={"100%"} justify={"space-between"} align={"center"}>
                 <Text
-                  title="Edit caption"
+                  title={isToday && "Edit caption"}
                   color="white"
                   fw={"bold"}
                   fs="xs"
                   style={{
-                    cursor: "pointer",
+                    cursor: isToday ? "pointer" : "default",
                     alignSelf: "flex-start",
                   }}
-                  mt="-.4rem"
-                  mb={"0.25rem"}
-                  zIndex={100}
+                  mt="-.3rem"
+                  mb={"0.2rem"}
+                  zIndex={1000}
                   onClick={() => {
-                    setIsEditType(false);
-                    setCommentEditing(false);
-                    setComment("");
-                    setEditingCaption(true);
+                    if (!isToday || comment?.isLoading) return;
+                    if (setComment) {
+                      setComment({
+                        ...comment,
+                        text: "",
+                        type: "",
+                      });
+                    }
+                    setCaption({
+                      ...caption,
+                      isEditing: isSelect ? true : !isPostModal,
+                      isModalEditing: isSelect ? false : isPostModal,
+                    });
+                    setTimeout(() => {
+                      captionRef?.current?.focus();
+                    }, 0);
                   }}
                 >
-                  {truncateText(caption, isPostModal ? 25 : 22)}
+                  {caption?.text}
                 </Text>
-                {!isSelect && (
-                  <Flex
-                    align={"center"}
-                    justify="center"
-                    gap={"0.325rem"}
-                    style={{
-                      transform: "translateY(-.25rem) translateX(-.25rem)",
-                    }}
-                  >
-                    <FaHeart
-                      fontSize={"0.9rem"}
-                      style={{
-                        color: numLikes > 0 ? "#f87171" : "#c1c2c5",
-                      }}
-                    />
-                    <Text
-                      fz={"0.9rem"}
-                      style={{
-                        cursor: "default",
-                      }}
-                    >
-                      {numLikes} {pluralize("like", numLikes)}
-                    </Text>
-                  </Flex>
-                )}
               </Flex>
             ) : (
               <TextInput
+                maxLength={29}
                 data-autoFocus
                 pt={isPostModal ? 2 : 4}
                 id="caption"
-                maxLength={25}
                 onBlur={() => {
-                  if (isCaptionLoading || addedEmoji) return;
-
-                  if (caption.length === 0 || originalCaption.length === 0) {
-                    setPost({
-                      ...post,
-                      caption: originalCaption,
+                  if (caption.error && !hasBlurredCaptionError) {
+                    setHasBlurredCaptionError(true);
+                    setCaption({
+                      ...caption,
+                      isEditing: true,
                     });
-                    setCaption(originalCaption);
-                    setEditingCaption(originalCaption.length === 0);
+                    setTimeout(() => {
+                      captionRef?.current?.focus();
+                    }, 0);
                     return;
-                  } else if (caption !== originalCaption) {
-                    setPost({
-                      ...post,
-                      caption: originalCaption,
-                    });
-                    setCaption(originalCaption);
                   }
-                  setEditingCaption(false);
+                  if (caption.isLoading || caption.addedEmoji) return;
+                  setPost({
+                    ...post,
+                    caption: caption?.originalText || "",
+                  });
+                  setCaption({
+                    ...caption,
+                    text: caption?.originalText || "",
+                    error: "",
+                    isEditing: caption?.originalText?.length === 0,
+                    isModalEditing: false,
+                  });
                 }}
                 ref={captionRef}
                 w="100%"
-                value={caption}
+                value={caption.text}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (value.length > 25) return;
-                  setCaption(e.target.value);
+                  if (value.length > 29) return;
+                  setCaption({
+                    ...caption,
+                    text: value,
+                    error: "",
+                  });
                   setPost({
                     ...post,
-                    caption: e.target.value,
+                    caption: value,
                   });
                 }}
+                error={caption.error}
                 placeholder="Add a caption..."
                 icon={<BsPencil />}
                 mb={isPostModal ? "0.75rem" : ".5rem"}
                 mt={isPostModal ? "0rem" : "-.4rem"}
                 rightSection={
-                  <ActionIcon
-                    onMouseDown={async () => {
-                      const updateCaption = (captionValue, isError = false) => {
-                        setPost({
-                          ...post,
-                          caption: captionValue,
-                        });
-                        setCaption(captionValue);
-                        setOriginalCaption(captionValue);
-                        setParentCaption(captionValue);
-                        if (isError) {
-                          setParentEditingCaption(!captionValue);
-                          setEditingCaption(!captionValue);
-                        } else {
-                          setParentEditingCaption(!post?.caption);
-                          setEditingCaption(!post?.caption);
-                        }
-                      };
-
-                      if (isSelect) {
-                        updateCaption(caption);
-                      } else {
-                        const ogCaption = originalCaption;
-                        setIsCaptionLoading(true);
-                        try {
-                          updateCaption(caption);
-                          await axios.post("/api/protected/caption", {
-                            postID: post?._id,
-                            caption,
-                          });
-                          setIsCaptionLoading(false);
-                        } catch {
-                          updateCaption(ogCaption, true);
-                          setIsCaptionLoading(false);
-                        }
-                      }
+                  <Flex
+                    align="center"
+                    justify="center"
+                    gap={"0.35rem"}
+                    style={{
+                      transform: "translateX(-.75rem)",
                     }}
-                    title="Add caption"
-                    disabled={
-                      isCaptionLoading ||
-                      (caption.length === 0 && originalCaption.length === 0) ||
-                      caption === originalCaption
-                    }
-                    loading={isCaptionLoading}
-                    variant={"filled"}
                   >
-                    <BsCheck />
-                  </ActionIcon>
+                    <EmojiPicker
+                      text={caption}
+                      setText={setCaption}
+                      inputRef={captionRef}
+                    />
+                    <ActionIcon
+                      onMouseDown={() =>
+                        captionPost({
+                          isSelect,
+                          post,
+                          setPost,
+                          caption,
+                          setCaption,
+                          badWordsFilter,
+                          setHasBlurredCaptionError,
+                        })
+                      }
+                      title="Add caption"
+                      disabled={
+                        caption.isLoading ||
+                        (caption.text.length === 0 &&
+                          caption?.originalText?.length === 0) ||
+                        caption.text === caption?.originalText ||
+                        caption.error
+                      }
+                      loading={caption.isLoading}
+                      variant={"subtle"}
+                      sx={(theme) => ({
+                        "&:hover": {
+                          backgroundColor: theme.colors.dark[7],
+                        },
+                        "&:active": {
+                          backgroundColor: theme.colors.dark[7],
+                        },
+                      })}
+                    >
+                      <BsCheck />
+                    </ActionIcon>
+                  </Flex>
                 }
-                style={{
+                sx={(theme) => ({
                   zIndex: 100,
-                }}
+                  input: {
+                    border:
+                      caption.addedEmoji &&
+                      `1px solid ${theme.colors.spotify[7]}`,
+                  },
+                })}
               />
             ))}
-          {isUser && editingCaption && (
-            <EmojiPicker
-              emojis={emojis}
-              isPostModal={isPostModal}
-              text={caption}
-              setText={setCaption}
-              setAddedEmoji={setAddedEmoji}
-              currentRef={captionRef}
-            />
-          )}
 
+          {/* non-user caption */}
           {!isUser && (
             <Text
-              title={
-                isPostModal
-                  ? caption.length > 29
-                    ? caption
-                    : ""
-                  : caption.length > 21
-                  ? caption
-                  : ""
-              }
+              // title={
+              //   isPostModal
+              //     ? caption?.text?.length > 29
+              //       ? caption?.text || ""
+              //       : ""
+              //     : caption?.text?.length > 21
+              //     ? caption?.text || ""
+              //     : ""
+              // }
               color="white"
               fw={"bold"}
               fs="xs"
@@ -675,20 +577,20 @@ function Post({
                 cursor: "default",
                 alignSelf: "flex-start",
               }}
-              mt="-.4rem"
+              mt={isUser ? "-.4rem" : "-.5rem"}
               mb={"0.25rem"}
               zIndex={100}
             >
-              {truncateText(caption, isPostModal ? 29 : 21)}
+              {post?.caption}
             </Text>
           )}
 
+          {/* image + audio */}
           <div
             style={{
               position: "relative",
             }}
-            onMouseEnter={() => setImageHovered(true)}
-            onMouseLeave={() => setImageHovered(false)}
+            ref={imageRef}
           >
             <Image
               src={post?.albumImage}
@@ -704,134 +606,142 @@ function Post({
                 </Stack>
               }
               style={{
-                opacity: imageHovered || isPlaying ? 0.3 : 1,
+                opacity: imageHovered || isAudioPlaying ? 0.3 : 1,
                 transition: "opacity 0.2s ease-in-out",
               }}
             />
 
-            {(imageHovered || isPlaying) && !!post?.previewUrl && (
-              <RingProgress
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                }}
-                title={isPlaying ? "Pause" : "Play"}
-                sections={[
-                  {
-                    value: songProgress,
-                    color: theme.colors.spotify[8],
-                  },
-                ]}
-                size={isPostModal ? 105 : 90}
-                thickness={isPostModal ? 7.5 : 7.5}
-                label={
-                  <Center>
-                    <ActionIcon
-                      onClick={() => {
-                        audioRef.current.currentTime = 0;
-                        if (!isPlaying) {
-                          audioRef.current.play();
-                          setIsPlaying(true);
-                        } else {
-                          audioRef.current.pause();
-                          setIsPlaying(false);
-                        }
-                      }}
-                      title={isPlaying ? "Pause" : "Play"}
-                      size={isPostModal ? "4.5rem" : "3.75rem"}
-                      sx={{
-                        "&:hover": {
-                          backgroundColor: "transparent !important",
-                        },
-                      }}
-                    >
-                      {!isPlaying ? (
-                        <BsPlayCircleFill
-                          style={{
-                            cursor: "pointer",
-                          }}
-                          fontSize={isPostModal ? "4.5rem" : "3.75rem"}
-                        />
-                      ) : (
-                        <BsPauseCircleFill
-                          style={{
-                            cursor: "pointer",
-                          }}
-                          fontSize={isPostModal ? "4.5rem" : "3.75rem"}
-                        />
-                      )}
-                    </ActionIcon>
-                  </Center>
-                }
-              />
-            )}
-            {(imageHovered || isPlaying) && !!post?.previewUrl && (
-              <ActionIcon
-                title="Listen on Spotify"
-                component="a"
-                href={post?.songUrl}
-                target="_blank"
-                radius={"xl"}
-                size={isPostModal ? "2rem" : "1.6rem"}
-                variant={"transparent"}
-                sx={{
-                  cursor: "pointer !important",
-                  position: "absolute",
-                  top: "0.6rem",
-
-                  right: "0.6rem",
-                }}
-              >
-                <BsSpotify
-                  fontSize={isPostModal ? "2rem" : "1.6rem"}
-                  style={{
-                    cursor: "pointer !important",
-                    color: theme.colors.spotify[8],
+            {(imageHovered || isAudioPlaying) && !!post?.previewUrl && (
+              <>
+                <RingProgress
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
                   }}
+                  title={isAudioPlaying ? "Pause" : "Play"}
+                  sections={[
+                    {
+                      value: audioProgress,
+                      color: theme.colors.spotify[8],
+                    },
+                  ]}
+                  size={isPostModal ? 105 : 90}
+                  thickness={isPostModal ? 7.5 : 7.5}
+                  label={
+                    <Center>
+                      <ActionIcon
+                        onClick={() => {
+                          audioRef.current.currentTime = 0;
+                          if (!isAudioPlaying) {
+                            audioRef.current.play();
+                            setIsAudioPlaying(true);
+                          } else {
+                            audioRef.current.pause();
+                            setIsAudioPlaying(false);
+                          }
+                        }}
+                        title={isAudioPlaying ? "Pause" : "Play"}
+                        size={isPostModal ? "4.5rem" : "3.75rem"}
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "transparent !important",
+                          },
+                        }}
+                      >
+                        {!isAudioPlaying ? (
+                          <BsPlayCircleFill
+                            style={{
+                              cursor: "pointer",
+                            }}
+                            fontSize={isPostModal ? "4.5rem" : "3.75rem"}
+                          />
+                        ) : (
+                          <BsPauseCircleFill
+                            style={{
+                              cursor: "pointer",
+                            }}
+                            fontSize={isPostModal ? "4.5rem" : "3.75rem"}
+                          />
+                        )}
+                      </ActionIcon>
+                    </Center>
+                  }
                 />
-              </ActionIcon>
+                <ActionIcon
+                  title="Listen on Spotify"
+                  component="a"
+                  href={post?.songUrl}
+                  target="_blank"
+                  radius={"xl"}
+                  size={isPostModal ? "2rem" : "1.6rem"}
+                  variant={"transparent"}
+                  sx={{
+                    cursor: "pointer !important",
+                    position: "absolute",
+                    top: "0.6rem",
+                    right: "0.6rem",
+                  }}
+                  onClick={() => {
+                    audioRef.current.pause();
+                    setIsAudioPlaying(false);
+                  }}
+                >
+                  <BsSpotify
+                    fontSize={isPostModal ? "2rem" : "1.6rem"}
+                    style={{
+                      cursor: "pointer !important",
+                      color: theme.colors.spotify[8],
+                    }}
+                  />
+                </ActionIcon>
+              </>
             )}
           </div>
 
           <audio src={post?.previewUrl} type="audio/mpeg" ref={audioRef} />
 
+          {/* song info */}
           <Flex
             direction={"column"}
-            justify={"center"}
-            align={"center"}
+            // justify={"center"}
+            // align={"center"}
             mt={8}
             mb={isSelect && "0.5rem"}
+            w={!isPostModal ? 275 : 375}
+            style={{
+              textAlign: "center",
+            }}
           >
             <Title
-              title={
-                post?.songName.length >= (isPostModal ? 32 : 15)
-                  ? post?.songName
-                  : null
-              }
+              // title={post?.songName.length >= 20 ? post?.songName : null}
               order={3}
               color="white"
               sx={{
                 cursor: "default",
               }}
+              className={"truncate"}
             >
-              {truncateText(post?.songName, isPostModal ? 30 : 15)}
+              {post?.songName}
             </Title>
             <Text
-              title={
-                post?.artists.join(", ").length >= (isPostModal ? 42 : 20)
-                  ? post?.artists.join(", ")
-                  : null
-              }
+              // title={
+              //   post?.artists.join(", ").length >= 30
+              //     ? post?.artists.join(", ")
+              //     : null
+              // }
               color="rgba(255, 255, 255, 0.8)"
               sx={{
                 cursor: "default",
               }}
+              className={"truncate"}
             >
-              {truncateText(post?.artists.join(", "), isPostModal ? 42 : 20)}
+              {post?.artists.join(", ")}
             </Text>
           </Flex>
+
+          {/* comments */}
           {!isSelect && (
             <Flex
               w="100%"
@@ -847,154 +757,141 @@ function Post({
             >
               {isPostModal && (
                 <Stack w={"100%"} spacing={8}>
-                  {commentEditing ? (
-                    <Textarea
-                      onBlur={() => {
-                        if (isEditType && comment === originalComment) {
-                          setIsEditType(false);
-                          setComment("");
-                          setCommentEditing(false);
-                          return;
+                  {!!comment.type ? (
+                    <>
+                      <Textarea
+                        onBlur={() => {
+                          if (
+                            comment.isLoading ||
+                            comment.addedEmoji ||
+                            numComments === 0
+                          )
+                            return;
+                          if (
+                            comment.type === "edit" &&
+                            comment.text === comment.originalText
+                          ) {
+                            setComment({
+                              ...comment,
+                              text: "",
+                              type: "",
+                            });
+                            return;
+                          }
+                          if (comment.text) return;
+                          setComment({
+                            ...comment,
+                            text: "",
+                            type: "",
+                          });
+                        }}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value.length > 100) return;
+                          setComment({
+                            ...comment,
+                            text: value,
+                            error: "",
+                          });
+                        }}
+                        error={comment.error}
+                        ref={commentRef}
+                        sx={{
+                          zIndex: 1000,
+                        }}
+                        styles={{
+                          input: {
+                            border:
+                              comment.addedEmoji &&
+                              `1px solid ${theme.colors.spotify[7]}`,
+                          },
+                        }}
+                        maxLength={100}
+                        data-autoFocus
+                        value={comment.text}
+                        placeholder="Add a comment..."
+                        w="100%"
+                        mt={"0.5rem"}
+                        icon={
+                          <AiOutlineComment
+                            style={{
+                              position: "absolute",
+                              top: ".75rem",
+                              left: "0.75rem",
+                            }}
+                          />
                         }
-                        if (comment) return;
-                        setIsEditType(false);
-                        setComment("");
-                        setCommentEditing(false);
-                      }}
-                      ref={commentRef}
-                      sx={{
-                        zIndex: 1000,
-                      }}
-                      maxLength={100}
-                      data-autoFocus
-                      value={comment}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value.length > 100) return;
-                        setComment(value);
-                      }}
-                      placeholder="Add a comment..."
-                      w="100%"
-                      mt={"0.5rem"}
-                      icon={
-                        <AiOutlineComment
-                          style={{
-                            position: "absolute",
-                            top: ".75rem",
-                            left: "0.75rem",
-                          }}
-                        />
-                      }
-                    />
+                        rightSection={
+                          <EmojiPicker
+                            text={comment}
+                            setText={setComment}
+                            inputRef={commentRef}
+                            styles={{
+                              position: "absolute",
+                              top: "0.375rem",
+                              right: "0.4rem",
+                            }}
+                          />
+                        }
+                      />
+                      <Button
+                        style={{
+                          zIndex: 100,
+                        }}
+                        disabled={
+                          comment.text.length === 0 ||
+                          (comment.type === "edit" &&
+                            comment.text === comment.originalText)
+                        }
+                        fullWidth
+                        loading={comment.isLoading}
+                        onClick={() =>
+                          postComment({
+                            comment,
+                            setComment,
+                            post,
+                            setPost,
+                            session,
+                            badWordsFilter,
+                            commentRef,
+                          })
+                        }
+                      >
+                        {comment.isLoading
+                          ? `${
+                              comment.type === "edit" ? "Updating" : "Posting"
+                            }...`
+                          : `${
+                              comment.type === "edit" ? "Update" : "Post"
+                            } Comment`}
+                      </Button>
+                    </>
                   ) : (
                     <Button
-                      mt={"0.5rem"}
+                      disabled={comment?.isLoading || comment?.isDeleting}
+                      mt={"0.3rem"}
                       mb="1.1rem"
-                      // mb="1rem"
-                      onClick={() => setCommentEditing(true)}
+                      onClick={() =>
+                        setComment({
+                          ...comment,
+                          type: "post",
+                        })
+                      }
                       leftIcon={<AiOutlineComment />}
                       variant={"light"}
                       color="spotify"
                       sx={{
-                        zIndex: 1000,
+                        zIndex: 100,
                       }}
                     >
                       Add a comment
                     </Button>
                   )}
-
-                  {commentEditing && (
-                    <>
-                      <EmojiPicker
-                        emojis={emojis}
-                        isPostModal={isPostModal}
-                        text={comment}
-                        setText={setComment}
-                        setAddedEmoji={setAddedEmoji}
-                        currentRef={commentRef}
-                        isComment
-                      />
-                      <Button
-                        style={{
-                          zIndex: 1000,
-                        }}
-                        disabled={
-                          comment.length === 0 ||
-                          (isEditType && comment === originalComment)
-                        }
-                        fullWidth
-                        loading={isCommentLoading}
-                        onClick={async () => {
-                          setIsCommentLoading(true);
-                          const originalComments = post?.comments || [];
-                          try {
-                            const now = new Date().toISOString();
-                            if (!isEditType) {
-                              const newComment = {
-                                text: comment,
-                                createdAt: now,
-                                username: session.user.name,
-                                userImage: session.user.image,
-                              };
-                              setPost({
-                                ...post,
-                                comments: [newComment, ...originalComments],
-                              });
-                            } else {
-                              setPost({
-                                ...post,
-                                comments: originalComments
-                                  .map((c) => {
-                                    if (c.createdAt === editCommentCreatedAt)
-                                      return {
-                                        ...c,
-                                        text: comment,
-                                        createdAt: now,
-                                      };
-                                    return c;
-                                  })
-                                  .sort(
-                                    (a, b) =>
-                                      new Date(b.createdAt) -
-                                      new Date(a.createdAt)
-                                  ),
-                              });
-                            }
-                            await axios.post("/api/protected/comment", {
-                              postID: post?._id,
-                              name: session?.user?.name,
-                              text: comment,
-                              createdAt: isEditType
-                                ? editCommentCreatedAt
-                                : now,
-                              type: isEditType ? "edit" : "post",
-                            });
-                            setComment("");
-                            setCommentEditing(false);
-                            setIsCommentLoading(false);
-                            setIsEditType(false);
-                            setEditCommentCreatedAt("");
-                            setIsCommentLoading(false);
-                          } catch {
-                            setPost({
-                              ...post,
-                              comments: originalComments,
-                            });
-                            setIsCommentLoading(false);
-                          }
-                        }}
-                      >
-                        {isCommentLoading
-                          ? "Posting..."
-                          : `${isEditType ? "Update" : "Post"} Comment`}
-                      </Button>
-                    </>
-                  )}
                 </Stack>
               )}
               {isPostModal ? (
                 <Stack w="100%" mt={"0.5rem"} px={"0.75rem"}>
-                  {!post?.comments?.length && !commentEditing ? (
+                  {numComments === 0 && !comment.type ? (
                     <Center
                       mt={"-.25rem"}
                       mb={"0.1rem"}
@@ -1009,20 +906,30 @@ function Post({
                     </Center>
                   ) : (
                     <Stack>
-                      {!commentEditing && (
+                      {!comment.type && (
                         <ScrollArea
-                          h={editingCaption ? "123px" : "137px"}
+                          h={
+                            caption.isModalEditing
+                              ? caption.error
+                                ? "102px"
+                                : "121px"
+                              : "148px"
+                          }
                           type={"always"}
                           offsetScrollbars
-                          mt={"-.5rem"}
+                          mt={"-1rem"}
                           px={"0.5rem"}
                           mb={"-0.5rem"}
                           styles={{
                             scrollbar: {
                               "&, &:hover": {
-                                background: "#212227",
+                                background: "transparent",
                                 borderRadius: "0.5rem",
                               },
+                              '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
+                                {
+                                  backgroundColor: "#474952",
+                                },
                             },
                           }}
                         >
@@ -1039,23 +946,17 @@ function Post({
                                 <CommentCard
                                   key={createdAt}
                                   text={text}
+                                  createdAt={createdAt}
+                                  formattedCreatedAt={dayjs(
+                                    createdAt
+                                  ).fromNow()}
                                   username={username}
                                   userImage={userImage}
-                                  createdAt={createdAt}
-                                  formattedCreatedAt={timeAgo.format(
-                                    new Date(createdAt)
-                                  )}
                                   isUser={username === session?.user?.name}
                                   post={post}
                                   setPost={setPost}
+                                  comment={comment}
                                   setComment={setComment}
-                                  setCommentEditing={setCommentEditing}
-                                  setIsEditType={setIsEditType}
-                                  setOriginalComment={setOriginalComment}
-                                  setEditCommentCreatedAt={
-                                    setEditCommentCreatedAt
-                                  }
-                                  setIsDeleteLoading={setIsDeleteLoading}
                                 />
                               )
                             )}
@@ -1071,7 +972,6 @@ function Post({
                   justify={"space-between"}
                   align={"center"}
                   mt={".3rem"}
-                  mb={".2rem"}
                 >
                   <UnstyledButton
                     onClick={() => {
@@ -1089,6 +989,15 @@ function Post({
                       ? "View comment"
                       : `View all ${numComments} comments`}
                   </UnstyledButton>
+                  <Text
+                    c="dimmed"
+                    sx={{
+                      transform: "translateX(-.15rem) translateY(-.25rem)",
+                      cursor: "default",
+                    }}
+                  >
+                    {dayjs(post?.createdAt).format("h:mm a")}
+                  </Text>
                 </Flex>
               )}
             </Flex>

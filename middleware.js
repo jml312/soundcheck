@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+export const config = {
+  matcher: "/api/protected/:function*",
+};
+
 export async function middleware(req) {
   const token = await getToken({ req });
 
@@ -13,7 +17,3 @@ export async function middleware(req) {
 
   return NextResponse.next();
 }
-
-export const config = {
-  matcher: "/api/protected/:path*",
-};

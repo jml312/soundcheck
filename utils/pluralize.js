@@ -1,3 +1,2 @@
-export const pluralize = (singular, value) => {
-  return value === 1 ? singular : `${singular}s`;
-};
+export const pluralize = (singular, value) =>
+  `${value} ${singular}${value === 1 ? "" : "s"}`;

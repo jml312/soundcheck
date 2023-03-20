@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 export default {
   name: 'comment',
   title: 'Comment',
@@ -24,7 +26,7 @@ export default {
       name: 'createdAt',
       title: 'Created At',
       type: 'datetime',
-      initialValue: new Date().toISOString(),
+      initialValue: dayjs().toISOString(),
     },
   ],
 }

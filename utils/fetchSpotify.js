@@ -1,4 +1,5 @@
 import axios from "axios";
+import dayjs from "dayjs";
 
 export const fetchSpotify = async (accessToken) => {
   if (!accessToken) return;
@@ -17,13 +18,12 @@ export const fetchSpotify = async (accessToken) => {
         },
       }
     );
-
     if (
       !!currentlyPlaying &&
       currentlyPlaying.currently_playing_type === "track"
     ) {
       spotifyData.push({
-        playedAt: new Date(Number(currentlyPlaying.timestamp)).toISOString(),
+        playedAt: dayjs(Number(currentlyPlaying.timestamp)).toISOString(),
         songName: currentlyPlaying.item.name,
         songUrl: currentlyPlaying.item.external_urls.spotify,
         previewUrl: currentlyPlaying.item.preview_url,
@@ -44,7 +44,6 @@ export const fetchSpotify = async (accessToken) => {
         },
       }
     );
-
     const filteredRecentlyPlayed = recentlyPlayed.items
       .filter((item) => item.track.type === "track")
       .map((item) => ({

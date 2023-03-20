@@ -1,40 +1,31 @@
 import { Modal } from "@mantine/core";
 import Post from "../Post";
 import { useState } from "react";
-import { useDidUpdate } from "@mantine/hooks";
 
 export default function PostModal({
-  post,
-  setPost,
   opened,
   close,
+  post,
+  setPost,
+  isUser = false,
   currentlyPlaying,
   setCurrentlyPlaying,
-  isUser = false,
-  originalCaption,
-  setOriginalCaption,
-  timeAgo,
-  setEditingCaption,
+  caption,
   setCaption,
-  isSelect,
-  isRightbar,
-  isCaptionLoading,
-  following,
-  setFollowing,
+  session,
+  numComments,
+  badWordsFilter,
 }) {
-  const [currEditing, setCurrEditing] = useState(false);
-  const [isCommentLoading, setIsCommentLoading] = useState(false);
-  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
-
-  useDidUpdate(() => {
-    if (!isSelect && isRightbar) {
-      if (opened) {
-        if (!post?.caption) {
-          setCurrEditing(true);
-        }
-      }
-    }
-  }, [opened]);
+  const [comment, setComment] = useState({
+    text: "",
+    originalText: "",
+    type: numComments === 0 ? "post" : "", // "post" or "edit"
+    error: "",
+    editedAt: "",
+    isLoading: false,
+    isDeleting: false,
+    addedEmoji: false,
+  });
 
   return (
     <Modal
@@ -44,10 +35,19 @@ export default function PostModal({
         opacity: 0.55,
       }}
       opened={opened}
-      // centered
       onClose={() => {
-        if (isCaptionLoading || isCommentLoading || isDeleteLoading) return;
-        close();
+        if (!comment.isLoading && !comment.isDeleting && !caption?.isLoading) {
+          setComment({
+            text: "",
+            originalText: "",
+            type: numComments === 0 ? "post" : "",
+            editedAt: "",
+            isLoading: false,
+            isDeleting: false,
+            addedEmoji: false,
+          });
+          close();
+        }
       }}
       withCloseButton={false}
       padding={0}
@@ -56,24 +56,16 @@ export default function PostModal({
       <Post
         post={post}
         setPost={setPost}
+        isUser={isUser}
+        isPostModal
         currentlyPlaying={currentlyPlaying}
         setCurrentlyPlaying={setCurrentlyPlaying}
-        isPostModal
-        isUser={isUser}
-        originalCaption={originalCaption}
-        setOriginalCaption={setOriginalCaption}
-        editingCaption={currEditing}
-        setEditingCaption={setCurrEditing}
-        timeAgo={timeAgo}
-        setParentCaption={setCaption}
-        setParentEditingCaption={setEditingCaption}
-        isRightbar={false}
-        isDeleteLoading={isDeleteLoading}
-        setIsDeleteLoading={setIsDeleteLoading}
-        isCommentLoading={isCommentLoading}
-        setIsCommentLoading={setIsCommentLoading}
-        following={following}
-        setFollowing={setFollowing}
+        comment={comment}
+        setComment={setComment}
+        caption={caption}
+        setCaption={setCaption}
+        session={session}
+        badWordsFilter={badWordsFilter}
       />
     </Modal>
   );

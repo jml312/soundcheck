@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 export default {
   name: 'user',
   title: 'User',
@@ -29,7 +31,7 @@ export default {
       name: 'createdAt',
       title: 'Created At',
       type: 'datetime',
-      initialValue: new Date().toISOString(),
+      initialValue: dayjs().toISOString(),
     },
     {
       name: 'postStreak',

@@ -1,65 +1,85 @@
-import { getSession } from "next-auth/react";
-import Rightbar from "@/components/Rightbar";
+import { getSession, useSession } from "next-auth/react";
 import { fetchSpotify } from "@/utils/fetchSpotify";
 import client from "@/lib/sanity";
-import { hasPostedTodayQuery, todayPostsQuery } from "@/lib/queries";
-import { useState } from "react";
-import { serverLogout } from "@/utils/serverLogout";
+import { postsQuery } from "@/lib/queries";
+import { clearAuthCookies } from "@/utils/clearAuthCookies";
 import Post from "@/components/Post";
-import { Flex, Button, Text, ScrollArea } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import FilterModal from "@/components/modals/FilterModal";
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
+import { getDayInterval } from "@/utils/getDayInterval";
+import dayjs from "dayjs";
+import { useState } from "react";
+import { Flex, Button, Text, ScrollArea } from "@mantine/core";
+import SelectSongModal from "@/components/modals/SelectSongModal";
+import Filter from "bad-words";
 
-function Home({ spotifyData, userPost, todayPosts, following }) {
+function Home({ spotifyData, todayPosts }) {
+  const { data: session } = useSession();
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [posts, setPosts] = useState({
-    feedPosts: todayPosts,
-    userPost,
-    following: following.map((f) => f._ref),
+    feedPosts: todayPosts.feedPosts,
+    userPost: todayPosts.userPost,
   });
   const [feedFilter, setFeedFilter] = useState({
-    date: new Date(),
+    date: dayjs().toDate(),
     type: "Everyone",
   });
+  const [caption, setCaption] = useState({
+    text: posts.userPost?.caption || "",
+    originalText: posts.userPost?.caption || "",
+    error: "",
+    isEditing: !posts.userPost?.caption,
+    isLoading: false,
+    addedEmoji: false,
+    isModalEditing: false,
+  });
+  const badWordsFilter = new Filter();
+  const oneCard = useMediaQuery("(max-width: 900px)");
+  const twoCards = useMediaQuery("(max-width: 1200px)");
+  const allPosts = !!posts?.userPost
+    ? [posts.userPost, ...posts.feedPosts]
+    : posts?.feedPosts || [];
+  const formattedDate = dayjs(feedFilter.date).format("MMMM D, YYYY");
   const [filterOpened, { open: openFilter, close: closeFilter }] =
     useDisclosure(false);
-  TimeAgo.addDefaultLocale(en);
-  const timeAgo = new TimeAgo("en-US");
-  const feedPosts = posts?.feedPosts;
-  const setFeedPosts = (posts) => {
-    setPosts({ ...posts, feedPosts: posts });
-  };
-  const setFeedPost = (post) => {
-    setPosts({
-      ...posts,
-      feedPosts: feedPosts.map((p) => (p._id === post._id ? post : p)),
-    });
-  };
-  const setUserPost = (post) => {
+  const [selectSongOpened, { close: closeSelectSong }] = useDisclosure(
+    !todayPosts?.userPost
+  );
+
+  const setUserPost = (post) =>
     setPosts({
       ...posts,
       userPost: post,
     });
-  };
-  const setFollowing = (following) => {
+  const setFeedPost = (post) =>
     setPosts({
       ...posts,
-      following,
+      feedPosts: posts.feedPosts.map((p) => (p._id === post._id ? post : p)),
     });
-  };
 
   return (
     <>
+      <SelectSongModal
+        opened={selectSongOpened}
+        close={closeSelectSong}
+        spotifyData={spotifyData}
+        currentlyPlaying={currentlyPlaying}
+        setCurrentlyPlaying={setCurrentlyPlaying}
+        session={session}
+        setPost={setUserPost}
+        caption={caption}
+        setCaption={setCaption}
+        badWordsFilter={badWordsFilter}
+      />
       <FilterModal
         opened={filterOpened}
         close={closeFilter}
         feedFilter={feedFilter}
         setFeedFilter={setFeedFilter}
-        todayPosts={todayPosts}
-        feedPosts={feedPosts}
-        setFeedPosts={setFeedPosts}
+        posts={posts}
+        setPosts={setPosts}
+        formattedDate={formattedDate}
+        session={session}
       />
 
       <Flex
@@ -71,7 +91,7 @@ function Home({ spotifyData, userPost, todayPosts, following }) {
         direction={"column"}
       >
         <Flex
-          w={"75%"}
+          w={"100%"}
           h="100%"
           justify={"center"}
           align={"center"}
@@ -79,95 +99,88 @@ function Home({ spotifyData, userPost, todayPosts, following }) {
             transform: "translateY(5rem)",
           }}
           direction={"column"}
+          mt={"2.25rem"}
         >
           <Flex
             w="100%"
             justify={"center"}
             align={"center"}
+            gap={".5rem"}
             style={{
-              transform: "translateY(-3rem)",
+              position: "absolute",
+              top: "0",
+              left: "0",
+              transform: "translateY(1.5rem)",
             }}
-            mb={"1rem"}
           >
-            <Button variant="light" color="gray" size="sm" onClick={openFilter}>
-              {feedFilter.type} on{" "}
-              {feedFilter.date.toLocaleString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
+            <Button
+              variant="light"
+              color="gray"
+              size="sm"
+              onClick={openFilter}
+              fw={"bold"}
+              mb={"2.15rem"}
+            >
+              {feedFilter.type} on {formattedDate}
             </Button>
           </Flex>
-
-          {!feedPosts?.length ? (
-            <Text fz={"lg"}>
-              {`No posts found for ${feedFilter.type.toLowerCase()} on ${feedFilter.date.toLocaleString(
-                "en-US",
-                {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                }
-              )}`}
-            </Text>
-          ) : (
+          {allPosts.length > 0 ? (
             <ScrollArea
-              w="75%"
-              h={500}
               type="always"
-              // mt={"2rem"}
-              // pt={"2rem"}
-              // styles={{
-              //   scrollbar: {
-              //     transform: "translateY(2rem)",
-              //   },
-              // }}
-              // style={{
-              //   transform: "translateY(-2rem)",
-              // }}
-              offsetScrollbars
+              w={oneCard ? "350px" : twoCards ? "700px" : "1050px"}
+              h={"565px"}
+              style={{
+                transform: "translateY(2.8rem)",
+              }}
               styles={{
                 scrollbar: {
                   "&, &:hover": {
-                    background: "#212227",
+                    backgroundColor: "transparent",
                     borderRadius: "0.5rem",
                   },
+                  '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
+                    backgroundColor: "#474952",
+                  },
+                },
+                corner: {
+                  display: "none",
                 },
               }}
             >
               <Flex
-                gap={"2.5rem"}
-                justify={"space-evenly"}
+                justify={"center"}
                 align={"center"}
-                wrap={"wrap"}
                 w={"100%"}
-                h="100%"
+                h={"100%"}
+                wrap={"wrap"}
+                gap="1.5rem"
               >
-                {feedPosts?.map((post) => (
-                  <Post
-                    key={post._id}
-                    post={post}
-                    setPost={setFeedPost}
-                    currentlyPlaying={currentlyPlaying}
-                    setCurrentlyPlaying={setCurrentlyPlaying}
-                    timeAgo={timeAgo}
-                    following={posts?.following}
-                    setFollowing={setFollowing}
-                  />
-                ))}
+                {allPosts?.map((post) => {
+                  const isUser = post?.username === session?.user?.name;
+                  return (
+                    <Post
+                      key={post._id}
+                      isUser={isUser}
+                      post={post}
+                      setPost={isUser ? setUserPost : setFeedPost}
+                      currentlyPlaying={currentlyPlaying}
+                      setCurrentlyPlaying={setCurrentlyPlaying}
+                      session={session}
+                      caption={caption}
+                      setCaption={setCaption}
+                      badWordsFilter={badWordsFilter}
+                    />
+                  );
+                })}
               </Flex>
             </ScrollArea>
+          ) : (
+            <Text fz={"lg"}>{`No posts 
+            for ${feedFilter.type} on
+            ${formattedDate}
+            `}</Text>
           )}
         </Flex>
-
-        <Rightbar
-          spotifyData={spotifyData}
-          post={posts?.userPost}
-          setPost={setUserPost}
-          currentlyPlaying={currentlyPlaying}
-          setCurrentlyPlaying={setCurrentlyPlaying}
-          timeAgo={timeAgo}
-        />
       </Flex>
     </>
   );
@@ -177,49 +190,57 @@ export async function getServerSideProps({ req, res }) {
   const session = await getSession({ req });
 
   if (!session) {
-    serverLogout(res);
+    clearAuthCookies(res);
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
   }
 
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todaysString = today.toISOString();
-
-    const { userPost, following } = await client.fetch(hasPostedTodayQuery, {
+    const { startDate, endDate } = getDayInterval(dayjs());
+    const todayPosts = await client.fetch(postsQuery, {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
       name: session?.user?.name,
-      todayStart: todaysString,
     });
 
-    const todayPosts = await client.fetch(todayPostsQuery, {
-      name: session?.user?.name,
-      todayStart: todaysString,
-    });
-
-    if (userPost) {
+    if (!!todayPosts.userPost) {
       return {
         props: {
-          userPost,
           todayPosts,
-          following,
         },
       };
     }
 
     const spotifyData = await fetchSpotify(session?.user?.access_token);
 
-    if (!spotifyData) {
-      serverLogout(res);
+    if (!spotifyData?.length) {
+      clearAuthCookies(res);
+      return {
+        redirect: {
+          destination: "/",
+          permanent: false,
+        },
+      };
     }
 
     return {
       props: {
         todayPosts,
         spotifyData,
-        following,
       },
     };
   } catch {
-    serverLogout(res);
+    clearAuthCookies(res);
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
   }
 }
 

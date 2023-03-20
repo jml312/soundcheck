@@ -1,5 +1,5 @@
-import { hasPostedYesterdayQuery } from "@/lib/queries";
 import client from "@/lib/sanity";
+import dayjs from "dayjs";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -20,6 +20,7 @@ export default async function handler(req, res) {
   } = req.body;
 
   try {
+    const today = dayjs().toISOString();
     const { _id } = await client.create({
       _type: "post",
       caption,
@@ -33,38 +34,21 @@ export default async function handler(req, res) {
       songID,
       likes: [],
       comments: [],
-      createdAt: new Date().toISOString(),
+      createdAt: today,
       user: {
         _type: "reference",
         _ref: name,
       },
     });
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0);
-
-    const { hasPostedYesterday, postStreak } = await client.fetch(
-      hasPostedYesterdayQuery,
-      {
-        name,
-        todayStart: today.toISOString(),
-        yesterdayStart: yesterday.toISOString(),
-      }
-    );
-
     await client
       .patch(name)
-      .set({
-        postStreak: hasPostedYesterday ? postStreak + 1 : 1,
-      })
+      .inc({ postStreak: 1 })
       .append("posts", [
         {
           _type: "reference",
           _ref: _id,
-          _key: today.toISOString(),
+          _key: today,
         },
       ])
       .commit();

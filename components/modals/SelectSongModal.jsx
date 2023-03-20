@@ -2,7 +2,6 @@ import {
   Modal,
   Select,
   Button,
-  Stack,
   Group,
   Avatar,
   Text,
@@ -10,8 +9,8 @@ import {
 } from "@mantine/core";
 import { BsMusicNoteBeamed } from "react-icons/bs";
 import Post from "../Post";
-import { forwardRef, useState, useEffect } from "react";
-import axios from "axios";
+import { forwardRef, useState, useRef } from "react";
+import { postSong } from "@/actions";
 
 const SelectItem = forwardRef(
   ({ songName, albumImage, albumName, ...others }, ref) => (
@@ -31,7 +30,6 @@ const SelectItem = forwardRef(
 SelectItem.displayName = "SelectItem";
 
 export default function SelectSongModal({
-  selectRef,
   opened,
   close,
   spotifyData,
@@ -39,48 +37,17 @@ export default function SelectSongModal({
   setCurrentlyPlaying,
   session,
   setPost,
-  originalCaption,
-  setOriginalCaption,
-  editingCaption,
-  setEditingCaption,
+  caption,
+  setCaption,
 }) {
   const theme = useMantineTheme();
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedSong, setSelectedSong] = useState();
-  const [selectedSongData, setSelectedSongData] = useState();
-
-  useEffect(() => {
-    if (opened) {
-      setSelectedSong(spotifyData[0]?.songName || "");
-      setSelectedSongData(spotifyData[0]);
-    }
-  }, [opened, spotifyData]);
-
-  const postSong = async () => {
-    setIsLoading(true);
-    try {
-      const {
-        data: { _id },
-      } = await axios.post("/api/protected/post", {
-        ...selectedSongData,
-        name: session.user.name,
-      });
-      setPost({
-        ...selectedSongData,
-        _id,
-        username: session.user.name,
-        userImage: session.user.image,
-        caption: selectedSongData?.caption,
-      });
-      setOriginalCaption(selectedSongData?.caption || "");
-      setEditingCaption(originalCaption.length === 0);
-      setIsLoading(false);
-      close();
-    } catch {
-      setIsLoading(false);
-      setPost(null);
-    }
-  };
+  const [selectedSong, setSelectedSong] = useState({
+    value: spotifyData ? spotifyData[0]?.songName : "",
+    data: spotifyData ? spotifyData[0] : {},
+    isChanged: false,
+    isLoading: false,
+  });
+  const selectRef = useRef(null);
 
   return (
     <Modal
@@ -106,14 +73,19 @@ export default function SelectSongModal({
       }}
     >
       <Select
-        w={!!selectedSong ? "100%" : 375}
-        mb={20}
+        clearable={false}
+        w={!!selectedSong.value ? "100%" : 375}
+        mb={15}
         radius={"0.25rem"}
-        ref={selectRef}
-        defaultValue={selectedSong}
         withinPortal
         dropdownPosition="bottom"
         placeholder="Choose a song"
+        maxDropdownHeight={350}
+        nothingFound="No songs found"
+        searchable
+        ref={selectRef}
+        defaultValue={selectedSong.value}
+        value={selectedSong.value}
         itemComponent={SelectItem}
         data={
           spotifyData?.map((data) => ({
@@ -122,24 +94,17 @@ export default function SelectSongModal({
             label: data.songName,
           })) || []
         }
-        searchable
-        clearable
-        allowDeselect
-        maxDropdownHeight={350}
-        nothingFound="No songs found"
         filter={(value, item) =>
           item.songName.toLowerCase().includes(value?.toLowerCase()?.trim()) ||
           item.albumName.toLowerCase().includes(value?.toLowerCase()?.trim())
         }
-        value={selectedSong}
         onChange={(value) => {
-          setSelectedSong(null);
-          setTimeout(() => {
-            setSelectedSong(value);
-          }, 0);
-          setSelectedSongData(
-            spotifyData.find((data) => data.songName === value)
-          );
+          setSelectedSong({
+            ...selectedSong,
+            value,
+            data: spotifyData?.find((data) => data.songName === value),
+            isChanged: true,
+          });
         }}
         icon={<BsMusicNoteBeamed />}
         styles={{
@@ -159,29 +124,50 @@ export default function SelectSongModal({
         }}
       />
 
-      {!!selectedSong && (
+      {!!selectedSong.value && (
         <Post
+          post={{
+            ...selectedSong.data,
+            username: session?.user?.name,
+            userImage: session?.user?.image,
+          }}
+          setPost={(post) => {
+            setSelectedSong({
+              ...selectedSong,
+              data: post,
+            });
+          }}
           isUser={true}
-          isSelect={true}
-          post={selectedSongData}
-          setPost={setSelectedSongData}
+          isPostModal
+          isSelect
           currentlyPlaying={currentlyPlaying}
           setCurrentlyPlaying={setCurrentlyPlaying}
-          originalCaption={originalCaption}
-          setOriginalCaption={setOriginalCaption}
-          editingCaption={editingCaption}
-          setEditingCaption={setEditingCaption}
-          isPostModal
+          selectedSong={selectedSong}
+          setSelectedSong={setSelectedSong}
+          session={session}
+          caption={caption}
+          setCaption={setCaption}
         />
       )}
 
       <Button
-        w={!!selectedSong ? "100%" : 375}
-        onClick={postSong}
+        w={!!selectedSong.value ? "100%" : 375}
+        onClick={() =>
+          postSong({
+            selectedSong,
+            setSelectedSong,
+            session,
+            setPost,
+            caption,
+            setCaption,
+            setCurrentlyPlaying,
+            close,
+          })
+        }
         fullWidth
-        disabled={!selectedSong}
-        mt={20}
-        loading={isLoading}
+        disabled={!selectedSong.value}
+        mt={15}
+        loading={selectedSong.isLoading}
       >
         Post this song!
       </Button>

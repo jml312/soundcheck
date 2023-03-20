@@ -35,7 +35,6 @@ export default async function handler(req, res) {
           },
         ])
         .commit();
-
       try {
         await axios.post(
           `https://api.spotify.com/v1/playlists/${playlistID}/tracks`,
@@ -67,11 +66,7 @@ export default async function handler(req, res) {
               Authorization: `Bearer ${accessToken}`,
             },
             data: {
-              tracks: [
-                {
-                  uri: `spotify:track:${songID}`,
-                },
-              ],
+              tracks: [{ uri: `spotify:track:${songID}` }],
             },
           }
         );

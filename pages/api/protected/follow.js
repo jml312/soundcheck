@@ -1,4 +1,5 @@
 import client from "@/lib/sanity";
+import dayjs from "dayjs";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -9,7 +10,7 @@ export default async function handler(req, res) {
 
   try {
     if (type === "follow") {
-      const key = new Date().toISOString();
+      const key = dayjs().toISOString();
       await client
         .patch(name)
         .append("following", [

@@ -7,18 +7,29 @@ import {
   Text,
   UnstyledButton,
   Navbar as MantineNavbar,
+  createStyles,
 } from "@mantine/core";
-import { useRouter } from "next/router";
 import { useSession, signOut } from "next-auth/react";
 import { BsChevronDown } from "react-icons/bs";
 import { FaSignOutAlt } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
 import { useState } from "react";
+import Link from "next/link";
+import { useMediaQuery } from "@mantine/hooks";
+
+const useStyles = createStyles((theme) => ({
+  logoText: {
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
+      fontSize: "1.5rem",
+    },
+  },
+}));
 
 function Navbar({ children }) {
-  const router = useRouter();
   const { data: session } = useSession();
   const [menuHover, setMenuHover] = useState(false);
+  const { classes } = useStyles();
+  const isMobile = useMediaQuery("(max-width: 480px)");
 
   return (
     <>
@@ -39,20 +50,21 @@ function Navbar({ children }) {
           align={"center"}
           px={16}
         >
-          <Title
-            color="white"
-            onClick={() => router.push("/home")}
-            style={{
-              cursor: "pointer",
-              transform: "translateY(-0.25rem)",
-              userSelect: "none",
-            }}
-          >
-            Soundcheck!
-          </Title>
+          <Link href="/home" passHref>
+            <Title
+              color="white"
+              style={{
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+              className={classes.logoText}
+            >
+              Soundcheck!
+            </Title>
+          </Link>
 
           <Menu
-            trigger="hover"
+            trigger={isMobile ? "click" : "hover"}
             openDelay={100}
             closeDelay={400}
             width={260}
@@ -64,7 +76,7 @@ function Navbar({ children }) {
           >
             <Menu.Target>
               <UnstyledButton
-                sx={(theme) => ({
+                sx={() => ({
                   borderRadius: "0.5rem",
                   padding: "0.5rem",
                   backgroundColor: menuHover ? "#141517" : "transparent",
@@ -91,12 +103,11 @@ function Navbar({ children }) {
               </UnstyledButton>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item
-                onClick={() => router.push("/my-profile")}
-                icon={<CgProfile size={"0.9rem"} stroke={1.5} />}
-              >
-                Profile
-              </Menu.Item>
+              <Link href="/my-profile" passHref>
+                <Menu.Item icon={<CgProfile size={"0.9rem"} stroke={1.5} />}>
+                  Profile
+                </Menu.Item>
+              </Link>
 
               <Menu.Divider />
               <Menu.Item

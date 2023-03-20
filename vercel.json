@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/post-streaks",
-      "schedule": "1 0 * * *"
-    }
-  ]
-}

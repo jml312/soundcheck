@@ -8,11 +8,7 @@ export default function Custom404() {
 
   useEffect(() => {
     if (status === "loading") return;
-    if (status === "unauthenticated") {
-      router.push("/");
-      return;
-    }
-    router.push("/home");
+    router.push(status === "unauthenticated" ? "/" : "/home");
   }, []);
 
   return null;

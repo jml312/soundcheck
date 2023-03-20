@@ -1,42 +1,89 @@
-import { Flex, ActionIcon } from "@mantine/core";
+import { HoverCard, ActionIcon, Flex } from "@mantine/core";
+import { VscReactions } from "react-icons/vsc";
+import { useDisclosure } from "@mantine/hooks";
 
-export default function EmojiPicker({
-  emojis,
-  isPostModal,
-  text,
-  setText,
-  setAddedEmoji,
-  isComment,
-  currentRef,
-}) {
+export default function EmojiPicker({ text, setText, inputRef, styles }) {
+  const emojis = ["🔥", "❤️", "👍", "😂", "😍", "🤩", "😭", "🤔"];
+  const [
+    emojiPickerOpened,
+    { open: openEmojiPicker, close: closeEmojiPicker },
+  ] = useDisclosure(false);
+
   return (
-    <Flex
-      w={"100%"}
-      align={"center"}
-      justify={"center"}
-      mt={!isPostModal ? "-.1rem" : isComment ? ".2rem" : "-.25rem"}
-      mb={!isPostModal ? ".5rem" : isComment ? ".2rem" : ".5rem"}
+    <HoverCard
+      zIndex={1000}
+      width={150}
+      shadow="md"
+      position="bottom-end"
+      onOpen={openEmojiPicker}
+      onClose={closeEmojiPicker}
     >
-      {emojis.map((emoji, i) => (
+      <HoverCard.Target>
         <ActionIcon
-          key={i}
+          size={"xs"}
+          variant={"subtle"}
+          sx={(theme) => ({
+            ...styles,
+            backgroundColor: emojiPickerOpened ? theme.colors.dark[7] : "none",
+            "&:hover": {
+              backgroundColor: theme.colors.dark[7],
+            },
+            "&:active": {
+              backgroundColor: theme.colors.dark[7],
+              transform: "none",
+            },
+          })}
           onMouseDown={() => {
-            if (setAddedEmoji) {
-              setAddedEmoji(true);
-            }
-            const newText = text.length === 0 ? `${emoji}` : `${text} ${emoji}`;
-            setText(newText);
+            setText({
+              ...text,
+              addedEmoji: true,
+            });
           }}
           onClick={() => {
-            if (currentRef) {
-              currentRef.current.focus();
-            }
-            setAddedEmoji(false);
+            setText({
+              ...text,
+              addedEmoji: false,
+            });
+            inputRef.current.focus();
           }}
         >
-          {emoji}
+          <VscReactions />
         </ActionIcon>
-      ))}
-    </Flex>
+      </HoverCard.Target>
+      <HoverCard.Dropdown>
+        <Flex wrap={"wrap"} justify={"space-between"} align={"center"}>
+          {emojis.map((emoji, idx) => (
+            <ActionIcon
+              key={idx}
+              onMouseDown={() => {
+                setText({
+                  ...text,
+                  text: text.text + emoji,
+                  addedEmoji: true,
+                });
+              }}
+              onClick={() => {
+                setText({
+                  ...text,
+                  addedEmoji: false,
+                });
+                inputRef.current.focus();
+              }}
+              sx={(theme) => ({
+                "&:hover": {
+                  backgroundColor: theme.colors.dark[7],
+                },
+                "&:active": {
+                  backgroundColor: theme.colors.dark[7],
+                  transform: "none",
+                },
+              })}
+            >
+              {emoji}
+            </ActionIcon>
+          ))}
+        </Flex>
+      </HoverCard.Dropdown>
+    </HoverCard>
   );
 }

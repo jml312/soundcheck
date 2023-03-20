@@ -1,55 +1,83 @@
-import { Modal, SegmentedControl, Stack, Text } from "@mantine/core";
+import {
+  Modal,
+  SegmentedControl,
+  Stack,
+  LoadingOverlay,
+  Button,
+  Center,
+  Box,
+} from "@mantine/core";
 import { MdOutlineDateRange } from "react-icons/md";
 import { DatePickerInput } from "@mantine/dates";
-import { notifications } from "@mantine/notifications";
-import { useDidUpdate } from "@mantine/hooks";
-import { pluralize } from "@/utils/pluralize";
+import axios from "axios";
+import { getDayInterval } from "@/utils/getDayInterval";
+import dayjs from "dayjs";
+import { useQuery } from "react-query";
+import { RiUserFollowFill, RiGroupFill } from "react-icons/ri";
+import { RxReset } from "react-icons/rx";
 
 export default function FilterModal({
   opened,
   close,
   feedFilter,
   setFeedFilter,
-  todayPosts,
-  feedPosts,
-  setFeedPosts,
+  posts,
+  setPosts,
+  formattedDate,
+  session,
 }) {
-  useDidUpdate(() => {
-    if (!feedPosts) {
-      // notifications.show({
-      //   message: `No posts found for or ${
-      //     feedFilter.type
-      //   } on ${feedFilter.date.toLocaleString("en-US", {
-      //     month: "long",
-      //     day: "numeric",
-      //     year: "numeric",
-      //   })}`,
-      //   color: "blue",
-      // });
-    } else {
-      // notifications.show({
-      //   message: `Showing ${feedPosts.length} ${pluralize(
-      //     "post",
-      //     feedPosts.length
-      //   )} for ${feedFilter.type} on ${feedFilter.date.toLocaleString("en-US", {
-      //     month: "long",
-      //     day: "numeric",
-      //     year: "numeric",
-      //   })}`,
-      //   color: "blue",
-      // });
-    }
-  }, [feedFilter, feedPosts]);
+  const { isLoading } = useQuery({
+    queryKey: [
+      "search",
+      {
+        date: dayjs(feedFilter.date).format("YYYY-MM-DD"),
+        type: feedFilter.type,
+      },
+    ],
+    queryFn: async () => {
+      const { startDate, endDate } = getDayInterval(feedFilter.date);
+      const { data } = await axios.get("/api/protected/search", {
+        params: {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+          name: session?.user?.name,
+          type: feedFilter.type,
+        },
+      });
+      return {
+        userPost: data.userPost || null,
+        feedPosts:
+          data.feedPosts.filter(({ isFollowing }) =>
+            feedFilter.type === "Following" ? isFollowing : true
+          ) || [],
+      };
+    },
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    retry: false,
+    retryOnMount: false,
+    retryDelay: 0,
+    notifyOnChangeProps: ["data"],
+    onSuccess: (data) => {
+      close();
+      setPosts({
+        ...posts,
+        userPost: data?.userPost || null,
+        feedPosts: data?.feedPosts || [],
+      });
+    },
+  });
 
   return (
     <Modal
       opened={opened}
-      onClose={close}
-      title={`${feedFilter.type} on ${feedFilter.date.toLocaleString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      })}`}
+      onClose={() => {
+        if (!isLoading) {
+          close();
+        }
+      }}
+      title={`${feedFilter.type} on ${formattedDate}`}
       returnFocus={false}
       centered
       size="sm"
@@ -59,15 +87,8 @@ export default function FilterModal({
         opacity: 0.55,
       }}
     >
+      <LoadingOverlay visible={isLoading} />
       <Stack w={"100%"} align={"center"} justify={"center"} spacing={"lg"}>
-        {/* <Text mt={"-0.25rem"} mb={"-0.5rem"}>
-          {feedFilter.type} on{" "}
-          {feedFilter.date.toLocaleString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </Text> */}
         <DatePickerInput
           w={"100%"}
           icon={<MdOutlineDateRange />}
@@ -78,25 +99,48 @@ export default function FilterModal({
           onChange={(date) => {
             setFeedFilter({
               ...feedFilter,
-              date: date,
+              date: dayjs(date).toDate(),
             });
-            const isToday = date.toDateString() === new Date().toDateString();
-            if (isToday) {
-              setFeedPosts(todayPosts);
-            } else {
-              setFeedPosts(null);
-            }
           }}
           mx="auto"
           maw={400}
-          minDate={new Date("2023-03-08")}
-          maxDate={new Date("2023-03-09")}
-          // maxDate={new Date()}
+          minDate={dayjs("2023-03-11").toDate()} // TODO: Change to first post date
+          maxDate={dayjs().toDate()}
+          styles={{
+            month: {
+              ".mantine-DatePickerInput-day[data-weekend]": {
+                color: "#c1c2c5 !important",
+              },
+              ".mantine-DatePickerInput-day[data-weekend][data-selected]": {
+                color: "#ffffff !important",
+              },
+            },
+            input: {
+              marginTop: ".2rem",
+            },
+          }}
         />
         <SegmentedControl
+          transitionDuration={0}
           data={[
-            { label: "Everyone", value: "Everyone" },
-            { label: "Following", value: "Following" },
+            {
+              value: "Everyone",
+              label: (
+                <Center>
+                  <RiGroupFill size=".65rem" />
+                  <Box ml={4}>Everyone</Box>
+                </Center>
+              ),
+            },
+            {
+              value: "Following",
+              label: (
+                <Center>
+                  <RiUserFollowFill size=".7rem" />
+                  <Box ml={4}>Following</Box>
+                </Center>
+              ),
+            },
           ]}
           value={feedFilter.type}
           onChange={(value) => {
@@ -106,6 +150,25 @@ export default function FilterModal({
             });
           }}
         />
+
+        <Button
+          onClick={() => {
+            setFeedFilter({
+              date: dayjs().toDate(),
+              type: "Everyone",
+            });
+          }}
+          color="gray"
+          variant="light"
+          fullWidth
+          leftIcon={<RxReset size=".7rem" />}
+          disabled={
+            dayjs(feedFilter.date).isSame(dayjs(), "day") &&
+            feedFilter.type === "Everyone"
+          }
+        >
+          Reset
+        </Button>
       </Stack>
     </Modal>
   );
