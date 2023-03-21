@@ -1,5 +1,7 @@
 import client from "@/lib/sanity";
 import dayjs from "dayjs";
+import { getDiscoverSongs } from "@/actions";
+import { getSession } from "next-auth/react";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -43,9 +45,19 @@ export default async function handler(req, res) {
       },
     });
 
+    const session = await getSession({ req });
+    const recommendations = await getDiscoverSongs({
+      name: session.user.name,
+      accessToken: session.user.accessToken,
+      client,
+    });
+
     await client
       .patch(name)
       .inc({ postStreak: 1 })
+      .set({
+        discoverSongs: recommendations,
+      })
       .append("posts", [
         {
           _type: "reference",

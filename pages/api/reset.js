@@ -2,6 +2,7 @@ import client from "@/lib/sanity";
 import { hasPostedYesterdayQuery } from "@/lib/queries";
 import dayjs from "dayjs";
 import { getDayInterval } from "@/utils/getDayInterval";
+import { getDiscoverSongs } from "@/actions";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -35,8 +36,17 @@ export default async function handle(req, res) {
         yesterdayEnd: yesterdayEnd.toISOString(),
       });
 
+      const recommendations = await getDiscoverSongs({
+        name: session.user.name,
+        accessToken: session.user.accessToken,
+        client,
+      });
+
       await client
         .patch(_id)
+        .set({
+          discoverSongs: recommendations,
+        })
         .set(hasPostedYesterday ? {} : { postStreak: 0 })
         .unset(["recentlyPlayed"])
         .commit();

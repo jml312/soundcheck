@@ -1,5 +1,7 @@
 import client from "@/lib/sanity";
 import axios from "axios";
+import { getDiscoverSongs } from "@/actions";
+import { getSession } from "next-auth/react";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -11,8 +13,18 @@ export default async function handler(req, res) {
 
   try {
     if (type === "like") {
+      const session = await getSession({ req });
+      const recommendations = await getDiscoverSongs({
+        name: session.user.name,
+        accessToken: session.user.accessToken,
+        client,
+      });
+
       await client
         .patch(name)
+        .set({
+          discoverSongs: recommendations,
+        })
         .append("likes", [
           {
             _type: "reference",

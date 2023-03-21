@@ -18,8 +18,8 @@ export default async function getPosts({ isClient, date, name }) {
     });
     return data;
   } else {
-    const client = await import("../lib/sanity.js").then((res) => res.default);
-    const { postsQuery } = await import("../lib/queries.js");
+    const client = await import("@/lib/sanity").then((res) => res.default);
+    const { postsQuery } = await import("@/lib/queries");
     const data = await client.fetch(postsQuery, {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),

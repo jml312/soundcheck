@@ -51,6 +51,12 @@ export default {
       of: [{type: 'track'}],
     },
     {
+      name: 'discoverSongs',
+      title: 'Discover Songs',
+      type: 'array',
+      of: [{type: 'track'}],
+    },
+    {
       name: 'posts',
       title: 'Posts',
       type: 'array',

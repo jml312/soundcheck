@@ -4,7 +4,7 @@ import client from "@/lib/sanity";
 import { recentlyPlayedQuery } from "@/lib/queries";
 
 export const fetchSpotify = async (session) => {
-  const { access_token, name } = session.user;
+  const { accessToken, name } = session.user;
 
   try {
     const recentlyPlayedSongs = await client.fetch(recentlyPlayedQuery, {
@@ -22,7 +22,7 @@ export const fetchSpotify = async (session) => {
       "https://api.spotify.com/v1/me/player/currently-playing",
       {
         headers: {
-          Authorization: `Bearer ${access_token}`,
+          Authorization: `Bearer ${accessToken}`,
           accept: "application/json",
           contentType: "application/json",
         },
@@ -53,7 +53,7 @@ export const fetchSpotify = async (session) => {
       "https://api.spotify.com/v1/me/player/recently-played",
       {
         headers: {
-          Authorization: `Bearer ${access_token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -88,7 +88,7 @@ export const fetchSpotify = async (session) => {
               `https://api.spotify.com/v1/artists/${artist.id}`,
               {
                 headers: {
-                  Authorization: `Bearer ${access_token}`,
+                  Authorization: `Bearer ${accessToken}`,
                 },
               }
             );

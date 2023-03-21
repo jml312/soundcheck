@@ -89,6 +89,11 @@ function Post({
       setAudioProgress(percent);
     });
     audioRef.current.addEventListener("ended", () => setAudioProgress(0));
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        audioRef.current.pause();
+      }
+    });
   }, []);
   useEffect(() => {
     if (!(currentlyPlaying === post?._id)) {
@@ -683,35 +688,41 @@ function Post({
               </>
             )}
             {imageHovered && isDiscover && !post?.previewUrl && (
-              <ActionIcon
-                title="Listen on Spotify"
-                component="a"
-                href={post?.songUrl}
-                target="_blank"
-                radius={"xl"}
-                size={"3.75rem"}
-                variant={"transparent"}
+              <Center
                 sx={{
-                  cursor: "pointer !important",
                   position: "absolute",
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, -50%)",
-                  "&:active": {},
-                }}
-                onClick={() => {
-                  audioRef.current.pause();
-                  setIsAudioPlaying(false);
                 }}
               >
-                <BsSpotify
-                  fontSize={"3.75rem"}
-                  style={{
-                    cursor: "pointer !important",
-                    color: theme.colors.spotify[8],
+                <ActionIcon
+                  title="Listen on Spotify"
+                  component="a"
+                  href={post?.songUrl}
+                  target="_blank"
+                  radius={"xl"}
+                  size={"3.75rem"}
+                  variant={"transparent"}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "transparent !important",
+                    },
                   }}
-                />
-              </ActionIcon>
+                  onClick={() => {
+                    audioRef.current.pause();
+                    setIsAudioPlaying(false);
+                  }}
+                >
+                  <BsSpotify
+                    fontSize={"3.75rem"}
+                    style={{
+                      cursor: "pointer !important",
+                      color: theme.colors.spotify[8],
+                    }}
+                  />
+                </ActionIcon>
+              </Center>
             )}
           </div>
 

@@ -80,8 +80,8 @@ function Navbar({ children }) {
 
           <Menu
             trigger={isMobile ? "click" : "hover"}
-            openDelay={100}
-            closeDelay={400}
+            openDelay={50}
+            closeDelay={100}
             width={260}
             position="bottom-end"
             transitionProps={{ transition: "pop-top-right" }}

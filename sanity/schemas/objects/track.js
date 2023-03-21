@@ -11,13 +11,6 @@ export default {
   },
   fields: [
     {
-      name: 'playedAt',
-      title: 'Played At',
-      type: 'datetime',
-      initialValue: dayjs().toISOString(),
-      validation: (Rule) => Rule.required(),
-    },
-    {
       name: 'songName',
       title: 'Song Name',
       type: 'string',
@@ -33,7 +26,6 @@ export default {
       name: 'previewUrl',
       title: 'Preview URL',
       type: 'url',
-      validation: (Rule) => Rule.required(),
     },
     {
       name: 'artists',
@@ -61,13 +53,6 @@ export default {
       validation: (Rule) => Rule.required(),
     },
     {
-      name: 'genres',
-      title: 'Genres',
-      type: 'array',
-      of: [{type: 'string'}],
-      validation: (Rule) => Rule.required(),
-    },
-    {
       name: 'albumName',
       title: 'Album Name',
       type: 'string',
@@ -90,6 +75,20 @@ export default {
       title: 'Song ID',
       type: 'string',
       validation: (Rule) => Rule.required(),
+    },
+    {
+      name: 'playedAt',
+      title: 'Played At',
+      type: 'datetime',
+      initialValue: dayjs().toISOString(),
+      hidden: ({document}) => !document?.playedAt,
+    },
+    {
+      name: 'genres',
+      title: 'Genres',
+      type: 'array',
+      of: [{type: 'string'}],
+      hidden: ({document}) => !document?.genres,
     },
   ],
 }

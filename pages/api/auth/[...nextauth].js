@@ -66,7 +66,7 @@ export default NextAuth({
           user.playlistID = id;
         }
 
-        user.access_token = account.access_token;
+        user.accessToken = account.access_token;
 
         return true;
       } catch {

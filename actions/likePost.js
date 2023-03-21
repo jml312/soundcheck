@@ -22,7 +22,7 @@ export default async function likePost({
       createdAt: dayjs().toISOString(),
       playlistID: session?.user?.playlistID,
       songID: post?.songID,
-      accessToken: session?.user?.access_token,
+      accessToken: session?.user?.accessToken,
     });
     setIsLikeLoading(false);
   } catch {
