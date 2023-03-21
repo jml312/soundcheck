@@ -38,6 +38,7 @@ function Discover({ recommendations }) {
       <Title
         style={{
           transform: "translateY(1.5rem)",
+          userSelect: "none",
         }}
       >
         Discover

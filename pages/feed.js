@@ -109,6 +109,33 @@ function Feed({ spotifyData, isRouteLoading }) {
     });
   }, [currentPosts]);
 
+  if (isRouteLoading) {
+    return (
+      <Flex
+        style={{
+          height: "calc(100vh - 5rem)",
+        }}
+        justify={"space-between"}
+        align={"stretch"}
+        direction={"column"}
+      >
+        <Flex
+          w={"100%"}
+          h="100%"
+          justify={"center"}
+          align={"center"}
+          style={{
+            transform: "translateY(5rem)",
+          }}
+          direction={"column"}
+          mt={"2.25rem"}
+        >
+          <Loader size="xl" />
+        </Flex>
+      </Flex>
+    );
+  }
+
   return (
     <>
       <SelectSongModal
@@ -223,7 +250,7 @@ function Feed({ spotifyData, isRouteLoading }) {
               )}
             </Transition>
           </Flex>
-          {(isRouteLoading && !isLoading) || isLoading ? (
+          {isLoading ? (
             <Loader size="xl" />
           ) : allPosts.length > 0 ? (
             <ScrollArea

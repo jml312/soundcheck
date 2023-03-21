@@ -689,13 +689,15 @@ function Post({
                 href={post?.songUrl}
                 target="_blank"
                 radius={"xl"}
-                size={"2rem"}
+                size={"3.75rem"}
                 variant={"transparent"}
                 sx={{
+                  cursor: "pointer !important",
                   position: "absolute",
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, -50%)",
+                  "&:active": {},
                 }}
                 onClick={() => {
                   audioRef.current.pause();
@@ -703,7 +705,7 @@ function Post({
                 }}
               >
                 <BsSpotify
-                  fontSize={"2rem"}
+                  fontSize={"3.75rem"}
                   style={{
                     cursor: "pointer !important",
                     color: theme.colors.spotify[8],
