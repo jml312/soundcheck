@@ -12,7 +12,7 @@ export default function Custom404() {
     router.push(
       status === "unauthenticated"
         ? "/"
-        : `/home?date=${dayjs().format("YYYY-MM-DD")}`
+        : `/feed?date=${dayjs().format("YYYY-MM-DD")}`
     );
   }, []);
 

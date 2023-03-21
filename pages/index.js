@@ -46,7 +46,7 @@ function Index() {
           setIsLoading(true);
           e.preventDefault();
           signIn("spotify", {
-            callbackUrl: `/home?date=${dayjs().format("YYYY-MM-DD")}`,
+            callbackUrl: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
           });
         }}
         size="md"
@@ -65,7 +65,7 @@ export async function getServerSideProps({ req }) {
   if (session) {
     return {
       redirect: {
-        destination: `/home?date=${dayjs().format("YYYY-MM-DD")}`,
+        destination: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
         permanent: false,
       },
     };

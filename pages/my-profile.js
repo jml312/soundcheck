@@ -19,8 +19,7 @@ function MyProfile() {
   );
 }
 
-export async function getServerSideProps(context) {
-  const { req, res } = context;
+export async function getServerSideProps({ req, res }) {
   const session = await getSession({ req });
 
   if (!session) {

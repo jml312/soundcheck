@@ -10,7 +10,7 @@ import {
   createStyles,
 } from "@mantine/core";
 import { useSession, signOut } from "next-auth/react";
-import { BsChevronDown } from "react-icons/bs";
+import { BsChevronDown, BsHeadphones } from "react-icons/bs";
 import { FaSignOutAlt } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
 import { useState } from "react";
@@ -53,7 +53,7 @@ function Navbar({ children }) {
           align={"center"}
           px={16}
         >
-          {router.asPath.includes("/home") ? (
+          {router.asPath.includes("/feed") ? (
             <Title
               color="white"
               style={{
@@ -64,7 +64,7 @@ function Navbar({ children }) {
               Soundcheck!
             </Title>
           ) : (
-            <Link href={`/home?date=${dayjs().format("YYYY-MM-DD")}`} passHref>
+            <Link href={`/feed?date=${dayjs().format("YYYY-MM-DD")}`} passHref>
               <Title
                 color="white"
                 style={{
@@ -121,6 +121,12 @@ function Navbar({ children }) {
               <Link href="/my-profile" passHref>
                 <Menu.Item icon={<CgProfile size={"0.9rem"} stroke={1.5} />}>
                   Profile
+                </Menu.Item>
+              </Link>
+
+              <Link href="/discover" passHref>
+                <Menu.Item icon={<BsHeadphones size={"0.9rem"} stroke={1.5} />}>
+                  Discover
                 </Menu.Item>
               </Link>
 

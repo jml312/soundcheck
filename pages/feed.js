@@ -24,7 +24,7 @@ import { START_DATE } from "@/constants";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import { getPosts } from "@/actions";
 
-function Home({ spotifyData, isRouteLoading }) {
+function Feed({ spotifyData, isRouteLoading }) {
   const router = useRouter();
   const { date } = router.query;
   const { data: session } = useSession();
@@ -168,7 +168,7 @@ function Home({ spotifyData, isRouteLoading }) {
               value={dayjs(date).isValid() ? dayjs(date).toDate() : null}
               onChange={(newDate) => {
                 router.push(
-                  `/home?date=${dayjs(newDate).format("YYYY-MM-DD")}`,
+                  `/feed?date=${dayjs(newDate).format("YYYY-MM-DD")}`,
                   undefined,
                   { shallow: true }
                 );
@@ -209,7 +209,7 @@ function Home({ spotifyData, isRouteLoading }) {
                     style={styles}
                     onClick={() => {
                       router.push(
-                        `/home?date=${dayjs().format("YYYY-MM-DD")}`,
+                        `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
                         undefined,
                         { shallow: true }
                       );
@@ -315,7 +315,7 @@ export async function getServerSideProps({ req, res, query }) {
     ) {
       return {
         redirect: {
-          destination: `/home?date=${dayjs().format("YYYY-MM-DD")}`,
+          destination: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
           permanent: false,
         },
       };
@@ -359,7 +359,7 @@ export async function getServerSideProps({ req, res, query }) {
         spotifyData,
       },
       redirect: !currentDate.isSame(dayjs(), "day") && {
-        destination: `/home?date=${dayjs().format("YYYY-MM-DD")}`,
+        destination: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
         permanent: false,
       },
     };
@@ -374,4 +374,4 @@ export async function getServerSideProps({ req, res, query }) {
   }
 }
 
-export default Home;
+export default Feed;
