@@ -91,7 +91,7 @@ function Post({
     audioRef.current.addEventListener("ended", () => setAudioProgress(0));
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
-        audioRef.current.pause();
+        audioRef?.current?.pause();
       }
     });
   }, []);
