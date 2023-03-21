@@ -42,6 +42,7 @@ function Post({
   isUser = false,
   isPostModal = false,
   isSelect = false,
+  isDiscover = false,
   currentlyPlaying,
   setCurrentlyPlaying,
   selectedSong,
@@ -158,134 +159,102 @@ function Post({
         }}
       >
         {/* like + follow */}
-        <Flex
-          w={isPostModal ? "100%" : "275px"}
-          justify={"space-between"}
-          align={"center"}
-          mt={isSelect ? "-.4rem" : "-0.55rem"}
-          pb={isSelect ? ".32rem" : "0.24rem"}
-          mb={"0.75rem"}
-          sx={(theme) => ({
-            borderBottom: `1px solid ${theme.colors.lightWhite[7]}`,
-          })}
-        >
-          <Tooltip
-            disabled={isSelect || isPostModal}
-            color="dark.7"
-            styles={{
-              tooltip: {
-                border: "none",
-                outline: "1px solid rgba(192, 193, 196, 0.75)",
-              },
-            }}
-            withinPortal
-            shadow="md"
-            offset={isSelect ? 5.25 : 3}
-            position="top"
-            label={
-              <>
-                <Group mt={3}>
-                  <Avatar
-                    src={post?.userImage}
-                    alt={`${post?.username}'s profile`}
-                    radius="xl"
-                    style={{
-                      border: "1px solid #c0c1c4",
-                    }}
-                  />
-                  <Stack spacing={5}>
-                    <Text
-                      size="sm"
-                      weight={700}
-                      sx={{ lineHeight: 1, cursor: "default" }}
-                    >
-                      {truncateText(post?.username, 19)}
-                      {isUser ? " (you)" : ""}
-                    </Text>
-                    <Group mt={1}>
+        {!isDiscover && (
+          <Flex
+            w={isPostModal ? "100%" : "275px"}
+            justify={"space-between"}
+            align={"center"}
+            mt={isSelect ? "-.4rem" : "-0.55rem"}
+            pb={isSelect ? ".32rem" : "0.24rem"}
+            mb={"0.75rem"}
+            sx={(theme) => ({
+              borderBottom: `1px solid ${theme.colors.lightWhite[7]}`,
+            })}
+          >
+            <Tooltip
+              disabled={isSelect || isPostModal}
+              color="dark.7"
+              styles={{
+                tooltip: {
+                  border: "none",
+                  outline: "1px solid rgba(192, 193, 196, 0.75)",
+                },
+              }}
+              withinPortal
+              shadow="md"
+              offset={isSelect ? 5.25 : 3}
+              position="top"
+              label={
+                <>
+                  <Group mt={3}>
+                    <Avatar
+                      src={post?.userImage}
+                      alt={`${post?.username}'s profile`}
+                      radius="xl"
+                      style={{
+                        border: "1px solid #c0c1c4",
+                      }}
+                    />
+                    <Stack spacing={5}>
                       <Text
-                        color="dimmed"
-                        size="xs"
+                        size="sm"
+                        weight={700}
                         sx={{ lineHeight: 1, cursor: "default" }}
                       >
-                        {dayjs(post?.joined).format("MMM D, YYYY")}
+                        {truncateText(post?.username, 19)}
+                        {isUser ? " (you)" : ""}
                       </Text>
-                    </Group>
-                  </Stack>
-                </Group>
-                <Group mt={9} spacing="sm">
-                  <Text
-                    size="sm"
-                    sx={{
-                      cursor: "default",
-                      opacity: 0.9,
-                    }}
-                  >
-                    <b>{post?.numFollowing || 0}</b> Following
-                  </Text>
-                  <Text
-                    size="sm"
-                    sx={{
-                      cursor: "default",
-                      opacity: 0.9,
-                    }}
-                  >
-                    <b>{post?.numFollowers || 0}</b> Follower
-                    {post?.numFollowers !== 1 && "s"}
-                  </Text>
-                </Group>
-              </>
-            }
-          >
-            {isSelect ? (
-              <Button
-                ml={isPostModal ? "-.5rem" : "-.3rem"}
-                compact
-                size={isPostModal ? "md" : "sm"}
-                sx={{
-                  cursor: "default",
-                  zIndex: 1,
-                  fontSize: "0.85rem",
-                  color: "rgba(255, 255, 255, 0.75)",
-                  backgroundColor: "transparent !important",
-                  "&:active": {
-                    transform: "none",
-                  },
-                }}
-                component="div"
-                leftIcon={
-                  <Avatar
-                    size={isPostModal ? 24 : 20}
-                    src={post?.userImage}
-                    alt={`${post?.username}'s profile`}
-                    radius={"xl"}
-                    style={{
-                      border: "1px solid #c0c1c4",
-                    }}
-                  />
-                }
-              >
-                {truncateText(post?.username, 19)}
-                {isUser ? " (you)" : ""}
-              </Button>
-            ) : (
-              <Link
-                href={isUser ? "/my-profile" : `/profile/${post?.username}`}
-                passHref
-              >
+                      <Group mt={1}>
+                        <Text
+                          color="dimmed"
+                          size="xs"
+                          sx={{ lineHeight: 1, cursor: "default" }}
+                        >
+                          {dayjs(post?.joined).format("MMM D, YYYY")}
+                        </Text>
+                      </Group>
+                    </Stack>
+                  </Group>
+                  <Group mt={9} spacing="sm">
+                    <Text
+                      size="sm"
+                      sx={{
+                        cursor: "default",
+                        opacity: 0.9,
+                      }}
+                    >
+                      <b>{post?.numFollowing || 0}</b> Following
+                    </Text>
+                    <Text
+                      size="sm"
+                      sx={{
+                        cursor: "default",
+                        opacity: 0.9,
+                      }}
+                    >
+                      <b>{post?.numFollowers || 0}</b> Follower
+                      {post?.numFollowers !== 1 && "s"}
+                    </Text>
+                  </Group>
+                </>
+              }
+            >
+              {isSelect ? (
                 <Button
                   ml={isPostModal ? "-.5rem" : "-.3rem"}
                   compact
                   size={isPostModal ? "md" : "sm"}
                   sx={{
+                    cursor: "default",
                     zIndex: 1,
-                    fontSize: isPostModal ? "0.85rem" : "0.75rem",
+                    fontSize: "0.85rem",
                     color: "rgba(255, 255, 255, 0.75)",
                     backgroundColor: "transparent !important",
-                    cursor: "pointer",
-                    transform: "translateY(.1rem)",
+                    "&:active": {
+                      transform: "none",
+                    },
                   }}
-                  component="a"
+                  component="div"
                   leftIcon={
                     <Avatar
                       size={isPostModal ? 24 : 20}
@@ -301,99 +270,133 @@ function Post({
                   {truncateText(post?.username, 19)}
                   {isUser ? " (you)" : ""}
                 </Button>
-              </Link>
-            )}
-          </Tooltip>
+              ) : (
+                <Link
+                  href={isUser ? "/my-profile" : `/profile/${post?.username}`}
+                  passHref
+                >
+                  <Button
+                    ml={isPostModal ? "-.5rem" : "-.3rem"}
+                    compact
+                    size={isPostModal ? "md" : "sm"}
+                    sx={{
+                      zIndex: 1,
+                      fontSize: isPostModal ? "0.85rem" : "0.75rem",
+                      color: "rgba(255, 255, 255, 0.75)",
+                      backgroundColor: "transparent !important",
+                      cursor: "pointer",
+                      transform: "translateY(.1rem)",
+                    }}
+                    component="a"
+                    leftIcon={
+                      <Avatar
+                        size={isPostModal ? 24 : 20}
+                        src={post?.userImage}
+                        alt={`${post?.username}'s profile`}
+                        radius={"xl"}
+                        style={{
+                          border: "1px solid #c0c1c4",
+                        }}
+                      />
+                    }
+                  >
+                    {truncateText(post?.username, 19)}
+                    {isUser ? " (you)" : ""}
+                  </Button>
+                </Link>
+              )}
+            </Tooltip>
 
-          {!isUser && (
-            <Flex justify={"center"} align="center">
-              <Tooltip
-                offset={3}
-                label={post?.isFollowing ? `Unfollow` : `Follow`}
-                position="top"
-                withinPortal
-                disabled={isFollowLoading || isPostModal}
-                color="dark.7"
-                styles={{
-                  tooltip: {
-                    border: "none",
-                    outline: "1px solid rgba(192, 193, 196, 0.75)",
-                  },
-                }}
-              >
-                <ActionIcon
-                  sx={(theme) => ({
-                    transform: "translateX(.1rem)",
-                    color: post?.isFollowing
-                      ? theme.colors.green[6]
-                      : "#c1c2c5",
-                    "&[data-disabled]": {
+            {!isUser && (
+              <Flex justify={"center"} align="center">
+                <Tooltip
+                  offset={3}
+                  label={post?.isFollowing ? `Unfollow` : `Follow`}
+                  position="top"
+                  withinPortal
+                  disabled={isFollowLoading || isPostModal}
+                  color="dark.7"
+                  styles={{
+                    tooltip: {
+                      border: "none",
+                      outline: "1px solid rgba(192, 193, 196, 0.75)",
+                    },
+                  }}
+                >
+                  <ActionIcon
+                    sx={(theme) => ({
+                      transform: "translateX(.1rem)",
                       color: post?.isFollowing
                         ? theme.colors.green[6]
                         : "#c1c2c5",
+                      "&[data-disabled]": {
+                        color: post?.isFollowing
+                          ? theme.colors.green[6]
+                          : "#c1c2c5",
+                      },
+                    })}
+                    variant={"transparent"}
+                    radius="xl"
+                    disabled={isFollowLoading || isUser}
+                    onClick={() =>
+                      followUser({
+                        isFollowing: post?.isFollowing,
+                        setIsFollowLoading,
+                        post,
+                        setPost,
+                        session,
+                      })
+                    }
+                  >
+                    {post?.isFollowing ? (
+                      <FaUserCheck fontSize="1.175rem" />
+                    ) : (
+                      <FaUserPlus fontSize="1.175rem" />
+                    )}
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip
+                  withinPortal
+                  label={post?.isLiked ? "Unlike" : "Like"}
+                  position="top"
+                  zIndex={2}
+                  offset={3}
+                  disabled={isLikeLoading || isPostModal}
+                  color="dark.7"
+                  styles={{
+                    tooltip: {
+                      border: "none",
+                      outline: "1px solid rgba(192, 193, 196, 0.75)",
                     },
-                  })}
-                  variant={"transparent"}
-                  radius="xl"
-                  disabled={isFollowLoading || isUser}
-                  onClick={() =>
-                    followUser({
-                      isFollowing: post?.isFollowing,
-                      setIsFollowLoading,
-                      post,
-                      setPost,
-                      session,
-                    })
-                  }
+                  }}
                 >
-                  {post?.isFollowing ? (
-                    <FaUserCheck fontSize="1.175rem" />
-                  ) : (
-                    <FaUserPlus fontSize="1.175rem" />
-                  )}
-                </ActionIcon>
-              </Tooltip>
-              <Tooltip
-                withinPortal
-                label={post?.isLiked ? "Unlike" : "Like"}
-                position="top"
-                zIndex={2}
-                offset={3}
-                disabled={isLikeLoading || isPostModal}
-                color="dark.7"
-                styles={{
-                  tooltip: {
-                    border: "none",
-                    outline: "1px solid rgba(192, 193, 196, 0.75)",
-                  },
-                }}
-              >
-                <ActionIcon
-                  variant={"transparent"}
-                  radius="xl"
-                  onClick={() =>
-                    likePost({
-                      isLiked: post?.isLiked,
-                      setIsLikeLoading,
-                      post,
-                      setPost,
-                      session,
-                    })
-                  }
-                  disabled={isLikeLoading || isUser}
-                  sx={(theme) => ({
-                    color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
-                    "&[data-disabled]": {
+                  <ActionIcon
+                    variant={"transparent"}
+                    radius="xl"
+                    onClick={() =>
+                      likePost({
+                        isLiked: post?.isLiked,
+                        setIsLikeLoading,
+                        post,
+                        setPost,
+                        session,
+                      })
+                    }
+                    disabled={isLikeLoading || isUser}
+                    sx={(theme) => ({
                       color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
-                    },
-                  })}
-                >
-                  <FaHeart />
-                </ActionIcon>
-              </Tooltip>
-            </Flex>
-          )}
-        </Flex>
+                      "&[data-disabled]": {
+                        color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+                      },
+                    })}
+                  >
+                    <FaHeart />
+                  </ActionIcon>
+                </Tooltip>
+              </Flex>
+            )}
+          </Flex>
+        )}
 
         {/* caption */}
         <Flex align="center" justify={"center"} direction={"column"}>
@@ -679,6 +682,35 @@ function Post({
                 </ActionIcon>
               </>
             )}
+            {imageHovered && isDiscover && !post?.previewUrl && (
+              <ActionIcon
+                title="Listen on Spotify"
+                component="a"
+                href={post?.songUrl}
+                target="_blank"
+                radius={"xl"}
+                size={"2rem"}
+                variant={"transparent"}
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                }}
+                onClick={() => {
+                  audioRef.current.pause();
+                  setIsAudioPlaying(false);
+                }}
+              >
+                <BsSpotify
+                  fontSize={"2rem"}
+                  style={{
+                    cursor: "pointer !important",
+                    color: theme.colors.spotify[8],
+                  }}
+                />
+              </ActionIcon>
+            )}
           </div>
 
           <audio src={post?.previewUrl} type="audio/mpeg" ref={audioRef} />
@@ -687,7 +719,7 @@ function Post({
           <Flex
             direction={"column"}
             mt={8}
-            mb={isSelect && "0.5rem"}
+            mb={(isDiscover || isSelect) && "0.5rem"}
             w={!isPostModal ? 275 : isSmall ? "75vw" : 375}
             // w={!isPostModal ? 275 : 375}
             style={{
@@ -716,7 +748,7 @@ function Post({
           </Flex>
 
           {/* comments */}
-          {!isSelect && (
+          {!isSelect && !isDiscover && (
             <Flex
               w="100%"
               gap={"0.4rem"}

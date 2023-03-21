@@ -1,9 +1,12 @@
-import { getSession } from "next-auth/react";
-import { Flex } from "@mantine/core";
+import { getSession, useSession } from "next-auth/react";
+import { Flex, ScrollArea, Title } from "@mantine/core";
 import client from "@/lib/sanity";
 import { discoverQuery } from "@/lib/queries";
 import axios from "axios";
 import { clearAuthCookies } from "@/utils/clearAuthCookies";
+import Post from "@/components/Post";
+import { useState } from "react";
+import { useMediaQuery } from "@mantine/hooks";
 
 const getMultipleRandom = (arr, n) => {
   const result = new Set();
@@ -15,35 +18,69 @@ const getMultipleRandom = (arr, n) => {
 };
 
 function Discover({ recommendations }) {
+  const { data: session } = useSession();
+  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const oneCard = useMediaQuery("(max-width: 900px)");
+  const twoCards = useMediaQuery("(max-width: 1200px)");
+
   return (
     <Flex
       justify={"center"}
       align={"center"}
-      // direction={"column"}
-      wrap={"wrap"}
+      direction={"column"}
       h={"calc(100vh - 5rem)"}
       w={"100%"}
       style={{
         transform: "translateY(5rem)",
+        overflow: "hidden",
       }}
     >
-      {recommendations.map((item) => (
-        <div
-          key={item.songID}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-          }}
-        >
-          <img src={item.albumImage} alt={item.albumName} />
-          <p>{item.songName}</p>
-          <p>{item.albumName}</p>
-          <p>{item.artists.map((artist) => artist.name).join(", ")}</p>
-          <audio src={item.previewUrl} controls />
-        </div>
-      ))}
+      <Title
+        style={{
+          transform: "translateY(1.5rem)",
+        }}
+      >
+        Discover
+      </Title>
+      <ScrollArea
+        mb={"4.5rem"}
+        w={oneCard ? "354px" : twoCards ? "700px" : "1050px"}
+        type={"always"}
+        offsetScrollbars
+        style={{
+          transform: "translateY(2.8rem)",
+        }}
+        styles={{
+          scrollbar: {
+            "&, &:hover": {
+              background: "transparent",
+              borderRadius: "0.5rem",
+            },
+            '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
+              backgroundColor: "#474952",
+            },
+            '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
+              display: "none",
+            },
+            corner: {
+              display: "none !important",
+            },
+          },
+        }}
+      >
+        <Flex justify={"center"} wrap={"wrap"} gap="1.5rem">
+          {recommendations.map((item) => (
+            <Post
+              key={item.songID}
+              post={{ ...item, _id: item.songID }}
+              isDiscover
+              currentlyPlaying={currentlyPlaying}
+              setCurrentlyPlaying={setCurrentlyPlaying}
+              session={session}
+            />
+          ))}
+        </Flex>
+      </ScrollArea>
     </Flex>
   );
 }
