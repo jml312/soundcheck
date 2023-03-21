@@ -4,6 +4,7 @@ import likePost from "./likePost";
 import postComment from "./postComment";
 import deleteComment from "./deleteComment";
 import followUser from "./followUser";
+import getPosts from "./getPosts";
 
 export {
   postSong,
@@ -12,4 +13,5 @@ export {
   postComment,
   deleteComment,
   followUser,
+  getPosts,
 };

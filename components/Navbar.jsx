@@ -16,6 +16,8 @@ import { CgProfile } from "react-icons/cg";
 import { useState } from "react";
 import Link from "next/link";
 import { useMediaQuery } from "@mantine/hooks";
+import dayjs from "dayjs";
+import { useRouter } from "next/router";
 
 const useStyles = createStyles((theme) => ({
   logoText: {
@@ -30,6 +32,7 @@ function Navbar({ children }) {
   const [menuHover, setMenuHover] = useState(false);
   const { classes } = useStyles();
   const isMobile = useMediaQuery("(max-width: 480px)");
+  const router = useRouter();
 
   return (
     <>
@@ -50,18 +53,30 @@ function Navbar({ children }) {
           align={"center"}
           px={16}
         >
-          <Link href="/home" passHref>
+          {router.asPath.includes("/home") ? (
             <Title
               color="white"
               style={{
-                cursor: "pointer",
                 userSelect: "none",
               }}
               className={classes.logoText}
             >
               Soundcheck!
             </Title>
-          </Link>
+          ) : (
+            <Link href={`/home?date=${dayjs().format("YYYY-MM-DD")}`} passHref>
+              <Title
+                color="white"
+                style={{
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+                className={classes.logoText}
+              >
+                Soundcheck!
+              </Title>
+            </Link>
+          )}
 
           <Menu
             trigger={isMobile ? "click" : "hover"}

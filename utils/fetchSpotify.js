@@ -1,10 +1,20 @@
 import axios from "axios";
 import dayjs from "dayjs";
+import client from "@/lib/sanity";
+import { recentlyPlayedQuery } from "@/lib/queries";
 
-export const fetchSpotify = async (accessToken) => {
-  if (!accessToken) return;
+export const fetchSpotify = async (session) => {
+  const { access_token, name } = session.user;
 
   try {
+    const recentlyPlayedSongs = await client.fetch(recentlyPlayedQuery, {
+      name,
+    });
+
+    if (recentlyPlayedSongs?.length > 0) {
+      return recentlyPlayedSongs;
+    }
+
     const spotifyData = [];
 
     // fetch currently playing
@@ -12,7 +22,7 @@ export const fetchSpotify = async (accessToken) => {
       "https://api.spotify.com/v1/me/player/currently-playing",
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${access_token}`,
           accept: "application/json",
           contentType: "application/json",
         },
@@ -27,7 +37,10 @@ export const fetchSpotify = async (accessToken) => {
         songName: currentlyPlaying.item.name,
         songUrl: currentlyPlaying.item.external_urls.spotify,
         previewUrl: currentlyPlaying.item.preview_url,
-        artists: currentlyPlaying.item.artists.map((artist) => artist.name),
+        artists: currentlyPlaying.item.artists.map((artist) => ({
+          id: artist.id,
+          name: artist.name,
+        })),
         albumName: currentlyPlaying.item.album.name,
         albumUrl: currentlyPlaying.item.album.external_urls.spotify,
         albumImage: currentlyPlaying.item.album.images[0].url,
@@ -40,7 +53,7 @@ export const fetchSpotify = async (accessToken) => {
       "https://api.spotify.com/v1/me/player/recently-played",
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${access_token}`,
         },
       }
     );
@@ -51,7 +64,10 @@ export const fetchSpotify = async (accessToken) => {
         songName: item.track.name,
         songUrl: item.track.external_urls.spotify,
         previewUrl: item.track.preview_url,
-        artists: item.track.artists.map((artist) => artist.name),
+        artists: item.track.artists.map((artist) => ({
+          id: artist.id,
+          name: artist.name,
+        })),
         albumName: item.track.album.name,
         albumUrl: item.track.album.external_urls.spotify,
         albumImage: item.track.album.images[0].url,
@@ -64,7 +80,41 @@ export const fetchSpotify = async (accessToken) => {
       )
       .sort((a, b) => (a.playedAt < b.playedAt ? 1 : -1));
 
-    return [...spotifyData, ...filteredRecentlyPlayed];
+    const allData = await Promise.all(
+      [...spotifyData, ...filteredRecentlyPlayed].map(async (item) => {
+        const genres = await Promise.all(
+          item.artists.map(async (artist) => {
+            const { data } = await axios.get(
+              `https://api.spotify.com/v1/artists/${artist.id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${access_token}`,
+                },
+              }
+            );
+            return data.genres;
+          })
+        );
+        return {
+          ...item,
+          _key: item.songID,
+          artists: item.artists.map((artist) => ({
+            ...artist,
+            _key: artist.id,
+          })),
+          genres: [...new Set(genres.flat())],
+        };
+      })
+    );
+
+    await client
+      .patch(name)
+      .set({
+        recentlyPlayed: allData,
+      })
+      .commit();
+
+    return allData;
   } catch {
     return [];
   }

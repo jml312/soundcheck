@@ -1,15 +1,22 @@
 import dayjs from 'dayjs'
 
 export default {
-  name: 'post',
-  title: 'Post',
-  type: 'document',
+  name: 'track',
+  title: 'Track',
+  type: 'object',
   preview: {
     select: {
       title: 'songName',
     },
   },
   fields: [
+    {
+      name: 'playedAt',
+      title: 'Played At',
+      type: 'datetime',
+      initialValue: dayjs().toISOString(),
+      validation: (Rule) => Rule.required(),
+    },
     {
       name: 'songName',
       title: 'Song Name',
@@ -82,36 +89,7 @@ export default {
       name: 'songID',
       title: 'Song ID',
       type: 'string',
-    },
-    {
-      name: 'createdAt',
-      title: 'Created At',
-      type: 'datetime',
-      initialValue: dayjs().toISOString(),
-    },
-    {
-      name: 'caption',
-      title: 'Caption',
-      type: 'string',
-    },
-    {
-      name: 'user',
-      title: 'User',
-      type: 'reference',
-      to: {type: 'user'},
       validation: (Rule) => Rule.required(),
-    },
-    {
-      name: 'likes',
-      title: 'Likes',
-      type: 'array',
-      of: [{type: 'like'}],
-    },
-    {
-      name: 'comments',
-      title: 'Comments',
-      type: 'array',
-      of: [{type: 'comment'}],
     },
   ],
 }

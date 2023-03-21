@@ -9,7 +9,7 @@ import {
 } from "@mantine/core";
 import { BsMusicNoteBeamed } from "react-icons/bs";
 import Post from "../Post";
-import { forwardRef, useState, useRef } from "react";
+import { forwardRef, useState, useEffect } from "react";
 import { postSong } from "@/actions";
 
 const SelectItem = forwardRef(
@@ -39,6 +39,7 @@ export default function SelectSongModal({
   setPost,
   caption,
   setCaption,
+  badWordsFilter,
 }) {
   const theme = useMantineTheme();
   const [selectedSong, setSelectedSong] = useState({
@@ -47,7 +48,17 @@ export default function SelectSongModal({
     isChanged: false,
     isLoading: false,
   });
-  const selectRef = useRef(null);
+
+  useEffect(() => {
+    if (opened) {
+      setSelectedSong({
+        value: spotifyData ? spotifyData[0]?.songName : "",
+        data: spotifyData ? spotifyData[0] : {},
+        isChanged: false,
+        isLoading: false,
+      });
+    }
+  }, [opened]);
 
   return (
     <Modal
@@ -83,7 +94,6 @@ export default function SelectSongModal({
         maxDropdownHeight={350}
         nothingFound="No songs found"
         searchable
-        ref={selectRef}
         defaultValue={selectedSong.value}
         value={selectedSong.value}
         itemComponent={SelectItem}
@@ -147,6 +157,7 @@ export default function SelectSongModal({
           session={session}
           caption={caption}
           setCaption={setCaption}
+          badWordsFilter={badWordsFilter}
         />
       )}
 
@@ -169,7 +180,7 @@ export default function SelectSongModal({
         mt={15}
         loading={selectedSong.isLoading}
       >
-        Post this song!
+        {selectedSong.isLoading ? "Posting..." : "Post this song!"}
       </Button>
     </Modal>
   );

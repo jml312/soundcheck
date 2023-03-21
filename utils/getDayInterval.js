@@ -1,6 +1,4 @@
-import dayjs from "dayjs";
-
-export const getDayInterval = (date) => ({
-  startDate: dayjs(date).startOf("day"),
-  endDate: dayjs(date).endOf("day"),
+export const getDayInterval = (dayjsDate) => ({
+  startDate: dayjsDate.startOf("day"),
+  endDate: dayjsDate.endOf("day"),
 });

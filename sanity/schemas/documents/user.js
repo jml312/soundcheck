@@ -45,6 +45,12 @@ export default {
       type: 'string',
     },
     {
+      name: 'recentlyPlayed',
+      title: 'Recently Played',
+      type: 'array',
+      of: [{type: 'track'}],
+    },
+    {
       name: 'posts',
       title: 'Posts',
       type: 'array',

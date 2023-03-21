@@ -7,23 +7,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { startDate, endDate, type, name } = req.query;
+    const { startDate, endDate, todayStart, todayEnd, name } = req.query;
 
-    if (!["everyone", "following"].includes(type.toLowerCase())) {
-      return res.status(400).json({ message: "Bad request" });
-    }
-
-    const { userPost, feedPosts } = await client.fetch(postsQuery, {
+    const currentPosts = await client.fetch(postsQuery, {
       startDate,
       endDate,
+      todayStart,
+      todayEnd,
       name,
     });
 
-    return res.status(200).json({
-      message: "Success",
-      userPost,
-      feedPosts,
-    });
+    return res.status(200).send(currentPosts);
   } catch {
     return res.status(500).json({ message: "Internal server error" });
   }

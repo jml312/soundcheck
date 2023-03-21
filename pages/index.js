@@ -4,6 +4,7 @@ import { BsSpotify } from "react-icons/bs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { notifications } from "@mantine/notifications";
+import dayjs from "dayjs";
 
 function Index() {
   const [isLoading, setIsLoading] = useState(false);
@@ -41,10 +42,11 @@ function Index() {
         Soundcheck!
       </Title>
       <Button
-        onClick={() => {
+        onClick={(e) => {
           setIsLoading(true);
+          e.preventDefault();
           signIn("spotify", {
-            callbackUrl: "/home",
+            callbackUrl: `/home?date=${dayjs().format("YYYY-MM-DD")}`,
           });
         }}
         size="md"
@@ -57,13 +59,13 @@ function Index() {
   );
 }
 
-export async function getServerSideProps({ req, res }) {
+export async function getServerSideProps({ req }) {
   const session = await getSession({ req });
 
   if (session) {
     return {
       redirect: {
-        destination: "/home",
+        destination: `/home?date=${dayjs().format("YYYY-MM-DD")}`,
         permanent: false,
       },
     };

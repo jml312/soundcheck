@@ -15,7 +15,6 @@ import {
   Button,
   TextInput,
   Textarea,
-  HoverCard,
   Group,
 } from "@mantine/core";
 import Link from "next/link";
@@ -31,7 +30,7 @@ import { useRef, useEffect, useState } from "react";
 import { truncateText } from "@/utils/truncateText";
 import PostModal from "./modals/PostModal";
 import { AiOutlineComment } from "react-icons/ai";
-import { useDisclosure, useHover } from "@mantine/hooks";
+import { useDisclosure, useHover, useMediaQuery } from "@mantine/hooks";
 import CommentCard from "./CommentCard";
 import EmojiPicker from "./EmojiPicker";
 import { likePost, followUser, captionPost, postComment } from "@/actions";
@@ -42,7 +41,6 @@ function Post({
   setPost,
   isUser = false,
   isPostModal = false,
-  isRightbar = false,
   isSelect = false,
   currentlyPlaying,
   setCurrentlyPlaying,
@@ -62,14 +60,15 @@ function Post({
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [commentOpen, { open: openComment, close: closeComment }] =
     useDisclosure(false);
+  const artists = post?.artists?.map((artist) => artist.name)?.join(", ");
   const numComments = post?.comments?.length || 0;
   const commentRef = useRef(null);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const captionRef = useRef(null);
   const theme = useMantineTheme();
   const isToday = dayjs(post?.createdAt).isSame(dayjs().toDate(), "day");
-  const [showUserDetails, setShowUserDetails] = useState(true);
   const [hasBlurredCaptionError, setHasBlurredCaptionError] = useState(false);
+  const isSmall = useMediaQuery("(max-width: 470px)");
 
   useEffect(() => {
     audioRef.current.addEventListener("play", () => {
@@ -147,17 +146,9 @@ function Post({
         pt=".85rem"
         maw={425}
         mah={"100%"}
-        pb={
-          isPostModal && numComments > 0 && !comment.type
-            ? ".75rem"
-            : isSelect
-            ? "0.25rem"
-            : "0rem"
-        }
+        pb={isPostModal && numComments > 0 && !comment.type ? ".75rem" : "0rem"}
         sx={{
           borderRadius: "0.5rem !important",
-          overflowY: "hidden !important",
-          overflowX: isSelect && "hidden !important",
           // border: `0.75px solid ${
           //   isUser ? theme.colors.spotify[7] : theme.colors.lightWhite[7]
           // }`,
@@ -170,52 +161,131 @@ function Post({
         <Flex
           w={isPostModal ? "100%" : "275px"}
           justify={"space-between"}
-          mt="-0.5rem"
-          pb="0.25rem"
+          align={"center"}
+          mt={isSelect ? "-.4rem" : "-0.55rem"}
+          pb={isSelect ? ".32rem" : "0.24rem"}
           mb={"0.75rem"}
           sx={(theme) => ({
             borderBottom: `1px solid ${theme.colors.lightWhite[7]}`,
           })}
         >
-          <HoverCard
-            onMouseOver={() => setShowUserDetails(true)}
-            onOpen={() => setShowUserDetails(true)}
-            disabled={!showUserDetails}
-            withinPortal
-            shadow="md"
-            offset={4}
-            position="bottom-start"
+          <Tooltip
+            disabled={isSelect || isPostModal}
+            color="dark.7"
             styles={{
-              dropdown: {
-                zIndex: 1000,
-                maxWidth: "300px",
-                backgroundColor: theme.colors.dark[7],
+              tooltip: {
                 border: "none",
-                outline: "1px solid rgba(255, 255, 255, 0.25)",
-                "&:focus": {
-                  border: "none",
-                  outline: "1px solid rgba(255, 255, 255, 0.25)",
-                },
+                outline: "1px solid rgba(192, 193, 196, 0.75)",
               },
             }}
+            withinPortal
+            shadow="md"
+            offset={isSelect ? 5.25 : 3}
+            position="top"
+            label={
+              <>
+                <Group mt={3}>
+                  <Avatar
+                    src={post?.userImage}
+                    alt={`${post?.username}'s profile`}
+                    radius="xl"
+                    style={{
+                      border: "1px solid #c0c1c4",
+                    }}
+                  />
+                  <Stack spacing={5}>
+                    <Text
+                      size="sm"
+                      weight={700}
+                      sx={{ lineHeight: 1, cursor: "default" }}
+                    >
+                      {truncateText(post?.username, 19)}
+                      {isUser ? " (you)" : ""}
+                    </Text>
+                    <Group mt={1}>
+                      <Text
+                        color="dimmed"
+                        size="xs"
+                        sx={{ lineHeight: 1, cursor: "default" }}
+                      >
+                        {dayjs(post?.joined).format("MMM D, YYYY")}
+                      </Text>
+                    </Group>
+                  </Stack>
+                </Group>
+                <Group mt={9} spacing="sm">
+                  <Text
+                    size="sm"
+                    sx={{
+                      cursor: "default",
+                      opacity: 0.9,
+                    }}
+                  >
+                    <b>{post?.numFollowing || 0}</b> Following
+                  </Text>
+                  <Text
+                    size="sm"
+                    sx={{
+                      cursor: "default",
+                      opacity: 0.9,
+                    }}
+                  >
+                    <b>{post?.numFollowers || 0}</b> Follower
+                    {post?.numFollowers !== 1 && "s"}
+                  </Text>
+                </Group>
+              </>
+            }
           >
-            <HoverCard.Target>
-              {isSelect ? (
+            {isSelect ? (
+              <Button
+                ml={isPostModal ? "-.5rem" : "-.3rem"}
+                compact
+                size={isPostModal ? "md" : "sm"}
+                sx={{
+                  cursor: "default",
+                  zIndex: 1,
+                  fontSize: "0.85rem",
+                  color: "rgba(255, 255, 255, 0.75)",
+                  backgroundColor: "transparent !important",
+                  "&:active": {
+                    transform: "none",
+                  },
+                }}
+                component="div"
+                leftIcon={
+                  <Avatar
+                    size={isPostModal ? 24 : 20}
+                    src={post?.userImage}
+                    alt={`${post?.username}'s profile`}
+                    radius={"xl"}
+                    style={{
+                      border: "1px solid #c0c1c4",
+                    }}
+                  />
+                }
+              >
+                {truncateText(post?.username, 19)}
+                {isUser ? " (you)" : ""}
+              </Button>
+            ) : (
+              <Link
+                href={isUser ? "/my-profile" : `/profile/${post?.username}`}
+                passHref
+              >
                 <Button
                   ml={isPostModal ? "-.5rem" : "-.3rem"}
                   compact
                   size={isPostModal ? "md" : "sm"}
                   sx={{
-                    cursor: "default",
                     zIndex: 1,
                     fontSize: isPostModal ? "0.85rem" : "0.75rem",
                     color: "rgba(255, 255, 255, 0.75)",
                     backgroundColor: "transparent !important",
-                    "&:active": {
-                      transform: "none",
-                    },
+                    cursor: "pointer",
+                    transform: "translateY(.1rem)",
                   }}
-                  component="div"
+                  component="a"
                   leftIcon={
                     <Avatar
                       size={isPostModal ? 24 : 20}
@@ -228,111 +298,26 @@ function Post({
                     />
                   }
                 >
-                  {truncateText(post?.username, 18)}
+                  {truncateText(post?.username, 19)}
                   {isUser ? " (you)" : ""}
                 </Button>
-              ) : (
-                <Link
-                  href={isUser ? "/my-profile" : `/profile/${post?.username}`}
-                  passHref
-                >
-                  <Button
-                    ml={isPostModal ? "-.5rem" : "-.3rem"}
-                    compact
-                    size={isPostModal ? "md" : "sm"}
-                    sx={{
-                      zIndex: 1,
-                      fontSize: isPostModal ? "0.85rem" : "0.75rem",
-                      color: "rgba(255, 255, 255, 0.75)",
-                      backgroundColor: "transparent !important",
-                      cursor: "pointer",
-                    }}
-                    component="a"
-                    leftIcon={
-                      <Avatar
-                        size={isPostModal ? 24 : 20}
-                        src={post?.userImage}
-                        alt={`${post?.username}'s profile`}
-                        radius={"xl"}
-                        style={{
-                          border: "1px solid #c0c1c4",
-                        }}
-                      />
-                    }
-                  >
-                    {truncateText(post?.username, 18)}
-                    {isUser ? " (you)" : ""}
-                  </Button>
-                </Link>
-              )}
-            </HoverCard.Target>
-            <HoverCard.Dropdown onMouseEnter={() => setShowUserDetails(false)}>
-              <Group>
-                <Avatar
-                  src={post?.userImage}
-                  alt={`${post?.username}'s profile`}
-                  radius="xl"
-                  style={{
-                    border: "1px solid #c0c1c4",
-                  }}
-                />
-                <Stack spacing={5}>
-                  <Text
-                    size="sm"
-                    weight={700}
-                    sx={{ lineHeight: 1, cursor: "default" }}
-                  >
-                    {truncateText(post?.username, 18)}
-                    {isUser ? " (you)" : ""}
-                  </Text>
-                  <Group>
-                    <Text
-                      color="dimmed"
-                      size="xs"
-                      sx={{ lineHeight: 1, cursor: "default" }}
-                    >
-                      {dayjs(post?.joined).format("MMM D, YYYY")}
-                    </Text>
-                  </Group>
-                </Stack>
-              </Group>
-              <Group mt="sm" spacing="sm">
-                <Text
-                  size="sm"
-                  sx={{
-                    cursor: "default",
-                  }}
-                >
-                  <b>{post?.numFollowing || 0}</b> Following
-                </Text>
-                <Text
-                  size="sm"
-                  sx={{
-                    cursor: "default",
-                  }}
-                >
-                  <b>{post?.numFollowers || 0}</b> Follower
-                  {post?.numFollowers !== 1 && "s"}
-                </Text>
-              </Group>
-            </HoverCard.Dropdown>
-          </HoverCard>
+              </Link>
+            )}
+          </Tooltip>
 
           {!isUser && (
             <Flex justify={"center"} align="center">
               <Tooltip
+                offset={3}
+                label={post?.isFollowing ? `Unfollow` : `Follow`}
+                position="top"
+                withinPortal
+                disabled={isFollowLoading || isPostModal}
                 color="dark.7"
-                label={
-                  post?.isFollowing
-                    ? `Unfollow ${post?.username}`
-                    : `Follow ${post?.username}`
-                }
-                position="bottom-end"
-                disabled={isFollowLoading}
                 styles={{
                   tooltip: {
                     border: "none",
-                    outline: "1px solid rgba(192, 193, 196, 0.25)",
+                    outline: "1px solid rgba(192, 193, 196, 0.75)",
                   },
                 }}
               >
@@ -369,14 +354,17 @@ function Post({
                 </ActionIcon>
               </Tooltip>
               <Tooltip
-                color="dark.7"
-                label={post?.isLiked ? "Unlike post" : "Like post"}
-                position="bottom-end"
+                withinPortal
+                label={post?.isLiked ? "Unlike" : "Like"}
+                position="top"
                 zIndex={2}
+                offset={3}
+                disabled={isLikeLoading || isPostModal}
+                color="dark.7"
                 styles={{
                   tooltip: {
                     border: "none",
-                    outline: "1px solid rgba(192, 193, 196, 0.25)",
+                    outline: "1px solid rgba(192, 193, 196, 0.75)",
                   },
                 }}
               >
@@ -561,15 +549,6 @@ function Post({
           {/* non-user caption */}
           {!isUser && (
             <Text
-              // title={
-              //   isPostModal
-              //     ? caption?.text?.length > 29
-              //       ? caption?.text || ""
-              //       : ""
-              //     : caption?.text?.length > 21
-              //     ? caption?.text || ""
-              //     : ""
-              // }
               color="white"
               fw={"bold"}
               fs="xs"
@@ -596,13 +575,15 @@ function Post({
               src={post?.albumImage}
               alt={post?.albumName}
               radius={"0.25rem"}
-              width={!isPostModal ? 275 : 375}
-              height={!isPostModal ? 275 : 375}
+              // width={!isPostModal ? 275 : 375}
+              // height={!isPostModal ? 275 : 375}
+              width={!isPostModal ? 275 : isSmall ? "75vw" : 375}
+              height={!isPostModal ? 275 : isSmall ? "75vw" : 375}
               withPlaceholder
               placeholder={
                 <Stack align="center">
                   <Text>{post?.albumName}</Text>
-                  <Text>{post?.artists.join(", ")}</Text>
+                  <Text>{artists}</Text>
                 </Stack>
               }
               style={{
@@ -705,17 +686,15 @@ function Post({
           {/* song info */}
           <Flex
             direction={"column"}
-            // justify={"center"}
-            // align={"center"}
             mt={8}
             mb={isSelect && "0.5rem"}
-            w={!isPostModal ? 275 : 375}
+            w={!isPostModal ? 275 : isSmall ? "75vw" : 375}
+            // w={!isPostModal ? 275 : 375}
             style={{
               textAlign: "center",
             }}
           >
             <Title
-              // title={post?.songName.length >= 20 ? post?.songName : null}
               order={3}
               color="white"
               sx={{
@@ -726,18 +705,13 @@ function Post({
               {post?.songName}
             </Title>
             <Text
-              // title={
-              //   post?.artists.join(", ").length >= 30
-              //     ? post?.artists.join(", ")
-              //     : null
-              // }
               color="rgba(255, 255, 255, 0.8)"
               sx={{
                 cursor: "default",
               }}
               className={"truncate"}
             >
-              {post?.artists.join(", ")}
+              {artists}
             </Text>
           </Flex>
 
@@ -957,6 +931,7 @@ function Post({
                                   setPost={setPost}
                                   comment={comment}
                                   setComment={setComment}
+                                  isSmall={isSmall}
                                 />
                               )
                             )}

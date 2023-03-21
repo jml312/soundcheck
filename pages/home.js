@@ -1,61 +1,113 @@
 import { getSession, useSession } from "next-auth/react";
 import { fetchSpotify } from "@/utils/fetchSpotify";
-import client from "@/lib/sanity";
-import { postsQuery } from "@/lib/queries";
 import { clearAuthCookies } from "@/utils/clearAuthCookies";
 import Post from "@/components/Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import FilterModal from "@/components/modals/FilterModal";
-import { getDayInterval } from "@/utils/getDayInterval";
 import dayjs from "dayjs";
-import { useState } from "react";
-import { Flex, Button, Text, ScrollArea } from "@mantine/core";
+import { useState, useEffect } from "react";
 import SelectSongModal from "@/components/modals/SelectSongModal";
 import Filter from "bad-words";
+import { useRouter } from "next/router";
+import {
+  Flex,
+  Text,
+  ScrollArea,
+  ActionIcon,
+  Loader,
+  Transition,
+  Tooltip,
+} from "@mantine/core";
+import { MdOutlineDateRange } from "react-icons/md";
+import { DatePickerInput } from "@mantine/dates";
+import { VscDebugRestart } from "react-icons/vsc";
+import { START_DATE } from "@/constants";
+import { dehydrate, QueryClient, useQuery } from "react-query";
+import { getPosts } from "@/actions";
 
-function Home({ spotifyData, todayPosts }) {
+function Home({ spotifyData, isRouteLoading }) {
+  const router = useRouter();
+  const { date } = router.query;
   const { data: session } = useSession();
-  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const { data: currentPosts, isLoading } = useQuery({
+    queryKey: ["posts", dayjs(date).format("YYYY-MM-DD")],
+    queryFn: () =>
+      getPosts({
+        isClient: true,
+        date: dayjs(date),
+        name: session?.user?.name,
+      }),
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    retry: false,
+    retryOnMount: false,
+    retryDelay: 0,
+    notifyOnChangeProps: ["data"],
+  });
+
   const [posts, setPosts] = useState({
-    feedPosts: todayPosts.feedPosts,
-    userPost: todayPosts.userPost,
+    feedPosts: currentPosts?.feedPosts,
+    userPost: currentPosts?.userPost,
+    hasPostedToday: currentPosts?.hasPostedToday,
   });
-  const [feedFilter, setFeedFilter] = useState({
-    date: dayjs().toDate(),
-    type: "Everyone",
-  });
+  const isToday = dayjs(date).isSame(dayjs(), "day");
   const [caption, setCaption] = useState({
     text: posts.userPost?.caption || "",
     originalText: posts.userPost?.caption || "",
     error: "",
-    isEditing: !posts.userPost?.caption,
+    isEditing: isToday && !posts.userPost?.caption,
+    isModalEditing: isToday && !posts.userPost?.caption,
     isLoading: false,
     addedEmoji: false,
-    isModalEditing: false,
   });
-  const badWordsFilter = new Filter();
-  const oneCard = useMediaQuery("(max-width: 900px)");
-  const twoCards = useMediaQuery("(max-width: 1200px)");
   const allPosts = !!posts?.userPost
     ? [posts.userPost, ...posts.feedPosts]
     : posts?.feedPosts || [];
-  const formattedDate = dayjs(feedFilter.date).format("MMMM D, YYYY");
-  const [filterOpened, { open: openFilter, close: closeFilter }] =
-    useDisclosure(false);
-  const [selectSongOpened, { close: closeSelectSong }] = useDisclosure(
-    !todayPosts?.userPost
-  );
+  const formattedDate = dayjs(date).format("MMMM D, YYYY");
+  const [selectSongOpened, { close: closeSelectSong, open: openSelectSong }] =
+    useDisclosure(
+      typeof currentPosts?.hasPostedToday === "boolean" &&
+        !currentPosts?.hasPostedToday
+    );
+  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const badWordsFilter = new Filter();
+  const oneCard = useMediaQuery("(max-width: 900px)");
+  const twoCards = useMediaQuery("(max-width: 1200px)");
 
   const setUserPost = (post) =>
     setPosts({
       ...posts,
       userPost: post,
     });
+
   const setFeedPost = (post) =>
     setPosts({
       ...posts,
       feedPosts: posts.feedPosts.map((p) => (p._id === post._id ? post : p)),
     });
+
+  useEffect(() => {
+    if (
+      typeof currentPosts?.hasPostedToday === "boolean" &&
+      !currentPosts?.hasPostedToday
+    ) {
+      openSelectSong();
+    }
+    setCaption({
+      text: currentPosts?.userPost?.caption || "",
+      originalText: currentPosts?.userPost?.caption || "",
+      error: "",
+      isEditing: isToday && !currentPosts?.userPost?.caption,
+      isModalEditing: isToday && !posts.userPost?.caption,
+      isLoading: false,
+      addedEmoji: false,
+    });
+    setPosts({
+      feedPosts: currentPosts?.feedPosts,
+      userPost: currentPosts?.userPost,
+      hasPostedToday: currentPosts?.hasPostedToday,
+    });
+  }, [currentPosts]);
 
   return (
     <>
@@ -70,16 +122,6 @@ function Home({ spotifyData, todayPosts }) {
         caption={caption}
         setCaption={setCaption}
         badWordsFilter={badWordsFilter}
-      />
-      <FilterModal
-        opened={filterOpened}
-        close={closeFilter}
-        feedFilter={feedFilter}
-        setFeedFilter={setFeedFilter}
-        posts={posts}
-        setPosts={setPosts}
-        formattedDate={formattedDate}
-        session={session}
       />
 
       <Flex
@@ -105,7 +147,7 @@ function Home({ spotifyData, todayPosts }) {
             w="100%"
             justify={"center"}
             align={"center"}
-            gap={".5rem"}
+            gap="0.75rem"
             style={{
               position: "absolute",
               top: "0",
@@ -113,21 +155,80 @@ function Home({ spotifyData, todayPosts }) {
               transform: "translateY(1.5rem)",
             }}
           >
-            <Button
-              variant="light"
-              color="gray"
-              size="sm"
-              onClick={openFilter}
-              fw={"bold"}
-              mb={"2.15rem"}
+            <DatePickerInput
+              icon={<MdOutlineDateRange />}
+              dropdownType="modal"
+              modalProps={{
+                centered: true,
+                overlayProps: {
+                  blur: 3,
+                  opacity: 0.55,
+                },
+              }}
+              value={dayjs(date).isValid() ? dayjs(date).toDate() : null}
+              onChange={(newDate) => {
+                router.push(
+                  `/home?date=${dayjs(newDate).format("YYYY-MM-DD")}`,
+                  undefined,
+                  { shallow: true }
+                );
+              }}
+              minDate={dayjs(START_DATE).toDate()}
+              maxDate={dayjs().toDate()}
+              styles={{
+                month: {
+                  ".mantine-DatePickerInput-day[data-weekend]": {
+                    color: "#c1c2c5 !important",
+                  },
+                  ".mantine-DatePickerInput-day[data-weekend][data-selected]": {
+                    color: "#ffffff !important",
+                  },
+                },
+                input: {},
+              }}
+            />
+            <Transition
+              mounted={!isToday}
+              transition="slide-right"
+              duration={200}
+              exitDuration={0}
             >
-              {feedFilter.type} on {formattedDate}
-            </Button>
+              {(styles) => (
+                <Tooltip
+                  label="Reset"
+                  position="right"
+                  color="dark.7"
+                  styles={{
+                    tooltip: {
+                      border: "none",
+                      outline: "1px solid rgba(192, 193, 196, 0.75)",
+                    },
+                  }}
+                >
+                  <ActionIcon
+                    style={styles}
+                    onClick={() => {
+                      router.push(
+                        `/home?date=${dayjs().format("YYYY-MM-DD")}`,
+                        undefined,
+                        { shallow: true }
+                      );
+                    }}
+                    color={"gray"}
+                    variant="outline"
+                  >
+                    <VscDebugRestart />
+                  </ActionIcon>
+                </Tooltip>
+              )}
+            </Transition>
           </Flex>
-          {allPosts.length > 0 ? (
+          {(isRouteLoading && !isLoading) || isLoading ? (
+            <Loader size="xl" />
+          ) : allPosts.length > 0 ? (
             <ScrollArea
               type="always"
-              w={oneCard ? "350px" : twoCards ? "700px" : "1050px"}
+              w={oneCard ? "354px" : twoCards ? "700px" : "1050px"}
               h={"565px"}
               style={{
                 transform: "translateY(2.8rem)",
@@ -149,6 +250,7 @@ function Home({ spotifyData, todayPosts }) {
             >
               <Flex
                 justify={"center"}
+                // align={"stretch"}
                 align={"center"}
                 w={"100%"}
                 h={"100%"}
@@ -160,6 +262,7 @@ function Home({ spotifyData, todayPosts }) {
                   return (
                     <Post
                       key={post._id}
+                      isLoading={isLoading}
                       isUser={isUser}
                       post={post}
                       setPost={isUser ? setUserPost : setFeedPost}
@@ -175,10 +278,7 @@ function Home({ spotifyData, todayPosts }) {
               </Flex>
             </ScrollArea>
           ) : (
-            <Text fz={"lg"}>{`No posts 
-            for ${feedFilter.type} on
-            ${formattedDate}
-            `}</Text>
+            <Text fz={"lg"} fw={"bold"}>{`No posts on ${formattedDate}`}</Text>
           )}
         </Flex>
       </Flex>
@@ -186,7 +286,7 @@ function Home({ spotifyData, todayPosts }) {
   );
 }
 
-export async function getServerSideProps({ req, res }) {
+export async function getServerSideProps({ req, res, query }) {
   const session = await getSession({ req });
 
   if (!session) {
@@ -200,22 +300,48 @@ export async function getServerSideProps({ req, res }) {
   }
 
   try {
-    const { startDate, endDate } = getDayInterval(dayjs());
-    const todayPosts = await client.fetch(postsQuery, {
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      name: session?.user?.name,
-    });
+    const { date } = query;
+    const currentDate = dayjs(date);
 
-    if (!!todayPosts.userPost) {
+    if (
+      !date ||
+      !currentDate.isValid() ||
+      !currentDate.isBetween(
+        START_DATE,
+        dayjs().format("YYYY-MM-DD"),
+        "day",
+        "[]"
+      )
+    ) {
       return {
-        props: {
-          todayPosts,
+        redirect: {
+          destination: `/home?date=${dayjs().format("YYYY-MM-DD")}`,
+          permanent: false,
         },
       };
     }
 
-    const spotifyData = await fetchSpotify(session?.user?.access_token);
+    const queryClient = new QueryClient();
+    const currentPosts = await queryClient.fetchQuery(
+      ["posts", currentDate.format("YYYY-MM-DD")],
+      () =>
+        getPosts({
+          isClient: false,
+          date: currentDate,
+          name: session?.user?.name,
+        })
+    );
+
+    if (currentPosts?.hasPostedToday) {
+      return {
+        props: {
+          dehydratedState: dehydrate(queryClient),
+          spotifyData: [],
+        },
+      };
+    }
+
+    const spotifyData = await fetchSpotify(session);
 
     if (!spotifyData?.length) {
       clearAuthCookies(res);
@@ -229,8 +355,12 @@ export async function getServerSideProps({ req, res }) {
 
     return {
       props: {
-        todayPosts,
+        dehydratedState: dehydrate(queryClient),
         spotifyData,
+      },
+      redirect: !currentDate.isSame(dayjs(), "day") && {
+        destination: `/home?date=${dayjs().format("YYYY-MM-DD")}`,
+        permanent: false,
       },
     };
   } catch {

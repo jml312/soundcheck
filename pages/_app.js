@@ -5,11 +5,14 @@ import { MantineProvider } from "@mantine/core";
 import Navbar from "@/components/Navbar";
 import Loader from "@/components/Loader";
 import { Notifications } from "@mantine/notifications";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import isBetween from "dayjs/plugin/isBetween";
 
 dayjs.extend(relativeTime, {
   thresholds: [
@@ -53,12 +56,35 @@ dayjs.updateLocale("en", {
   },
 });
 
+dayjs.extend(customParseFormat);
+dayjs.extend(isBetween);
+
 export default function App({
   Component,
   pageProps: { session, ...pageProps },
 }) {
-  const [queryClient] = useState(() => new QueryClient());
   const emptyColors = (num) => Array(num).fill("");
+  const [queryClient] = useState(() => new QueryClient());
+  const router = useRouter();
+  const [isRouteLoading, setIsRouteLoading] = useState(false);
+
+  useEffect(() => {
+    router.events.on("routeChangeStart", (url, { shallow }) => {
+      if (!shallow) {
+        setIsRouteLoading(true);
+      }
+    });
+    router.events.on("routeChangeComplete", (url, { shallow }) => {
+      if (!shallow) {
+        setIsRouteLoading(false);
+      }
+    });
+    return () => {
+      router.events.off("routeChangeStart", () => {});
+      router.events.off("routeChangeComplete", () => {});
+    };
+  }, [router.events]);
+
   return (
     <>
       <Head>
@@ -75,46 +101,49 @@ export default function App({
 
       <SessionProvider session={session}>
         <QueryClientProvider client={queryClient}>
-          <MantineProvider
-            withGlobalStyles
-            withNormalizeCSS
-            theme={{
-              colorScheme: "dark",
-              colors: {
-                spotify: [
-                  ...emptyColors(7),
-                  "rgba(29, 185, 84, 0.9)",
-                  "rgba(29, 185, 84, 1)",
-                ],
-                lightWhite: [
-                  ...emptyColors(6),
-                  "#a8a9ad",
-                  "rgba(192, 193, 196, 0.75)",
-                  "#c0c1c4",
-                ],
-                lightGray: ["#3C3F42", ...emptyColors(7), "#25262b"],
-              },
-              primaryColor: "spotify",
-              components: {
-                Button: {
-                  styles: (theme) => ({
-                    root: {
-                      color: "white",
-                      backgroundColor: theme.colors.spotify[6],
-                      "&:hover": {
-                        backgroundColor: theme.colors.spotify[7],
-                      },
-                    },
-                  }),
+          <Hydrate state={pageProps.dehydratedState}>
+            <MantineProvider
+              withGlobalStyles
+              withNormalizeCSS
+              theme={{
+                loader: "bars",
+                colorScheme: "dark",
+                colors: {
+                  spotify: [
+                    ...emptyColors(7),
+                    "rgba(29, 185, 84, 0.9)",
+                    "rgba(29, 185, 84, 1)",
+                  ],
+                  lightWhite: [
+                    ...emptyColors(6),
+                    "#a8a9ad",
+                    "rgba(192, 193, 196, 0.75)",
+                    "#c0c1c4",
+                  ],
+                  lightGray: ["#3C3F42", ...emptyColors(7), "#25262b"],
                 },
-              },
-            }}
-          >
-            <Notifications />
-            <Auth>
-              <Component {...pageProps} />
-            </Auth>
-          </MantineProvider>
+                primaryColor: "spotify",
+                components: {
+                  Button: {
+                    styles: (theme) => ({
+                      root: {
+                        color: "white",
+                        backgroundColor: theme.colors.spotify[6],
+                        "&:hover": {
+                          backgroundColor: theme.colors.spotify[7],
+                        },
+                      },
+                    }),
+                  },
+                },
+              }}
+            >
+              <Notifications />
+              <Auth>
+                <Component {...pageProps} isRouteLoading={isRouteLoading} />
+              </Auth>
+            </MantineProvider>
+          </Hydrate>
         </QueryClientProvider>
       </SessionProvider>
     </>

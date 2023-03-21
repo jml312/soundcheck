@@ -25,8 +25,8 @@ export default function CommentCard({
   setPost,
   comment,
   setComment,
+  isSmall,
 }) {
-  // memoize formattedCreatedAt
   const formattedCreatedAtMemo = useMemo(() => formattedCreatedAt, []);
 
   return (
@@ -61,7 +61,7 @@ export default function CommentCard({
                 mb={-1}
               >
                 <Avatar
-                  size={32}
+                  size={isSmall ? 24 : 32}
                   src={userImage}
                   alt={`${username}'s profile`}
                   radius={"xl"}
@@ -71,6 +71,7 @@ export default function CommentCard({
                 />
                 <Title
                   order={6}
+                  fz={isSmall ? "xs" : ""}
                   fw={500}
                   sx={{
                     color: "#e7e7e7",
@@ -90,6 +91,7 @@ export default function CommentCard({
             cursor: "default",
             transform: "translateY(-0.35rem)",
           }}
+          fz={isSmall ? ".8rem" : ""}
         >
           {formattedCreatedAtMemo}
         </Text>

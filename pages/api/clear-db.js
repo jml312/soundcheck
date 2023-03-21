@@ -7,7 +7,7 @@ export default async function handle(req, res) {
 
   const { secret } = req.query;
 
-  if (secret !== process.env.CLEAR_DB_SECRET) {
+  if (secret !== process.env.API_SECRET) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
