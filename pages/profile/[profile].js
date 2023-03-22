@@ -2,11 +2,11 @@ import { Flex } from "@mantine/core";
 import { useSession, getSession } from "next-auth/react";
 import { clearAuthCookies, getDayInterval } from "@/utils";
 import client from "@/lib/sanity";
-import { hasPostedTodayQuery } from "@/lib/queries";
+import { hasPostedTodayQuery, profileQuery } from "@/lib/queries";
 import Profile from "@/components/Profile";
 import dayjs from "dayjs";
 
-function UserProfile() {
+function UserProfile({ profile }) {
   const { data: session } = useSession();
 
   return (
@@ -52,8 +52,12 @@ export async function getServerSideProps({ req, res }) {
     };
   }
 
+  const profile = await client.fetch(profileQuery, {
+    userId: session.user.id,
+  });
+
   return {
-    props: {},
+    props: { profile },
   };
 }
 
