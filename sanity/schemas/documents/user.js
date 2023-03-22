@@ -86,5 +86,11 @@ export default {
       type: 'array',
       of: [{type: 'reference', to: {type: 'user'}}],
     },
+    {
+      name: 'notifications',
+      title: 'Notifications',
+      type: 'array',
+      of: [{type: 'notification'}],
+    },
   ],
 }

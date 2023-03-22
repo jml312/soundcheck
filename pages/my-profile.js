@@ -1,5 +1,10 @@
 import { Flex } from "@mantine/core";
 import { useSession, getSession } from "next-auth/react";
+import { clearAuthCookies, getDayInterval } from "@/utils";
+import client from "@/lib/sanity";
+import { hasPostedTodayQuery } from "@/lib/queries";
+import Profile from "@/components/Profile";
+import dayjs from "dayjs";
 
 function MyProfile() {
   const { data: session } = useSession();
@@ -14,7 +19,7 @@ function MyProfile() {
         transform: "translateY(5rem)",
       }}
     >
-      {JSON.stringify(session, null, 2)}
+      <Profile isUser session={session} />
     </Flex>
   );
 }
@@ -23,11 +28,28 @@ export async function getServerSideProps({ req, res }) {
   const session = await getSession({ req });
 
   if (!session) {
-    res.writeHead(302, {
-      Location: "/",
-    });
-    res.end();
-    return { props: {} };
+    clearAuthCookies(res);
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  const { startDate: todayStart, endDate: todayEnd } = getDayInterval(dayjs());
+  const hasPostedToday = await client.fetch(hasPostedTodayQuery, {
+    userId: session.user.id,
+    todayStart: todayStart.toISOString(),
+    todayEnd: todayEnd.toISOString(),
+  });
+  if (!hasPostedToday) {
+    return {
+      redirect: {
+        destination: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
+        permanent: false,
+      },
+    };
   }
 
   return {

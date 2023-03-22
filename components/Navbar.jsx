@@ -8,6 +8,8 @@ import {
   UnstyledButton,
   Navbar as MantineNavbar,
   createStyles,
+  ActionIcon,
+  Indicator,
 } from "@mantine/core";
 import { useSession, signOut } from "next-auth/react";
 import { BsChevronDown, BsHeadphones } from "react-icons/bs";
@@ -15,9 +17,13 @@ import { FaSignOutAlt } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
 import { useState } from "react";
 import Link from "next/link";
-import { useMediaQuery } from "@mantine/hooks";
+import { useMediaQuery, useDisclosure } from "@mantine/hooks";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
+import { MdOutlineNotifications } from "react-icons/md";
+import { useQuery } from "react-query";
+import { getNotifications } from "@/actions";
+import NotificationModal from "./modals/NotificationModal";
 
 const useStyles = createStyles((theme) => ({
   logoText: {
@@ -34,8 +40,22 @@ function Navbar({ children }) {
   const isMobile = useMediaQuery("(max-width: 480px)");
   const router = useRouter();
 
+  const { data: notifications } = useQuery({
+    queryKey: "notifications",
+    queryFn: () =>
+      getNotifications({
+        userId: session?.user?.id,
+      }),
+  });
+
+  const [
+    notificationOpen,
+    { open: openNotification, close: closeNotification },
+  ] = useDisclosure(false);
+
   return (
     <>
+      <NotificationModal open={notificationOpen} close={closeNotification} />
       <MantineNavbar
         width="100%"
         height={"5rem"}
@@ -77,68 +97,83 @@ function Navbar({ children }) {
               </Title>
             </Link>
           )}
+          <Group spacing={10}>
+            <ActionIcon
+              onClick={() => {}}
+              disabled={!notifications || notifications.length === 0}
+              sx={{
+                "&[data-disabled]": {
+                  backgroundColor: "transparent",
+                  border: "none",
+                },
+              }}
+            >
+              <MdOutlineNotifications size={"1.5rem"} />
+            </ActionIcon>
+            <Menu
+              trigger={isMobile ? "click" : "hover"}
+              openDelay={50}
+              closeDelay={100}
+              width={260}
+              position="bottom-end"
+              transitionProps={{ transition: "pop-top-right" }}
+              withinPortal
+              onOpen={() => setMenuHover(true)}
+              onClose={() => setMenuHover(false)}
+            >
+              <Menu.Target>
+                <UnstyledButton
+                  sx={() => ({
+                    borderRadius: "0.5rem",
+                    padding: "0.5rem",
+                    backgroundColor: menuHover ? "#141517" : "transparent",
+                    "&:hover": {
+                      backgroundColor: "#141517",
+                    },
+                  })}
+                >
+                  <Group spacing={8}>
+                    <Avatar
+                      src={session?.user?.image}
+                      alt={session?.user?.name}
+                      radius="xl"
+                      size={27}
+                      sx={(theme) => ({
+                        border: `1px solid ${theme.colors.lightWhite[8]}`,
+                      })}
+                    />
+                    <Text weight={500} size="sm" sx={{ lineHeight: 1 }} mr={3}>
+                      {session?.user?.name}
+                    </Text>
+                    <BsChevronDown size={"1rem"} stroke={1.5} />
+                  </Group>
+                </UnstyledButton>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Link href="/my-profile" passHref>
+                  <Menu.Item icon={<CgProfile size={"0.9rem"} stroke={1.5} />}>
+                    Profile
+                  </Menu.Item>
+                </Link>
 
-          <Menu
-            trigger={isMobile ? "click" : "hover"}
-            openDelay={50}
-            closeDelay={100}
-            width={260}
-            position="bottom-end"
-            transitionProps={{ transition: "pop-top-right" }}
-            withinPortal
-            onOpen={() => setMenuHover(true)}
-            onClose={() => setMenuHover(false)}
-          >
-            <Menu.Target>
-              <UnstyledButton
-                sx={() => ({
-                  borderRadius: "0.5rem",
-                  padding: "0.5rem",
-                  backgroundColor: menuHover ? "#141517" : "transparent",
-                  "&:hover": {
-                    backgroundColor: "#141517",
-                  },
-                })}
-              >
-                <Group spacing={8}>
-                  <Avatar
-                    src={session?.user?.image}
-                    alt={session?.user?.name}
-                    radius="xl"
-                    size={27}
-                    sx={(theme) => ({
-                      border: `1px solid ${theme.colors.lightWhite[8]}`,
-                    })}
-                  />
-                  <Text weight={500} size="sm" sx={{ lineHeight: 1 }} mr={3}>
-                    {session?.user?.name}
-                  </Text>
-                  <BsChevronDown size={"1rem"} stroke={1.5} />
-                </Group>
-              </UnstyledButton>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Link href="/my-profile" passHref>
-                <Menu.Item icon={<CgProfile size={"0.9rem"} stroke={1.5} />}>
-                  Profile
+                <Link href="/discover" passHref>
+                  <Menu.Item
+                    icon={<BsHeadphones size={"0.9rem"} stroke={1.5} />}
+                  >
+                    Discover
+                  </Menu.Item>
+                </Link>
+
+                <Menu.Divider />
+                <Menu.Item
+                  onClick={() => signOut()}
+                  icon={<FaSignOutAlt size={"0.9rem"} stroke={1.5} />}
+                >
+                  Sign out
                 </Menu.Item>
-              </Link>
-
-              <Link href="/discover" passHref>
-                <Menu.Item icon={<BsHeadphones size={"0.9rem"} stroke={1.5} />}>
-                  Discover
-                </Menu.Item>
-              </Link>
-
-              <Menu.Divider />
-              <Menu.Item
-                onClick={() => signOut()}
-                icon={<FaSignOutAlt size={"0.9rem"} stroke={1.5} />}
-              >
-                Sign out
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
+              </Menu.Dropdown>
+            </Menu>
+          </Group>
         </Flex>
       </MantineNavbar>
       {children}

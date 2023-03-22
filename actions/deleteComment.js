@@ -23,6 +23,7 @@ export default async function deleteComment({
     await axios.delete("/api/protected/comment", {
       data: {
         postID: post?._id,
+        postUserId: post?.userId,
         userId,
         createdAt,
         type: "delete",

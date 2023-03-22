@@ -31,6 +31,7 @@ export default NextAuth({
           comments: [],
           following: [],
           followers: [],
+          notifications: [],
         });
 
         let followsSoundcheck = false;

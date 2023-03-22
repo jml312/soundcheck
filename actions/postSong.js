@@ -1,4 +1,5 @@
 import axios from "axios";
+import { notifications } from "@mantine/notifications";
 
 export default async function postSong({
   selectedSong,
@@ -16,7 +17,7 @@ export default async function postSong({
   });
   try {
     const {
-      data: { _id },
+      data: { _id, postStreak },
     } = await axios.post("/api/protected/post", {
       ...selectedSong.data,
       userId: session.user.id,
@@ -40,6 +41,13 @@ export default async function postSong({
     });
     setCurrentlyPlaying(null);
     close();
+    notifications.show({
+      title: `🔥 Your post streak is now ${postStreak}`,
+      message: `${selectedSong.data?.songName} by ${selectedSong.data?.artists
+        .map((artist) => artist.name)
+        .join(", ")}`,
+      autoClose: 7000,
+    });
   } catch {
     setSelectedSong({
       ...selectedSong,

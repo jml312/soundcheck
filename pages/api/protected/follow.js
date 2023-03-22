@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { type, userId, toFollowId } = req.body;
+  const { type, userId, postUserId, toFollowId } = req.body;
 
   try {
     if (type === "follow") {
@@ -30,6 +30,22 @@ export default async function handler(req, res) {
             _key: key,
           },
         ])
+        .append("notifications", [
+          {
+            _type: "notification",
+            _key: key,
+            type: "follow",
+            post: {
+              _type: "reference",
+              _ref: postUserId,
+            },
+            user: {
+              _type: "reference",
+              _ref: userId,
+            },
+            createdAt: key,
+          },
+        ])
         .commit();
     } else if (type === "unfollow") {
       await client
@@ -39,6 +55,9 @@ export default async function handler(req, res) {
       await client
         .patch(toFollowId)
         .unset([`followers[_ref == \"${userId}\"]`])
+        .unset([
+          `notifications[type == \"follow\" && user._ref == \"${userId}\"]`,
+        ])
         .commit();
     }
 

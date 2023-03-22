@@ -27,7 +27,7 @@ import {
   BsPencil,
 } from "react-icons/bs";
 import { useRef, useEffect, useState } from "react";
-import { truncateText } from "@/utils/truncateText";
+import { truncateText } from "@/utils";
 import PostModal from "./modals/PostModal";
 import { AiOutlineComment } from "react-icons/ai";
 import { useDisclosure, useHover, useMediaQuery } from "@mantine/hooks";
@@ -277,7 +277,7 @@ function Post({
                 </Button>
               ) : (
                 <Link
-                  href={isUser ? "/my-profile" : `/profile/${post?.username}`}
+                  href={isUser ? "/my-profile" : `/profile/${post?.userId}`}
                   passHref
                 >
                   <Button

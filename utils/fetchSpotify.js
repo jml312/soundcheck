@@ -1,9 +1,10 @@
 import axios from "axios";
 import dayjs from "dayjs";
-import client from "@/lib/sanity";
 import { recentlyPlayedQuery } from "@/lib/queries";
 
-export const fetchSpotify = async (session) => {
+// import client from "@/lib/sanity";
+
+export const fetchSpotify = async ({ session, client }) => {
   const { accessToken, id } = session.user;
 
   try {

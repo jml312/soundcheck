@@ -23,7 +23,6 @@ export default async function handle(req, res) {
         .patch(userID)
         .unset([
           "recentlyPlayed",
-          "discoverSongs",
           "posts",
           "likes",
           "comments",

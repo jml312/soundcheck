@@ -52,7 +52,7 @@ export default async function handler(req, res) {
       client,
     });
 
-    await client
+    const { postStreak } = await client
       .patch(userId)
       .inc({ postStreak: 1 })
       .set({
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
       ])
       .commit();
 
-    return res.status(200).json({ message: "Success", _id });
+    return res.status(200).json({ message: "Success", _id, postStreak });
   } catch {
     return res.status(500).json({ message: "Internal server error" });
   }

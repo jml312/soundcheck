@@ -1,7 +1,7 @@
 import client from "@/lib/sanity";
 import { hasPostedYesterdayQuery } from "@/lib/queries";
 import dayjs from "dayjs";
-import { getDayInterval } from "@/utils/getDayInterval";
+import { getDayInterval } from "@/utils";
 import { getDiscoverSongs } from "@/actions";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -19,13 +19,14 @@ export default async function handle(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { secret } = req.query;
+  const { secret, testMode } = req.query;
 
   if (secret !== process.env.API_SECRET) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   try {
+    const sendAt = getRandom9To5().unix();
     const userIDs = await client.fetch(`*[_type == "user"] {_id, email}`);
     userIDs.forEach(async ({ _id, email }) => {
       const { startDate: yesterdayStart, endDate: yesterdayEnd } =
@@ -51,15 +52,14 @@ export default async function handle(req, res) {
         .unset(["recentlyPlayed"])
         .commit();
 
-      const msg = {
+      await sgMail.send({
         to: email,
-        from: "",
+        from: "jml312@case.edu",
         subject: "Your daily reminder",
         text: "Your daily reminder",
         html: `<strong>Your daily reminder</strong>`,
-        sendAt: getRandom9To5().unix(),
-      };
-      await sgMail.send(msg);
+        sendAt: !testMode && sendAt,
+      });
     });
 
     return res.status(200).json({ message: "Success" });

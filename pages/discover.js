@@ -1,11 +1,11 @@
 import { getSession, useSession } from "next-auth/react";
 import { Flex, ScrollArea, Title, Text } from "@mantine/core";
-import { clearAuthCookies } from "@/utils/clearAuthCookies";
+import { getDayInterval, clearAuthCookies } from "@/utils";
 import Post from "@/components/Post";
 import { useState } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import client from "@/lib/sanity";
-import { userDiscoverQuery } from "@/lib/queries";
+import { userDiscoverQuery, hasPostedTodayQuery } from "@/lib/queries";
 import dayjs from "dayjs";
 
 function Discover({ recommendations }) {
@@ -106,11 +106,16 @@ export async function getServerSideProps({ req, res }) {
   }
 
   try {
-    const recommendations = await client.fetch(userDiscoverQuery, {
+    const { startDate: todayStart, endDate: todayEnd } = getDayInterval(
+      dayjs()
+    );
+    const hasPostedToday = await client.fetch(hasPostedTodayQuery, {
       userId: session.user.id,
+      todayStart: todayStart.toISOString(),
+      todayEnd: todayEnd.toISOString(),
     });
 
-    if (!recommendations?.length) {
+    if (!hasPostedToday) {
       return {
         redirect: {
           destination: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
@@ -118,6 +123,10 @@ export async function getServerSideProps({ req, res }) {
         },
       };
     }
+
+    const recommendations = await client.fetch(userDiscoverQuery, {
+      userId: session.user.id,
+    });
 
     return {
       props: {

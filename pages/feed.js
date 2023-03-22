@@ -1,6 +1,5 @@
 import { getSession, useSession } from "next-auth/react";
-import { fetchSpotify } from "@/utils/fetchSpotify";
-import { clearAuthCookies } from "@/utils/clearAuthCookies";
+import { clearAuthCookies, fetchSpotify } from "@/utils";
 import Post from "@/components/Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import dayjs from "dayjs";
@@ -23,6 +22,7 @@ import { VscDebugRestart } from "react-icons/vsc";
 import { START_DATE } from "@/constants";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import { getPosts } from "@/actions";
+import client from "@/lib/sanity";
 
 function Feed({ spotifyData, isRouteLoading }) {
   const router = useRouter();
@@ -36,9 +36,9 @@ function Feed({ spotifyData, isRouteLoading }) {
         date: dayjs(date),
         userId: session?.user?.id,
       }),
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
+    // refetchOnMount: false,
+    // refetchOnReconnect: false,
+    // refetchOnWindowFocus: false,
     retry: false,
     retryOnMount: false,
     retryDelay: 0,
@@ -353,6 +353,7 @@ export async function getServerSideProps({ req, res, query }) {
       () =>
         getPosts({
           isClient: false,
+          client,
           date: currentDate,
           userId: session?.user?.id,
         })
@@ -367,7 +368,7 @@ export async function getServerSideProps({ req, res, query }) {
       };
     }
 
-    const spotifyData = await fetchSpotify(session);
+    const spotifyData = await fetchSpotify({ session, client });
 
     if (!spotifyData?.length) {
       clearAuthCookies(res);

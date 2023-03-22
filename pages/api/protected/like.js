@@ -8,8 +8,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { postID, userId, type, createdAt, playlistID, songID, accessToken } =
-    req.body;
+  const {
+    postID,
+    userId,
+    postUserId,
+    type,
+    createdAt,
+    playlistID,
+    songID,
+    accessToken,
+  } = req.body;
 
   try {
     if (type === "like") {
@@ -47,6 +55,25 @@ export default async function handler(req, res) {
           },
         ])
         .commit();
+      await client
+        .patch(postUserId)
+        .append("notifications", [
+          {
+            _type: "notification",
+            _key: createdAt,
+            type: "like",
+            post: {
+              _type: "reference",
+              _ref: postID,
+            },
+            user: {
+              _type: "reference",
+              _ref: userId,
+            },
+            createdAt,
+          },
+        ])
+        .commit();
       try {
         await axios.post(
           `https://api.spotify.com/v1/playlists/${playlistID}/tracks`,
@@ -68,6 +95,12 @@ export default async function handler(req, res) {
       await client
         .patch(postID)
         .unset([`likes[user._ref == \"${userId}\"]`])
+        .commit();
+      await client
+        .patch(postUserId)
+        .unset([
+          `notifications[type == \"like\" && post._ref == \"${postID}\"]`,
+        ])
         .commit();
 
       try {

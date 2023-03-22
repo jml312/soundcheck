@@ -17,6 +17,7 @@ export default async function followUser({
     });
     await axios.post("/api/protected/follow", {
       userId: session?.user?.id,
+      postUserId: post?.userId,
       toFollowId: post?.userId,
       type: isFollowing ? "unfollow" : "follow",
     });

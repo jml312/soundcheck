@@ -10,7 +10,7 @@ import {
 } from "@mantine/core";
 import Link from "next/link";
 import { AiFillDelete, AiFillEdit } from "react-icons/ai";
-import { truncateText } from "@/utils/truncateText";
+import { truncateText } from "@/utils";
 import { deleteComment } from "@/actions";
 import { useMemo } from "react";
 
@@ -50,7 +50,7 @@ export default function CommentCard({
         }}
       >
         <Flex align={"center"} gap={"xs"} pb={4}>
-          <Link passHref href={isUser ? "/my-profile" : `/profile/${username}`}>
+          <Link passHref href={isUser ? "/my-profile" : `/profile/${userId}`}>
             <UnstyledButton>
               <Flex
                 gap={"xs"}
