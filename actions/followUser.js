@@ -16,8 +16,8 @@ export default async function followUser({
       numFollowers: post?.numFollowers + (isFollowing ? -1 : 1),
     });
     await axios.post("/api/protected/follow", {
-      name: session?.user?.name,
-      toFollowName: post?.username,
+      userId: session?.user?.id,
+      toFollowId: post?.userId,
       type: isFollowing ? "unfollow" : "follow",
     });
     setIsFollowLoading(false);

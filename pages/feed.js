@@ -34,7 +34,7 @@ function Feed({ spotifyData, isRouteLoading }) {
       getPosts({
         isClient: true,
         date: dayjs(date),
-        name: session?.user?.name,
+        userId: session?.user?.id,
       }),
     refetchOnMount: false,
     refetchOnReconnect: false,
@@ -277,15 +277,14 @@ function Feed({ spotifyData, isRouteLoading }) {
             >
               <Flex
                 justify={"center"}
-                // align={"stretch"}
-                align={"center"}
+                align={"end"}
                 w={"100%"}
                 h={"100%"}
                 wrap={"wrap"}
                 gap="1.5rem"
               >
                 {allPosts?.map((post) => {
-                  const isUser = post?.username === session?.user?.name;
+                  const isUser = post?.userId === session?.user?.id;
                   return (
                     <Post
                       key={post._id}
@@ -355,7 +354,7 @@ export async function getServerSideProps({ req, res, query }) {
         getPosts({
           isClient: false,
           date: currentDate,
-          name: session?.user?.name,
+          userId: session?.user?.id,
         })
     );
 

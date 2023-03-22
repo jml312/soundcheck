@@ -107,7 +107,7 @@ export async function getServerSideProps({ req, res }) {
 
   try {
     const recommendations = await client.fetch(userDiscoverQuery, {
-      name: session.user.name,
+      userId: session.user.id,
     });
 
     if (!recommendations?.length) {

@@ -21,7 +21,15 @@ export default async function handle(req, res) {
     userIDs.forEach(async (userID) => {
       await client
         .patch(userID)
-        .unset(["posts", "likes", "comments", "following", "followers"])
+        .unset([
+          "recentlyPlayed",
+          "discoverSongs",
+          "posts",
+          "likes",
+          "comments",
+          "following",
+          "followers",
+        ])
         .commit();
     });
 

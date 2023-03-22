@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export default async function deleteComment({
-  username,
+  userId,
   createdAt,
   post,
   setPost,
@@ -23,7 +23,7 @@ export default async function deleteComment({
     await axios.delete("/api/protected/comment", {
       data: {
         postID: post?._id,
-        name: username,
+        userId,
         createdAt,
         type: "delete",
       },

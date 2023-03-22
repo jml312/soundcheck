@@ -10,9 +10,13 @@ const getMultipleRandom = (arr, n) => {
   return Array.from(result);
 };
 
-export default async function getDiscoverSongs({ name, accessToken, client }) {
+export default async function getDiscoverSongs({
+  userId,
+  accessToken,
+  client,
+}) {
   const discoverData = await client.fetch(discoverQuery, {
-    name,
+    userId,
   });
 
   let seedArtists = [],

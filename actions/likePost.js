@@ -17,7 +17,7 @@ export default async function likePost({
     });
     await axios.post("/api/protected/like", {
       postID: post?._id,
-      name: session?.user?.name,
+      userId: session?.user?.id,
       type: isLiked ? "unlike" : "like",
       createdAt: dayjs().toISOString(),
       playlistID: session?.user?.playlistID,

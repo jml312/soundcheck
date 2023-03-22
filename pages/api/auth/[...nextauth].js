@@ -12,16 +12,20 @@ export default NextAuth({
   callbacks: {
     async signIn({ account, user }) {
       if (account.provider !== "spotify") return false;
+      const { id, name, email, image } = user;
+      const { access_token } = account;
       try {
-        const { name, email, image } = user;
         const { playlistID } = await client.createIfNotExists({
           _type: "user",
-          _id: name,
+          _id: id,
           name,
           email,
           image,
-          postStreak: 0,
           createdAt: dayjs().toISOString(),
+          postStreak: 0,
+          playlistID: "",
+          recentlyPlayed: [],
+          discoverSongs: [],
           posts: [],
           likes: [],
           comments: [],
@@ -32,10 +36,10 @@ export default NextAuth({
         let followsSoundcheck = false;
         try {
           const { data } = await axios.get(
-            `https://api.spotify.com/v1/playlists/${playlistID}/followers/contains?ids=${name}`,
+            `https://api.spotify.com/v1/playlists/${playlistID}/followers/contains?ids=${id}`,
             {
               headers: {
-                Authorization: `Bearer ${account.access_token}`,
+                Authorization: `Bearer ${access_token}`,
               },
             }
           );
@@ -46,9 +50,9 @@ export default NextAuth({
           user.playlistID = playlistID;
         } else {
           const {
-            data: { id },
+            data: { id: _playlistID },
           } = await axios.post(
-            `https://api.spotify.com/v1/users/${name}/playlists`,
+            `https://api.spotify.com/v1/users/${id}/playlists`,
             {
               name: "Soundcheck!",
               public: false,
@@ -57,16 +61,16 @@ export default NextAuth({
             },
             {
               headers: {
-                Authorization: `Bearer ${account.access_token}`,
+                Authorization: `Bearer ${access_token}`,
               },
             }
           );
 
-          await client.patch(name).set({ playlistID: id }).commit();
-          user.playlistID = id;
+          await client.patch(id).set({ playlistID: _playlistID }).commit();
+          user.playlistID = _playlistID;
         }
 
-        user.accessToken = account.access_token;
+        user.accessToken = access_token;
 
         return true;
       } catch {

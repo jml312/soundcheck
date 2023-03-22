@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     albumName,
     albumUrl,
     albumImage,
-    name,
+    userId,
     songID,
   } = req.body;
 
@@ -41,19 +41,19 @@ export default async function handler(req, res) {
       createdAt: today,
       user: {
         _type: "reference",
-        _ref: name,
+        _ref: userId,
       },
     });
 
     const session = await getSession({ req });
     const recommendations = await getDiscoverSongs({
-      name: session.user.name,
+      userId: session.user.id,
       accessToken: session.user.accessToken,
       client,
     });
 
     await client
-      .patch(name)
+      .patch(userId)
       .inc({ postStreak: 1 })
       .set({
         discoverSongs: recommendations,

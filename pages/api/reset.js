@@ -31,13 +31,13 @@ export default async function handle(req, res) {
       const { startDate: yesterdayStart, endDate: yesterdayEnd } =
         getDayInterval(dayjs().subtract(1, "day"));
       const hasPostedYesterday = await client.fetch(hasPostedYesterdayQuery, {
-        name: _id,
+        userId: _id,
         yesterdayStart: yesterdayStart.toISOString(),
         yesterdayEnd: yesterdayEnd.toISOString(),
       });
 
       const recommendations = await getDiscoverSongs({
-        name: session.user.name,
+        userId: _id,
         accessToken: session.user.accessToken,
         client,
       });

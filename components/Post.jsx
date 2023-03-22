@@ -961,7 +961,13 @@ function Post({
                             }}
                           >
                             {post?.comments?.map(
-                              ({ text, username, userImage, createdAt }) => (
+                              ({
+                                text,
+                                username,
+                                userId,
+                                userImage,
+                                createdAt,
+                              }) => (
                                 <CommentCard
                                   key={createdAt}
                                   text={text}
@@ -969,9 +975,10 @@ function Post({
                                   formattedCreatedAt={dayjs(
                                     createdAt
                                   ).fromNow()}
+                                  userId={userId}
                                   username={username}
                                   userImage={userImage}
-                                  isUser={username === session?.user?.name}
+                                  isUser={userId === session?.user?.id}
                                   post={post}
                                   setPost={setPost}
                                   comment={comment}

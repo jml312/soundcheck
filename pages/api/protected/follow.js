@@ -6,39 +6,39 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { type, name, toFollowName } = req.body;
+  const { type, userId, toFollowId } = req.body;
 
   try {
     if (type === "follow") {
       const key = dayjs().toISOString();
       await client
-        .patch(name)
+        .patch(userId)
         .append("following", [
           {
             _type: "reference",
-            _ref: toFollowName,
+            _ref: toFollowId,
             _key: key,
           },
         ])
         .commit();
       await client
-        .patch(toFollowName)
+        .patch(toFollowId)
         .append("followers", [
           {
             _type: "reference",
-            _ref: name,
+            _ref: userId,
             _key: key,
           },
         ])
         .commit();
     } else if (type === "unfollow") {
       await client
-        .patch(name)
-        .unset([`following[_ref == \"${toFollowName}\"]`])
+        .patch(userId)
+        .unset([`following[_ref == \"${toFollowId}\"]`])
         .commit();
       await client
-        .patch(toFollowName)
-        .unset([`followers[_ref == \"${name}\"]`])
+        .patch(toFollowId)
+        .unset([`followers[_ref == \"${userId}\"]`])
         .commit();
     }
 

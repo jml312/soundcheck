@@ -138,6 +138,7 @@ export default function SelectSongModal({
         <Post
           post={{
             ...selectedSong.data,
+            userId: session?.user?.id,
             username: session?.user?.name,
             userImage: session?.user?.image,
           }}

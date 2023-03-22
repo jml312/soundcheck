@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { getDayInterval } from "@/utils/getDayInterval";
 
-export default async function getPosts({ isClient, date, name }) {
+export default async function getPosts({ isClient, date, userId }) {
   const { startDate, endDate } = getDayInterval(date);
   const { startDate: todayStart, endDate: todayEnd } = getDayInterval(dayjs());
 
@@ -13,7 +13,7 @@ export default async function getPosts({ isClient, date, name }) {
         endDate: endDate.toISOString(),
         todayStart: todayStart.toISOString(),
         todayEnd: todayEnd.toISOString(),
-        name,
+        userId,
       },
     });
     return data;
@@ -25,7 +25,7 @@ export default async function getPosts({ isClient, date, name }) {
       endDate: endDate.toISOString(),
       todayStart: todayStart.toISOString(),
       todayEnd: todayEnd.toISOString(),
-      name,
+      userId,
     });
     return data;
   }

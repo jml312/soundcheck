@@ -18,6 +18,7 @@ export default function CommentCard({
   text,
   createdAt,
   formattedCreatedAt,
+  userId,
   username,
   userImage,
   isUser,
@@ -78,7 +79,7 @@ export default function CommentCard({
                     cursor: "default",
                   }}
                 >
-                  {truncateText(post?.username, 12)}
+                  {truncateText(username, 12)}
                   {isUser ? " (you)" : ""}
                 </Title>
               </Flex>
@@ -164,7 +165,7 @@ export default function CommentCard({
             leftIcon={<AiFillDelete />}
             onClick={() =>
               deleteComment({
-                username,
+                userId,
                 createdAt,
                 post,
                 setPost,

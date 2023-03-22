@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { postID, name, text, createdAt, type } = req.body;
+  const { postID, userId, text, createdAt, type } = req.body;
 
   if (!["post", "edit", "delete"].includes(type)) {
     return res.status(400).json({ message: "Bad request" });
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         .unset([`comments[_key == \"${createdAt}\"]`])
         .commit();
       await client
-        .patch(name)
+        .patch(userId)
         .unset([`comments[_key == \"${createdAt}\"]`])
         .commit();
     } else if (["post", "edit"].includes(type)) {
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
           .unset([`comments[_key == \"${createdAt}\"]`])
           .commit();
         await client
-          .patch(name)
+          .patch(userId)
           .unset([`comments[_key == \"${createdAt}\"]`])
           .commit();
         created = dayjs().toISOString();
@@ -41,12 +41,12 @@ export default async function handler(req, res) {
         text,
         user: {
           _type: "reference",
-          _ref: name,
+          _ref: userId,
         },
         createdAt: created,
       };
       await client
-        .patch(name)
+        .patch(userId)
         .append("comments", [
           {
             _type: "reference",

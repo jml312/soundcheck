@@ -33,6 +33,7 @@ export default async function postComment({
           {
             text: comment.text,
             createdAt: now,
+            userId: session.user.id,
             username: session.user.name,
             userImage: session.user.image,
           },
@@ -57,7 +58,7 @@ export default async function postComment({
     }
     await axios.post("/api/protected/comment", {
       postID: post?._id,
-      name: session?.user?.name,
+      userId: session?.user?.id,
       text: comment.text,
       createdAt: comment.type === "post" ? now : comment.editedAt,
       type: comment.type,

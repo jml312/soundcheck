@@ -8,20 +8,20 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { postID, name, type, createdAt, playlistID, songID, accessToken } =
+  const { postID, userId, type, createdAt, playlistID, songID, accessToken } =
     req.body;
 
   try {
     if (type === "like") {
       const session = await getSession({ req });
       const recommendations = await getDiscoverSongs({
-        name: session.user.name,
+        userId: session.user.id,
         accessToken: session.user.accessToken,
         client,
       });
 
       await client
-        .patch(name)
+        .patch(userId)
         .set({
           discoverSongs: recommendations,
         })
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
             createdAt,
             user: {
               _type: "reference",
-              _ref: name,
+              _ref: userId,
             },
           },
         ])
@@ -62,12 +62,12 @@ export default async function handler(req, res) {
       } catch {}
     } else if (type === "unlike") {
       await client
-        .patch(name)
+        .patch(userId)
         .unset([`likes[_ref == \"${postID}\"]`])
         .commit();
       await client
         .patch(postID)
-        .unset([`likes[user._ref == \"${name}\"]`])
+        .unset([`likes[user._ref == \"${userId}\"]`])
         .commit();
 
       try {

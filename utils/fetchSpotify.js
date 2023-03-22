@@ -4,11 +4,11 @@ import client from "@/lib/sanity";
 import { recentlyPlayedQuery } from "@/lib/queries";
 
 export const fetchSpotify = async (session) => {
-  const { accessToken, name } = session.user;
+  const { accessToken, id } = session.user;
 
   try {
     const recentlyPlayedSongs = await client.fetch(recentlyPlayedQuery, {
-      name,
+      userId: id,
     });
 
     if (recentlyPlayedSongs?.length > 0) {
@@ -108,7 +108,7 @@ export const fetchSpotify = async (session) => {
     );
 
     await client
-      .patch(name)
+      .patch(id)
       .set({
         recentlyPlayed: allData,
       })
