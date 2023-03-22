@@ -9,7 +9,9 @@ import {
   Navbar as MantineNavbar,
   createStyles,
   ActionIcon,
+  Tooltip,
   Indicator,
+  useMantineTheme,
 } from "@mantine/core";
 import { useSession, signOut } from "next-auth/react";
 import { BsChevronDown, BsHeadphones } from "react-icons/bs";
@@ -39,6 +41,7 @@ function Navbar({ children }) {
   const { classes } = useStyles();
   const isMobile = useMediaQuery("(max-width: 480px)");
   const router = useRouter();
+  const theme = useMantineTheme();
 
   const { data: notifications } = useQuery({
     queryKey: "notifications",
@@ -97,19 +100,34 @@ function Navbar({ children }) {
               </Title>
             </Link>
           )}
-          <Group spacing={10}>
-            <ActionIcon
-              onClick={() => {}}
-              disabled={!notifications || notifications.length === 0}
-              sx={{
-                "&[data-disabled]": {
-                  backgroundColor: "transparent",
-                  border: "none",
-                },
-              }}
-            >
-              <MdOutlineNotifications size={"1.5rem"} />
-            </ActionIcon>
+          <Group
+            spacing={!notifications || notifications.length === 0 ? 10 : 14}
+          >
+            <Group position="center">
+              <Indicator
+                label={notifications?.length || 0}
+                size={"1.1rem"}
+                color={"lightGray"}
+                // color={theme.colors.spotify[8]}
+                inline
+                withBorder
+                disabled={!notifications || notifications.length === 0}
+              >
+                <ActionIcon
+                  onClick={() => {}}
+                  disabled={!notifications || notifications.length === 0}
+                  sx={{
+                    "&[data-disabled]": {
+                      backgroundColor: "transparent",
+                      border: "none",
+                    },
+                  }}
+                >
+                  <MdOutlineNotifications size={"1.5rem"} />
+                </ActionIcon>
+              </Indicator>
+            </Group>
+
             <Menu
               trigger={isMobile ? "click" : "hover"}
               openDelay={50}

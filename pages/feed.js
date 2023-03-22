@@ -15,6 +15,9 @@ import {
   Loader,
   Transition,
   Tooltip,
+  Title,
+  Stack,
+  Group,
 } from "@mantine/core";
 import { MdOutlineDateRange } from "react-icons/md";
 import { DatePickerInput } from "@mantine/dates";
@@ -182,73 +185,94 @@ function Feed({ spotifyData, isRouteLoading }) {
               transform: "translateY(1.5rem)",
             }}
           >
-            <DatePickerInput
-              icon={<MdOutlineDateRange />}
-              dropdownType="modal"
-              modalProps={{
-                centered: true,
-                overlayProps: {
-                  blur: 3,
-                  opacity: 0.55,
-                },
+            {/* <Stack
+              align="center"
+              spacing="2.75rem"
+              style={{
+                transform: "translateY(-3rem)",
               }}
-              value={dayjs(date).isValid() ? dayjs(date).toDate() : null}
-              onChange={(newDate) => {
-                router.push(
-                  `/feed?date=${dayjs(newDate).format("YYYY-MM-DD")}`,
-                  undefined,
-                  { shallow: true }
-                );
-              }}
-              minDate={dayjs(START_DATE).toDate()}
-              maxDate={dayjs().toDate()}
-              styles={{
-                month: {
-                  ".mantine-DatePickerInput-day[data-weekend]": {
-                    color: "#c1c2c5 !important",
-                  },
-                  ".mantine-DatePickerInput-day[data-weekend][data-selected]": {
-                    color: "#ffffff !important",
-                  },
-                },
-                input: {},
-              }}
-            />
-            <Transition
-              mounted={!isToday}
-              transition="slide-right"
-              duration={200}
-              exitDuration={0}
             >
-              {(styles) => (
-                <Tooltip
-                  label="Reset"
-                  position="right"
-                  color="dark.7"
-                  styles={{
-                    tooltip: {
-                      border: "none",
-                      outline: "1px solid rgba(192, 193, 196, 0.75)",
+              <Title
+                style={{
+                  transform: "translateY(1.5rem)",
+                  userSelect: "none",
+                }}
+                order={2}
+              >
+                Feed
+              </Title> */}
+
+              {/* <Group spacing="xs" align="center" position="center"> */}
+                <DatePickerInput
+                  icon={<MdOutlineDateRange />}
+                  dropdownType="modal"
+                  modalProps={{
+                    centered: true,
+                    overlayProps: {
+                      blur: 3,
+                      opacity: 0.55,
                     },
                   }}
+                  value={dayjs(date).isValid() ? dayjs(date).toDate() : null}
+                  onChange={(newDate) => {
+                    router.push(
+                      `/feed?date=${dayjs(newDate).format("YYYY-MM-DD")}`,
+                      undefined,
+                      { shallow: true }
+                    );
+                  }}
+                  minDate={dayjs(START_DATE).toDate()}
+                  maxDate={dayjs().toDate()}
+                  styles={{
+                    month: {
+                      ".mantine-DatePickerInput-day[data-weekend]": {
+                        color: "#c1c2c5 !important",
+                      },
+                      ".mantine-DatePickerInput-day[data-weekend][data-selected]":
+                        {
+                          color: "#ffffff !important",
+                        },
+                    },
+                    input: {},
+                  }}
+                />
+                <Transition
+                  mounted={!isToday}
+                  transition="slide-right"
+                  duration={200}
+                  exitDuration={0}
                 >
-                  <ActionIcon
-                    style={styles}
-                    onClick={() => {
-                      router.push(
-                        `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
-                        undefined,
-                        { shallow: true }
-                      );
-                    }}
-                    color={"gray"}
-                    variant="outline"
-                  >
-                    <VscDebugRestart />
-                  </ActionIcon>
-                </Tooltip>
-              )}
-            </Transition>
+                  {(styles) => (
+                    <Tooltip
+                      label="Reset"
+                      position="right"
+                      color="dark.7"
+                      styles={{
+                        tooltip: {
+                          border: "none",
+                          outline: "1px solid rgba(192, 193, 196, 0.75)",
+                        },
+                      }}
+                    >
+                      <ActionIcon
+                        style={styles}
+                        onClick={() => {
+                          router.push(
+                            `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
+                            undefined,
+                            { shallow: true }
+                          );
+                        }}
+                        color={"gray"}
+                        variant="outline"
+                      >
+                        <VscDebugRestart />
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
+                </Transition>
+              {/* </Group> */}
+            {/* </Stack> */}
           </Flex>
           {isLoading ? (
             <Loader size="xl" />

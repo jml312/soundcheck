@@ -1,6 +1,6 @@
-import { Modal } from "@mantine/core";
 import Post from "../Post";
 import { useState } from "react";
+import { Modal } from "@mantine/core";
 
 export default function PostModal({
   opened,
@@ -16,10 +16,13 @@ export default function PostModal({
   numComments,
   badWordsFilter,
 }) {
+  const hasCommented = post?.comments?.some(
+    (comment) => comment.userId === session?.user?.id
+  );
   const [comment, setComment] = useState({
     text: "",
     originalText: "",
-    type: numComments === 0 ? "post" : "", // "post" or "edit"
+    type: !hasCommented ? "post" : "", // "post" or "edit"
     error: "",
     editedAt: "",
     isLoading: false,
@@ -29,6 +32,8 @@ export default function PostModal({
 
   return (
     <Modal
+      yOffset={hasCommented && !comment.type ? "2vh" : "5vh"}
+      centered={!hasCommented || comment.type}
       size="auto"
       overlayProps={{
         blur: 3,

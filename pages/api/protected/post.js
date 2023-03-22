@@ -55,9 +55,8 @@ export default async function handler(req, res) {
     const { postStreak } = await client
       .patch(userId)
       .inc({ postStreak: 1 })
-      .set({
-        discoverSongs: recommendations,
-      })
+      .set({ discoverSongs: recommendations })
+      .unset(["recentlyPlayed"])
       .append("posts", [
         {
           _type: "reference",

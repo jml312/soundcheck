@@ -26,7 +26,7 @@ export default async function handle(req, res) {
   }
 
   try {
-    const sendAt = getRandom9To5().unix();
+    const sendAt = getRandom9To5();
     const userIDs = await client.fetch(`*[_type == "user"] {_id, email}`);
     userIDs.forEach(async ({ _id, email }) => {
       const { startDate: yesterdayStart, endDate: yesterdayEnd } =
@@ -36,29 +36,24 @@ export default async function handle(req, res) {
         yesterdayStart: yesterdayStart.toISOString(),
         yesterdayEnd: yesterdayEnd.toISOString(),
       });
-
       const recommendations = await getDiscoverSongs({
         userId: _id,
         accessToken: session.user.accessToken,
         client,
       });
-
       await client
         .patch(_id)
-        .set({
-          discoverSongs: recommendations,
-        })
         .set(hasPostedYesterday ? {} : { postStreak: 0 })
-        .unset(["recentlyPlayed"])
+        .set({ discoverSongs: recommendations })
         .commit();
 
       await sgMail.send({
         to: email,
-        from: "jml312@case.edu",
+        from: "",
         subject: "Your daily reminder",
         text: "Your daily reminder",
         html: `<strong>Your daily reminder</strong>`,
-        sendAt: !testMode && sendAt,
+        sendAt: dayjs(testMode === "true" ? undefined : sendAt).unix(),
       });
     });
 

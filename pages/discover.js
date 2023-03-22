@@ -1,5 +1,5 @@
 import { getSession, useSession } from "next-auth/react";
-import { Flex, ScrollArea, Title, Text } from "@mantine/core";
+import { Flex, ScrollArea, Title, Text, Stack } from "@mantine/core";
 import { getDayInterval, clearAuthCookies } from "@/utils";
 import Post from "@/components/Post";
 import { useState } from "react";
@@ -27,15 +27,17 @@ function Discover({ recommendations }) {
       }}
     >
       {recommendations?.length > 0 ? (
-        <Title
+        <Stack
+          align={"center"}
+          spacing={8}
           style={{
             transform: "translateY(1.5rem)",
             userSelect: "none",
           }}
-          order={2}
         >
-          Discover
-        </Title>
+          <Title order={2}>Discover</Title>
+          <Text c="dimmed">Like posts or come back tomorrow for more!</Text>
+        </Stack>
       ) : null}
 
       {!recommendations?.length ? (

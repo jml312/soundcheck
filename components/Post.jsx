@@ -160,7 +160,7 @@ function Post({
           // }`,
           // border: isUser && `0.75px solid ${theme.colors.lightWhite[7]}`,
           // border: isUser && `0.75px solid ${theme.colors.spotify[7]}`,
-          border: `0.75px solid ${theme.colors.lightWhite[7]}`,
+          // border: `0.75px solid ${theme.colors.lightWhite[7]}`,
         }}
       >
         {/* like + follow */}
@@ -806,7 +806,7 @@ function Post({
                         }}
                         onChange={(e) => {
                           const value = e.target.value;
-                          if (value.length > 100) return;
+                          if (value.length > 111) return;
                           setComment({
                             ...comment,
                             text: value,
@@ -825,11 +825,13 @@ function Post({
                               `1px solid ${theme.colors.spotify[7]}`,
                           },
                         }}
-                        maxLength={100}
+                        maxLength={111}
                         data-autoFocus
                         value={comment.text}
                         placeholder="Add a comment..."
                         w="100%"
+                        minRows={3}
+                        maxRows={3}
                         mt={"0.5rem"}
                         icon={
                           <AiOutlineComment
@@ -850,6 +852,7 @@ function Post({
                               top: "0.375rem",
                               right: "0.4rem",
                             }}
+                            isDisabled={comment.isLoading}
                           />
                         }
                       />
@@ -927,13 +930,7 @@ function Post({
                     <Stack>
                       {!comment.type && (
                         <ScrollArea
-                          h={
-                            caption.isModalEditing
-                              ? caption.error
-                                ? "102px"
-                                : "121px"
-                              : "148px"
-                          }
+                          h={caption.isModalEditing ? "174px" : "200px"}
                           type={"always"}
                           offsetScrollbars
                           mt={"-1rem"}

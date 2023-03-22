@@ -2,7 +2,13 @@ import { HoverCard, ActionIcon, Flex } from "@mantine/core";
 import { VscReactions } from "react-icons/vsc";
 import { useDisclosure } from "@mantine/hooks";
 
-export default function EmojiPicker({ text, setText, inputRef, styles }) {
+export default function EmojiPicker({
+  text,
+  setText,
+  inputRef,
+  styles,
+  isDisabled,
+}) {
   const emojis = ["🔥", "❤️", "👍", "😂", "😍", "🤩", "😭", "🤔"];
   const [
     emojiPickerOpened,
@@ -20,6 +26,7 @@ export default function EmojiPicker({ text, setText, inputRef, styles }) {
     >
       <HoverCard.Target>
         <ActionIcon
+          disabled={isDisabled}
           size={"xs"}
           variant={"subtle"}
           sx={(theme) => ({
