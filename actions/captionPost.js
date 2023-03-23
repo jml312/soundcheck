@@ -25,7 +25,7 @@ export default async function captionPost({
     setCaption({
       ...caption,
       originalText: caption.text,
-      isEditing: !post?.caption,
+      isEditing: !caption.text,
     });
   } else {
     const originalCaption = caption.originalText;
@@ -34,6 +34,10 @@ export default async function captionPost({
       isLoading: true,
     });
     try {
+      await axios.post("/api/protected/caption", {
+        postID: post?._id,
+        caption: caption.text,
+      });
       setPost({
         ...post,
         caption: caption.text,
@@ -41,11 +45,9 @@ export default async function captionPost({
       setCaption({
         ...caption,
         originalText: caption.text,
-        isEditing: !post?.caption,
-      });
-      await axios.post("/api/protected/caption", {
-        postID: post?._id,
-        caption: caption.text,
+        isEditing: !caption.text,
+        isModalEditing: !caption.text,
+        isLoading: false,
       });
     } catch {
       setPost({
@@ -57,6 +59,7 @@ export default async function captionPost({
         text: originalCaption,
         originalText: originalCaption,
         isEditing: !originalCaption,
+        isLoading: false,
       });
     }
   }

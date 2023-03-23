@@ -9,9 +9,7 @@ import {
   Navbar as MantineNavbar,
   createStyles,
   ActionIcon,
-  Tooltip,
   Indicator,
-  useMantineTheme,
 } from "@mantine/core";
 import { useSession, signOut } from "next-auth/react";
 import { BsChevronDown, BsHeadphones } from "react-icons/bs";
@@ -41,7 +39,6 @@ function Navbar({ children }) {
   const { classes } = useStyles();
   const isMobile = useMediaQuery("(max-width: 480px)");
   const router = useRouter();
-  const theme = useMantineTheme();
 
   const { data: notifications } = useQuery({
     queryKey: "notifications",
@@ -101,17 +98,17 @@ function Navbar({ children }) {
             </Link>
           )}
           <Group
-            spacing={!notifications || notifications.length === 0 ? 10 : 14}
+            spacing={!notifications || notifications.length === 0 ? 4 : 14}
           >
             <Group position="center">
               <Indicator
                 label={notifications?.length || 0}
+                disabled={!notifications || notifications.length === 0}
                 size={"1.1rem"}
                 color={"lightGray"}
                 // color={theme.colors.spotify[8]}
                 inline
                 withBorder
-                disabled={!notifications || notifications.length === 0}
               >
                 <ActionIcon
                   onClick={() => {}}
@@ -157,7 +154,7 @@ function Navbar({ children }) {
                       radius="xl"
                       size={27}
                       sx={(theme) => ({
-                        border: `1px solid ${theme.colors.lightWhite[8]}`,
+                        outline: `1px solid ${theme.colors.lightWhite[8]}`,
                       })}
                     />
                     <Text weight={500} size="sm" sx={{ lineHeight: 1 }} mr={3}>

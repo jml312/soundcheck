@@ -53,7 +53,7 @@ function Index() {
         leftIcon={<BsSpotify />}
         loading={isLoading}
       >
-        Continue with Spotify
+        {isLoading ? "Loading..." : "Continue with Spotify"}
       </Button>
     </Flex>
   );

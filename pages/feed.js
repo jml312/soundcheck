@@ -15,9 +15,9 @@ import {
   Loader,
   Transition,
   Tooltip,
-  Title,
   Stack,
   Group,
+  Box,
 } from "@mantine/core";
 import { MdOutlineDateRange } from "react-icons/md";
 import { DatePickerInput } from "@mantine/dates";
@@ -26,12 +26,17 @@ import { START_DATE } from "@/constants";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import { getPosts } from "@/actions";
 import client from "@/lib/sanity";
+import Rightbar from "@/components/Rightbar";
 
 function Feed({ spotifyData, isRouteLoading }) {
   const router = useRouter();
   const { date } = router.query;
   const { data: session } = useSession();
-  const { data: currentPosts, isLoading } = useQuery({
+  const {
+    data: currentPosts,
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ["posts", dayjs(date).format("YYYY-MM-DD")],
     queryFn: () =>
       getPosts({
@@ -55,17 +60,14 @@ function Feed({ spotifyData, isRouteLoading }) {
   });
   const isToday = dayjs(date).isSame(dayjs(), "day");
   const [caption, setCaption] = useState({
-    text: posts.userPost?.caption || "",
-    originalText: posts.userPost?.caption || "",
+    text: currentPosts?.userPost?.caption || "",
+    originalText: currentPosts?.userPost?.caption || "",
     error: "",
-    isEditing: isToday && !posts.userPost?.caption,
-    isModalEditing: isToday && !posts.userPost?.caption,
+    isEditing: isToday && !currentPosts?.userPost?.caption,
+    isModalEditing: false,
     isLoading: false,
     addedEmoji: false,
   });
-  const allPosts = !!posts?.userPost
-    ? [posts.userPost, ...posts.feedPosts]
-    : posts?.feedPosts || [];
   const formattedDate = dayjs(date).format("MMMM D, YYYY");
   const [selectSongOpened, { close: closeSelectSong, open: openSelectSong }] =
     useDisclosure(
@@ -74,8 +76,19 @@ function Feed({ spotifyData, isRouteLoading }) {
     );
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const badWordsFilter = new Filter();
-  const oneCard = useMediaQuery("(max-width: 900px)");
-  const twoCards = useMediaQuery("(max-width: 1200px)");
+  const isMobile = useMediaQuery("(max-width: 769px)");
+  const twoCards = useMediaQuery("(min-width: 1115px) and (max-width: 1460px)");
+  const threeCards = useMediaQuery(
+    "(min-width: 1460px) and (max-width: 1805px)"
+  );
+  const fourCards = useMediaQuery("(min-width: 1805px)");
+
+  const getScrollAreaWidth = () => {
+    if (twoCards) return "705px";
+    else if (threeCards) return "1050px";
+    else if (fourCards) return "1395px";
+    else return "360px";
+  };
 
   const setUserPost = (post) =>
     setPosts({
@@ -96,19 +109,19 @@ function Feed({ spotifyData, isRouteLoading }) {
     ) {
       openSelectSong();
     }
+    setPosts({
+      feedPosts: currentPosts?.feedPosts,
+      userPost: currentPosts?.userPost,
+      hasPostedToday: currentPosts?.hasPostedToday,
+    });
     setCaption({
       text: currentPosts?.userPost?.caption || "",
       originalText: currentPosts?.userPost?.caption || "",
       error: "",
       isEditing: isToday && !currentPosts?.userPost?.caption,
-      isModalEditing: isToday && !posts.userPost?.caption,
+      isModalEditing: false,
       isLoading: false,
       addedEmoji: false,
-    });
-    setPosts({
-      feedPosts: currentPosts?.feedPosts,
-      userPost: currentPosts?.userPost,
-      hasPostedToday: currentPosts?.hasPostedToday,
     });
   }, [currentPosts]);
 
@@ -163,159 +176,134 @@ function Feed({ spotifyData, isRouteLoading }) {
         direction={"column"}
       >
         <Flex
-          w={"100%"}
-          h="100%"
-          justify={"center"}
-          align={"center"}
           style={{
-            transform: "translateY(5rem)",
+            transform: isMobile ? "translateY(8rem)" : "translateY(5rem)",
           }}
-          direction={"column"}
-          mt={"2.25rem"}
+          w="100%"
+          h={isMobile ? "auto" : "100%"}
+          justify={"space-between"}
+          align={"center"}
+          direction={isMobile ? "column-reverse" : "row"}
         >
-          <Flex
-            w="100%"
-            justify={"center"}
+          <Stack
             align={"center"}
-            gap="0.75rem"
-            style={{
-              position: "absolute",
-              top: "0",
-              left: "0",
-              transform: "translateY(1.5rem)",
-            }}
+            h="100%"
+            justify="center"
+            w={isMobile ? "100%" : "calc(100% - 375px)"}
           >
-            {/* <Stack
-              align="center"
-              spacing="2.75rem"
-              style={{
-                transform: "translateY(-3rem)",
-              }}
-            >
-              <Title
-                style={{
-                  transform: "translateY(1.5rem)",
-                  userSelect: "none",
+            {/* date picker */}
+            <Group w="100%" position="center">
+              <DatePickerInput
+                icon={<MdOutlineDateRange />}
+                dropdownType="modal"
+                modalProps={{
+                  centered: true,
+                  overlayProps: {
+                    blur: 3,
+                    opacity: 0.55,
+                  },
                 }}
-                order={2}
-              >
-                Feed
-              </Title> */}
-
-              {/* <Group spacing="xs" align="center" position="center"> */}
-                <DatePickerInput
-                  icon={<MdOutlineDateRange />}
-                  dropdownType="modal"
-                  modalProps={{
-                    centered: true,
-                    overlayProps: {
-                      blur: 3,
-                      opacity: 0.55,
+                value={dayjs(date).isValid() ? dayjs(date).toDate() : null}
+                onChange={(newDate) => {
+                  router.push(
+                    `/feed?date=${dayjs(newDate).format("YYYY-MM-DD")}`,
+                    undefined,
+                    { shallow: true }
+                  );
+                }}
+                minDate={dayjs(START_DATE).toDate()}
+                maxDate={dayjs().toDate()}
+                styles={{
+                  month: {
+                    ".mantine-DatePickerInput-day[data-weekend]": {
+                      color: "#c1c2c5 !important",
                     },
-                  }}
-                  value={dayjs(date).isValid() ? dayjs(date).toDate() : null}
-                  onChange={(newDate) => {
-                    router.push(
-                      `/feed?date=${dayjs(newDate).format("YYYY-MM-DD")}`,
-                      undefined,
-                      { shallow: true }
-                    );
-                  }}
-                  minDate={dayjs(START_DATE).toDate()}
-                  maxDate={dayjs().toDate()}
-                  styles={{
-                    month: {
-                      ".mantine-DatePickerInput-day[data-weekend]": {
-                        color: "#c1c2c5 !important",
+                    ".mantine-DatePickerInput-day[data-weekend][data-selected]":
+                      {
+                        color: "#ffffff !important",
                       },
-                      ".mantine-DatePickerInput-day[data-weekend][data-selected]":
-                        {
-                          color: "#ffffff !important",
-                        },
-                    },
-                    input: {},
-                  }}
-                />
-                <Transition
-                  mounted={!isToday}
-                  transition="slide-right"
-                  duration={200}
-                  exitDuration={0}
-                >
-                  {(styles) => (
-                    <Tooltip
-                      label="Reset"
-                      position="right"
-                      color="dark.7"
-                      styles={{
-                        tooltip: {
-                          border: "none",
-                          outline: "1px solid rgba(192, 193, 196, 0.75)",
-                        },
-                      }}
-                    >
-                      <ActionIcon
-                        style={styles}
-                        onClick={() => {
-                          router.push(
-                            `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
-                            undefined,
-                            { shallow: true }
-                          );
-                        }}
-                        color={"gray"}
-                        variant="outline"
-                      >
-                        <VscDebugRestart />
-                      </ActionIcon>
-                    </Tooltip>
-                  )}
-                </Transition>
-              {/* </Group> */}
-            {/* </Stack> */}
-          </Flex>
-          {isLoading ? (
-            <Loader size="xl" />
-          ) : allPosts.length > 0 ? (
-            <ScrollArea
-              type="always"
-              w={oneCard ? "354px" : twoCards ? "700px" : "1050px"}
-              h={"565px"}
-              style={{
-                transform: "translateY(2.8rem)",
-              }}
-              styles={{
-                scrollbar: {
-                  "&, &:hover": {
-                    backgroundColor: "transparent",
-                    borderRadius: "0.5rem",
                   },
-                  '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
-                    backgroundColor: "#474952",
-                  },
-                },
-                corner: {
-                  display: "none",
-                },
-              }}
-            >
-              <Flex
-                justify={"center"}
-                align={"end"}
-                w={"100%"}
-                h={"100%"}
-                wrap={"wrap"}
-                gap="1.5rem"
+                  input: {},
+                }}
+              />
+              <Transition
+                mounted={!isToday}
+                transition="slide-right"
+                duration={200}
+                exitDuration={0}
               >
-                {allPosts?.map((post) => {
-                  const isUser = post?.userId === session?.user?.id;
-                  return (
+                {(styles) => (
+                  <Tooltip
+                    label="Reset"
+                    position="right"
+                    color="dark.7"
+                    styles={{
+                      tooltip: {
+                        border: "none",
+                        outline: "1px solid rgba(192, 193, 196, 0.75)",
+                      },
+                    }}
+                  >
+                    <ActionIcon
+                      style={styles}
+                      onClick={() => {
+                        router.push(
+                          `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
+                          undefined,
+                          { shallow: true }
+                        );
+                      }}
+                      color={"gray"}
+                      variant="outline"
+                    >
+                      <VscDebugRestart />
+                    </ActionIcon>
+                  </Tooltip>
+                )}
+              </Transition>
+            </Group>
+
+            {/* feed posts */}
+            {posts?.feedPosts?.length > 0 ? (
+              <ScrollArea
+                type="always"
+                w={getScrollAreaWidth()}
+                h={"565px"}
+                mt={isMobile && "1.5rem"}
+                mb={isMobile && "1rem"}
+                style={{
+                  transform: !isMobile && "translateY(2.8rem)",
+                }}
+                styles={{
+                  scrollbar: {
+                    "&, &:hover": {
+                      backgroundColor: "transparent",
+                      borderRadius: "0.5rem",
+                    },
+                    '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
+                      {
+                        backgroundColor: "#474952",
+                      },
+                  },
+                  corner: {
+                    display: "none",
+                  },
+                }}
+              >
+                <Flex
+                  justify={"center"}
+                  align={"end"}
+                  w={"100%"}
+                  h={"100%"}
+                  wrap={"wrap"}
+                  gap="1.5rem"
+                >
+                  {posts?.feedPosts?.map((post) => (
                     <Post
                       key={post._id}
                       isLoading={isLoading}
-                      isUser={isUser}
                       post={post}
-                      setPost={isUser ? setUserPost : setFeedPost}
+                      setPost={setFeedPost}
                       currentlyPlaying={currentlyPlaying}
                       setCurrentlyPlaying={setCurrentlyPlaying}
                       session={session}
@@ -323,13 +311,32 @@ function Feed({ spotifyData, isRouteLoading }) {
                       setCaption={setCaption}
                       badWordsFilter={badWordsFilter}
                     />
-                  );
-                })}
-              </Flex>
-            </ScrollArea>
-          ) : (
-            <Text fz={"lg"} fw={"bold"}>{`No posts on ${formattedDate}`}</Text>
-          )}
+                  ))}
+                </Flex>
+              </ScrollArea>
+            ) : (
+              <Text
+                fz={"lg"}
+                fw={"bold"}
+              >{`No posts on ${formattedDate}`}</Text>
+            )}
+
+            <Box></Box>
+          </Stack>
+
+          {/* user post */}
+          <Rightbar
+            post={posts?.userPost}
+            setPost={setUserPost}
+            isLoading={isLoading}
+            currentlyPlaying={currentlyPlaying}
+            setCurrentlyPlaying={setCurrentlyPlaying}
+            session={session}
+            caption={caption}
+            setCaption={setCaption}
+            badWordsFilter={badWordsFilter}
+            isMobile={isMobile}
+          />
         </Flex>
       </Flex>
     </>

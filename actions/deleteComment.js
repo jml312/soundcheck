@@ -7,6 +7,7 @@ export default async function deleteComment({
   setPost,
   comment,
   setComment,
+  commentsRef,
 }) {
   const originalPost = post;
   setComment({
@@ -31,8 +32,12 @@ export default async function deleteComment({
     });
     setComment({
       ...comment,
+      type: originalPost?.comments?.length - 1 === 0 ? "post" : "",
       isDeleting: false,
     });
+    setTimeout(() => {
+      commentsRef?.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }, 100);
   } catch {
     setComment({
       ...comment,

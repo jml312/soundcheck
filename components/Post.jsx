@@ -16,6 +16,7 @@ import {
   TextInput,
   Textarea,
   Group,
+  LoadingOverlay,
 } from "@mantine/core";
 import Link from "next/link";
 import { FaHeart, FaUserPlus, FaUserCheck } from "react-icons/fa";
@@ -64,6 +65,7 @@ function Post({
   const artists = post?.artists?.map((artist) => artist.name)?.join(", ");
   const numComments = post?.comments?.length || 0;
   const commentRef = useRef(null);
+  const commentsRef = useRef(null);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const captionRef = useRef(null);
   const theme = useMantineTheme();
@@ -143,6 +145,16 @@ function Post({
         badWordsFilter={badWordsFilter}
       />
 
+      <LoadingOverlay
+        visible={
+          comment?.isLoading || comment?.isDeleting || caption?.isLoading
+        }
+        // visible
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        zIndex={1000}
+      />
+
       <Flex
         bg="lightGray"
         justify={"center"}
@@ -197,7 +209,7 @@ function Post({
                       alt={`${post?.username}'s profile`}
                       radius="xl"
                       style={{
-                        border: "1px solid #c0c1c4",
+                        outline: "1px solid #c0c1c4",
                       }}
                     />
                     <Stack spacing={5}>
@@ -267,7 +279,7 @@ function Post({
                       alt={`${post?.username}'s profile`}
                       radius={"xl"}
                       style={{
-                        border: "1px solid #c0c1c4",
+                        outline: "1px solid #c0c1c4",
                       }}
                     />
                   }
@@ -300,7 +312,7 @@ function Post({
                         alt={`${post?.username}'s profile`}
                         radius={"xl"}
                         style={{
-                          border: "1px solid #c0c1c4",
+                          outline: "1px solid #c0c1c4",
                         }}
                       />
                     }
@@ -404,9 +416,11 @@ function Post({
         )}
 
         {/* caption */}
-        <Flex align="center" justify={"center"} direction={"column"}>
+        <Flex align="center" justify={"center"} direction={"column"} maw={375}>
           {isUser &&
-            (!caption.isEditing && !caption.isModalEditing ? (
+            ((!caption.isEditing && !caption.isModalEditing) ||
+            !isPostModal ||
+            commentOpen ? (
               <Flex w={"100%"} justify={"space-between"} align={"center"}>
                 <Text
                   title={isToday && "Edit caption"}
@@ -414,14 +428,23 @@ function Post({
                   fw={"bold"}
                   fs="xs"
                   style={{
-                    cursor: isToday ? "pointer" : "default",
+                    cursor:
+                      isToday && !(commentOpen || !isPostModal)
+                        ? "pointer"
+                        : "default",
                     alignSelf: "flex-start",
                   }}
                   mt="-.3rem"
                   mb={"0.2rem"}
-                  zIndex={1000}
+                  zIndex={999}
                   onClick={() => {
-                    if (!isToday || comment?.isLoading) return;
+                    if (
+                      !isToday ||
+                      comment?.isLoading ||
+                      comment?.isDeleting ||
+                      !isPostModal
+                    )
+                      return;
                     if (setComment) {
                       setComment({
                         ...comment,
@@ -439,7 +462,9 @@ function Post({
                     }, 0);
                   }}
                 >
-                  {caption?.text}
+                  {commentOpen || !isPostModal
+                    ? caption?.originalText
+                    : caption?.text}
                 </Text>
               </Flex>
             ) : (
@@ -447,7 +472,6 @@ function Post({
                 maxLength={29}
                 data-autoFocus
                 pt={isPostModal ? 2 : 4}
-                id="caption"
                 onBlur={() => {
                   if (caption.error && !hasBlurredCaptionError) {
                     setHasBlurredCaptionError(true);
@@ -469,7 +493,8 @@ function Post({
                     ...caption,
                     text: caption?.originalText || "",
                     error: "",
-                    isEditing: caption?.originalText?.length === 0,
+                    isEditing:
+                      !commentOpen && caption?.originalText?.length === 0,
                     isModalEditing: false,
                   });
                 }}
@@ -507,6 +532,10 @@ function Post({
                       text={caption}
                       setText={setCaption}
                       inputRef={captionRef}
+                      isDisabled={
+                        caption.isLoading || caption.text.length === 29
+                      }
+                      maxLen={29}
                     />
                     <ActionIcon
                       onMouseDown={() =>
@@ -583,8 +612,6 @@ function Post({
               src={post?.albumImage}
               alt={post?.albumName}
               radius={"0.25rem"}
-              // width={!isPostModal ? 275 : 375}
-              // height={!isPostModal ? 275 : 375}
               width={!isPostModal ? 275 : isSmall ? "75vw" : 375}
               height={!isPostModal ? 275 : isSmall ? "75vw" : 375}
               withPlaceholder
@@ -734,7 +761,6 @@ function Post({
             mt={8}
             mb={(isDiscover || isSelect) && "0.5rem"}
             w={!isPostModal ? 275 : isSmall ? "75vw" : 375}
-            // w={!isPostModal ? 275 : 375}
             style={{
               textAlign: "center",
             }}
@@ -806,7 +832,7 @@ function Post({
                         }}
                         onChange={(e) => {
                           const value = e.target.value;
-                          if (value.length > 111) return;
+                          if (value.length > 80) return;
                           setComment({
                             ...comment,
                             text: value,
@@ -816,7 +842,7 @@ function Post({
                         error={comment.error}
                         ref={commentRef}
                         sx={{
-                          zIndex: 1000,
+                          zIndex: 999,
                         }}
                         styles={{
                           input: {
@@ -825,13 +851,17 @@ function Post({
                               `1px solid ${theme.colors.spotify[7]}`,
                           },
                         }}
-                        maxLength={111}
+                        maxLength={80}
                         data-autoFocus
                         value={comment.text}
-                        placeholder="Add a comment..."
+                        placeholder={
+                          comment.type === "edit"
+                            ? "Edit your comment..."
+                            : "Add your comment..."
+                        }
                         w="100%"
-                        minRows={3}
-                        maxRows={3}
+                        minRows={2}
+                        maxRows={2}
                         mt={"0.5rem"}
                         icon={
                           <AiOutlineComment
@@ -852,21 +882,26 @@ function Post({
                               top: "0.375rem",
                               right: "0.4rem",
                             }}
-                            isDisabled={comment.isLoading}
+                            isDisabled={
+                              comment.isLoading || comment?.text?.length === 80
+                            }
+                            maxLen={80}
                           />
                         }
                       />
                       <Button
+                        mb={-4}
                         style={{
                           zIndex: 100,
                         }}
                         disabled={
                           comment.text.length === 0 ||
                           (comment.type === "edit" &&
-                            comment.text === comment.originalText)
+                            comment.text === comment.originalText) ||
+                          comment.isLoading ||
+                          comment.isDeleting
                         }
                         fullWidth
-                        loading={comment.isLoading}
                         onClick={() =>
                           postComment({
                             comment,
@@ -879,20 +914,16 @@ function Post({
                           })
                         }
                       >
-                        {comment.isLoading
-                          ? `${
-                              comment.type === "edit" ? "Updating" : "Posting"
-                            }...`
-                          : `${
-                              comment.type === "edit" ? "Update" : "Post"
-                            } Comment`}
+                        {`${
+                          comment.type === "edit" ? "Update" : "Post"
+                        } Comment`}
                       </Button>
                     </>
                   ) : (
                     <Button
                       disabled={comment?.isLoading || comment?.isDeleting}
                       mt={"0.3rem"}
-                      mb="1.1rem"
+                      mb={numComments === 0 ? "0px" : "1.1rem"}
                       onClick={() =>
                         setComment({
                           ...comment,
@@ -912,29 +943,28 @@ function Post({
                 </Stack>
               )}
               {isPostModal ? (
-                <Stack w="100%" mt={"0.5rem"} px={"0.75rem"}>
-                  {numComments === 0 && !comment.type ? (
-                    <Center
-                      mt={"-.25rem"}
-                      mb={"0.1rem"}
-                      style={{
-                        cursor: "default",
-                        transform: "translateY(-0.75rem)",
-                      }}
-                    >
-                      <Text color="dimmed" fontSize={"0.9rem"}>
-                        No comments
-                      </Text>
-                    </Center>
-                  ) : (
-                    <Stack>
+                <Stack
+                  w="100%"
+                  mt={"0.5rem"}
+                  align={"center"}
+                  justify={"center"}
+                  maw={375}
+                >
+                  {!(numComments === 0 && !comment.type) && (
+                    <Stack w="100%" align={"center"}>
                       {!comment.type && (
                         <ScrollArea
-                          h={caption.isModalEditing ? "174px" : "200px"}
+                          viewportRef={commentsRef}
+                          h={
+                            caption.isModalEditing
+                              ? "174px"
+                              : numComments === 1
+                              ? "152px"
+                              : "200px"
+                          }
+                          w="100%"
                           type={"always"}
-                          offsetScrollbars
                           mt={"-1rem"}
-                          px={"0.5rem"}
                           mb={"-0.5rem"}
                           styles={{
                             scrollbar: {
@@ -950,8 +980,9 @@ function Post({
                           }}
                         >
                           <Stack
-                            align="start"
-                            justify="start"
+                            w="100%"
+                            align="center"
+                            justify="center"
                             spacing={"md"}
                             style={{
                               zIndex: 1,
@@ -980,7 +1011,8 @@ function Post({
                                   setPost={setPost}
                                   comment={comment}
                                   setComment={setComment}
-                                  isSmall={isSmall}
+                                  numComments={numComments}
+                                  commentsRef={commentsRef}
                                 />
                               )
                             )}

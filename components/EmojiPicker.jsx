@@ -1,6 +1,7 @@
 import { HoverCard, ActionIcon, Flex } from "@mantine/core";
 import { VscReactions } from "react-icons/vsc";
 import { useDisclosure } from "@mantine/hooks";
+import { useEffect } from "react";
 
 export default function EmojiPicker({
   text,
@@ -8,12 +9,25 @@ export default function EmojiPicker({
   inputRef,
   styles,
   isDisabled,
+  maxLen,
 }) {
   const emojis = ["🔥", "❤️", "👍", "😂", "😍", "🤩", "😭", "🤔"];
   const [
     emojiPickerOpened,
     { open: openEmojiPicker, close: closeEmojiPicker },
   ] = useDisclosure(false);
+
+  useEffect(() => {
+    if (text.addedEmoji && (text.text.length >= maxLen || isDisabled)) {
+      setTimeout(() => {
+        inputRef.current.focus();
+        setText({
+          ...text,
+          addedEmoji: false,
+        });
+      }, 0);
+    }
+  }, [text.addedEmoji, text.text, maxLen, isDisabled]);
 
   return (
     <HoverCard
@@ -23,10 +37,11 @@ export default function EmojiPicker({
       position="bottom-end"
       onOpen={openEmojiPicker}
       onClose={closeEmojiPicker}
+      disabled={text.text.length >= maxLen || isDisabled}
     >
       <HoverCard.Target>
         <ActionIcon
-          disabled={isDisabled}
+          disabled={text.text.length >= maxLen || isDisabled}
           size={"xs"}
           variant={"subtle"}
           sx={(theme) => ({

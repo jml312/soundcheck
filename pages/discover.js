@@ -11,8 +11,19 @@ import dayjs from "dayjs";
 function Discover({ recommendations }) {
   const { data: session } = useSession();
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
-  const oneCard = useMediaQuery("(max-width: 900px)");
-  const twoCards = useMediaQuery("(max-width: 1200px)");
+
+  const twoCards = useMediaQuery("(min-width: 745px) and (max-width: 1092px)");
+  const threeCards = useMediaQuery(
+    "(min-width: 1092px) and (max-width: 1425px)"
+  );
+  const fourCards = useMediaQuery("(min-width: 1425px)");
+
+  const getScrollAreaWidth = () => {
+    if (twoCards) return "705px";
+    else if (threeCards) return "1050px";
+    else if (fourCards) return "1395px";
+    else return "360px";
+  };
 
   return (
     <Flex
@@ -52,7 +63,7 @@ function Discover({ recommendations }) {
       ) : (
         <ScrollArea
           mb={"4.5rem"}
-          w={oneCard ? "354px" : twoCards ? "700px" : "1050px"}
+          w={getScrollAreaWidth()}
           type={"always"}
           offsetScrollbars
           style={{

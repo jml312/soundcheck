@@ -32,8 +32,9 @@ export default function PostModal({
 
   return (
     <Modal
-      yOffset={hasCommented && !comment.type ? "2vh" : "5vh"}
-      centered={!hasCommented || comment.type}
+      yOffset={"2vh"}
+      // yOffset={hasCommented && !comment.type ? "2vh" : "5vh"}
+      // centered={!hasCommented || comment.type}
       size="auto"
       overlayProps={{
         blur: 3,
