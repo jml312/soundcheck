@@ -3,7 +3,7 @@ import { IoMdRemoveCircleOutline } from "react-icons/io";
 import dayjs from "dayjs";
 import { Drawer, Modal, ScrollArea, Button, Stack } from "@mantine/core";
 
-export default function NotificationDrawer({ opened, close }) {
+export default function NotificationModal({ opened, close }) {
   const NUM = 12;
   return (
     <Drawer

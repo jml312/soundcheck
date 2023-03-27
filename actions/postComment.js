@@ -71,9 +71,8 @@ export default async function postComment({
       isLoading: false,
     });
     setTimeout(() => {
-      if (!commentScrollRef.current) return;
-      commentScrollRef.current.scrollTo({
-        top: commentScrollRef.current.scrollHeight,
+      commentScrollRef?.current?.scrollTo({
+        top: commentScrollRef?.current?.scrollHeight,
         behavior: "smooth",
       });
     }, 100);

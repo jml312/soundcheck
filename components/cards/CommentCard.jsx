@@ -34,32 +34,7 @@ export default function CommentCard({
   const commentRef = useRef();
   const formattedDate = useMemo(() => dayjs(createdAt).fromNow(), [post]);
   const isUser = userId === session?.user?.id;
-
   const splitText = text.split(" ");
-
-  const newText = splitText
-    .map((word, i) => {
-      const isMention =
-        word.startsWith("@") &&
-        text.indexOf(word) ===
-          splitText.slice(0, i).join(" ").length + (i === 0 ? 0 : 1) &&
-        allUsers?.some((user) => user.username === word.slice(1));
-      return isMention ? (
-        <span
-          key={i}
-          style={{
-            color: theme.colors.blue[6],
-          }}
-        >
-          {word}
-        </span>
-      ) : (
-        word
-      );
-    })
-    .join(" ");
-
-  console.log(newText);
 
   useEffect(() => {
     if (
@@ -85,6 +60,7 @@ export default function CommentCard({
       style={{
         cursor: "default",
         placeSelf: "flex-start",
+        overflowWrap: "anywhere",
       }}
     >
       <Avatar
@@ -126,17 +102,19 @@ export default function CommentCard({
           fz={"1rem"}
           fw="bold"
           style={{
-            lineHeight: "1.25rem",
             transform: "translateY(-.25rem)",
           }}
         >
           {splitText.map((word, i) => {
-            // check if word is a mention
+            // check if word is a mention if it
+            // starts with @, is the first occurrence of that username, and if the username exists
             const isMention =
               word.startsWith("@") &&
               text.indexOf(word) ===
                 splitText.slice(0, i).join(" ").length + (i === 0 ? 0 : 1) &&
-              allUsers?.some((user) => user.username === word.slice(1));
+              allUsers?.some(
+                (user) => user.username === word.slice(1)
+              );
             const isEnd = i === splitText.length - 1;
             return isMention ? (
               <>

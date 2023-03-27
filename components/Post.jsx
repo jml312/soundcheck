@@ -843,7 +843,7 @@ function Post({
               sx={{
                 cursor: "default",
               }}
-              className={"truncate"}
+              truncate
             >
               {post?.songName}
             </Title>
@@ -852,7 +852,7 @@ function Post({
               sx={{
                 cursor: "default",
               }}
-              className={"truncate"}
+              truncate
             >
               {artists}
             </Text>

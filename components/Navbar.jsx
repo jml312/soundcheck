@@ -20,7 +20,7 @@ import Link from "next/link";
 import { useMediaQuery, useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/router";
 import { MdOutlineNotifications } from "react-icons/md";
-import NotificationDrawer from "./drawers/NotificationDrawer";
+import NotificationModal from "./modals/NotificationModal";
 import { useQuery } from "react-query";
 import { getNotifications } from "@/actions";
 
@@ -60,7 +60,7 @@ function Navbar({ children }) {
 
   return (
     <>
-      <NotificationDrawer
+      <NotificationModal
         open={notificationOpen}
         close={closeNotification}
         currentNotifications={currentNotifications}
