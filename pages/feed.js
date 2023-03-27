@@ -1,58 +1,24 @@
 import { getSession, useSession } from "next-auth/react";
-import { clearAuthCookies, fetchSpotify } from "@/utils";
+import { clearAuthCookies, fetchSpotify, getDayInterval } from "@/utils";
 import Post from "@/components/Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import dayjs from "dayjs";
-import { useState, useEffect } from "react";
 import SelectSongModal from "@/components/modals/SelectSongModal";
 import Filter from "bad-words";
 import { useRouter } from "next/router";
-import {
-  Flex,
-  Text,
-  ScrollArea,
-  ActionIcon,
-  Loader,
-  Transition,
-  Tooltip,
-  Stack,
-  Group,
-  Box,
-} from "@mantine/core";
-import { MdOutlineDateRange } from "react-icons/md";
-import { DatePickerInput } from "@mantine/dates";
-import { VscDebugRestart } from "react-icons/vsc";
-import { START_DATE } from "@/constants";
-import { dehydrate, QueryClient, useQuery } from "react-query";
-import { getPosts } from "@/actions";
+import { Flex, Text, ScrollArea, Stack, Box } from "@mantine/core";
+import { useState, useEffect } from "react";
 import client from "@/lib/sanity";
-import Rightbar from "@/components/Rightbar";
+import { postsQuery, allUsersQuery } from "@/lib/queries";
 
-function Feed({ spotifyData, isRouteLoading }) {
+function Feed({ currentPosts, spotifyData, allUsers }) {
   const router = useRouter();
-  const { date } = router.query;
-  const { data: session } = useSession();
   const {
-    data: currentPosts,
-    isLoading,
-    isFetching,
-  } = useQuery({
-    queryKey: ["posts", dayjs(date).format("YYYY-MM-DD")],
-    queryFn: () =>
-      getPosts({
-        isClient: true,
-        date: dayjs(date),
-        userId: session?.user?.id,
-      }),
-    // refetchOnMount: false,
-    // refetchOnReconnect: false,
-    // refetchOnWindowFocus: false,
-    retry: false,
-    retryOnMount: false,
-    retryDelay: 0,
-    notifyOnChangeProps: ["data"],
-  });
-
+    date,
+    postId: notificationPostId,
+    commentId: notificationCommentId,
+  } = router.query;
+  const { data: session } = useSession();
   const [posts, setPosts] = useState({
     feedPosts: currentPosts?.feedPosts,
     userPost: currentPosts?.userPost,
@@ -62,12 +28,11 @@ function Feed({ spotifyData, isRouteLoading }) {
   const [caption, setCaption] = useState({
     text: currentPosts?.userPost?.caption || "",
     originalText: currentPosts?.userPost?.caption || "",
-    error: "",
     isEditing: isToday && !currentPosts?.userPost?.caption,
-    isModalEditing: false,
-    isLoading: false,
-    addedEmoji: false,
+    error: "",
+    isFocused: false,
   });
+  const [activePost, setActivePost] = useState(null);
   const formattedDate = dayjs(date).format("MMMM D, YYYY");
   const [selectSongOpened, { close: closeSelectSong, open: openSelectSong }] =
     useDisclosure(
@@ -117,40 +82,11 @@ function Feed({ spotifyData, isRouteLoading }) {
     setCaption({
       text: currentPosts?.userPost?.caption || "",
       originalText: currentPosts?.userPost?.caption || "",
-      error: "",
-      isEditing: isToday && !currentPosts?.userPost?.caption,
-      isModalEditing: false,
-      isLoading: false,
       addedEmoji: false,
+      isEditing: isToday && !currentPosts?.userPost?.caption,
+      error: "",
     });
   }, [currentPosts]);
-
-  if (isRouteLoading) {
-    return (
-      <Flex
-        style={{
-          height: "calc(100vh - 5rem)",
-        }}
-        justify={"space-between"}
-        align={"stretch"}
-        direction={"column"}
-      >
-        <Flex
-          w={"100%"}
-          h="100%"
-          justify={"center"}
-          align={"center"}
-          style={{
-            transform: "translateY(5rem)",
-          }}
-          direction={"column"}
-          mt={"2.25rem"}
-        >
-          <Loader size="xl" />
-        </Flex>
-      </Flex>
-    );
-  }
 
   return (
     <>
@@ -165,6 +101,8 @@ function Feed({ spotifyData, isRouteLoading }) {
         caption={caption}
         setCaption={setCaption}
         badWordsFilter={badWordsFilter}
+        activePost={activePost}
+        setActivePost={setActivePost}
       />
 
       <Flex
@@ -191,159 +129,121 @@ function Feed({ spotifyData, isRouteLoading }) {
             justify="center"
             w={isMobile ? "100%" : "calc(100% - 375px)"}
           >
-            {/* date picker */}
-            <Group w="100%" position="center">
-              <DatePickerInput
-                icon={<MdOutlineDateRange />}
-                dropdownType="modal"
-                modalProps={{
-                  centered: true,
-                  overlayProps: {
-                    blur: 3,
-                    opacity: 0.55,
-                  },
-                }}
-                value={dayjs(date).isValid() ? dayjs(date).toDate() : null}
-                onChange={(newDate) => {
-                  router.push(
-                    `/feed?date=${dayjs(newDate).format("YYYY-MM-DD")}`,
-                    undefined,
-                    { shallow: true }
-                  );
-                }}
-                minDate={dayjs(START_DATE).toDate()}
-                maxDate={dayjs().toDate()}
-                styles={{
-                  month: {
-                    ".mantine-DatePickerInput-day[data-weekend]": {
-                      color: "#c1c2c5 !important",
-                    },
-                    ".mantine-DatePickerInput-day[data-weekend][data-selected]":
-                      {
-                        color: "#ffffff !important",
-                      },
-                  },
-                  input: {},
-                }}
-              />
-              <Transition
-                mounted={!isToday}
-                transition="slide-right"
-                duration={200}
-                exitDuration={0}
-              >
-                {(styles) => (
-                  <Tooltip
-                    label="Reset"
-                    position="right"
-                    color="dark.7"
+            {
+              <>
+                {/* <Box></Box> */}
+
+                {/* feed posts */}
+                {posts?.feedPosts?.length > 0 ? (
+                  <ScrollArea
+                    type="always"
+                    w={getScrollAreaWidth()}
+                    h={"565px"}
+                    mt={isMobile && "1.5rem"}
+                    mb={isMobile && "1rem"}
+                    style={{
+                      transform: !isMobile && "translateY(2.8rem)",
+                    }}
                     styles={{
-                      tooltip: {
-                        border: "none",
-                        outline: "1px solid rgba(192, 193, 196, 0.75)",
+                      scrollbar: {
+                        "&, &:hover": {
+                          backgroundColor: "transparent",
+                          borderRadius: "0.5rem",
+                        },
+                        '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
+                          {
+                            backgroundColor: "#474952",
+                          },
+                      },
+                      corner: {
+                        display: "none",
                       },
                     }}
                   >
-                    <ActionIcon
-                      style={styles}
-                      onClick={() => {
-                        router.push(
-                          `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
-                          undefined,
-                          { shallow: true }
-                        );
-                      }}
-                      color={"gray"}
-                      variant="outline"
+                    <Flex
+                      justify={"center"}
+                      align={"end"}
+                      w={"100%"}
+                      h={"100%"}
+                      wrap={"wrap"}
+                      gap="1.5rem"
                     >
-                      <VscDebugRestart />
-                    </ActionIcon>
-                  </Tooltip>
+                      {posts?.feedPosts?.map((post) => (
+                        <Post
+                          key={post._id}
+                          post={post}
+                          setPost={setFeedPost}
+                          currentlyPlaying={currentlyPlaying}
+                          setCurrentlyPlaying={setCurrentlyPlaying}
+                          session={session}
+                          caption={caption}
+                          setCaption={setCaption}
+                          badWordsFilter={badWordsFilter}
+                          notificationPostId={notificationPostId}
+                          notificationCommentId={notificationCommentId}
+                          allUsers={allUsers}
+                          activePost={activePost}
+                          setActivePost={setActivePost}
+                        />
+                      ))}
+                    </Flex>
+                  </ScrollArea>
+                ) : (
+                  <Text
+                    fz={"lg"}
+                    fw={"bold"}
+                    style={{
+                      cursor: "default",
+                      transform: isMobile && "translateY(2.4rem)",
+                    }}
+                  >{`No posts on ${formattedDate}`}</Text>
                 )}
-              </Transition>
-            </Group>
 
-            {/* feed posts */}
-            {posts?.feedPosts?.length > 0 ? (
-              <ScrollArea
-                type="always"
-                w={getScrollAreaWidth()}
-                h={"565px"}
-                mt={isMobile && "1.5rem"}
-                mb={isMobile && "1rem"}
-                style={{
-                  transform: !isMobile && "translateY(2.8rem)",
-                }}
-                styles={{
-                  scrollbar: {
-                    "&, &:hover": {
-                      backgroundColor: "transparent",
-                      borderRadius: "0.5rem",
-                    },
-                    '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
-                      {
-                        backgroundColor: "#474952",
-                      },
-                  },
-                  corner: {
-                    display: "none",
-                  },
-                }}
-              >
-                <Flex
-                  justify={"center"}
-                  align={"end"}
-                  w={"100%"}
-                  h={"100%"}
-                  wrap={"wrap"}
-                  gap="1.5rem"
-                >
-                  {posts?.feedPosts?.map((post) => (
-                    <Post
-                      key={post._id}
-                      isLoading={isLoading}
-                      post={post}
-                      setPost={setFeedPost}
-                      currentlyPlaying={currentlyPlaying}
-                      setCurrentlyPlaying={setCurrentlyPlaying}
-                      session={session}
-                      caption={caption}
-                      setCaption={setCaption}
-                      badWordsFilter={badWordsFilter}
-                    />
-                  ))}
-                </Flex>
-              </ScrollArea>
-            ) : (
-              <Text
-                fz={"lg"}
-                fw={"bold"}
-              >{`No posts on ${formattedDate}`}</Text>
-            )}
-
-            <Box></Box>
+                {/* <Box></Box> */}
+              </>
+            }
           </Stack>
 
           {/* user post */}
-          <Rightbar
-            post={posts?.userPost}
-            setPost={setUserPost}
-            isLoading={isLoading}
-            currentlyPlaying={currentlyPlaying}
-            setCurrentlyPlaying={setCurrentlyPlaying}
-            session={session}
-            caption={caption}
-            setCaption={setCaption}
-            badWordsFilter={badWordsFilter}
-            isMobile={isMobile}
-          />
+          <Flex
+            sx={{
+              borderBottom: isMobile && "1px solid rgba(230, 236, 240, 0.5)",
+              borderLeft: !isMobile && "1px solid rgba(230, 236, 240, 0.5)",
+              height: "100%",
+            }}
+            align="center"
+            justify="center"
+            w={!isMobile ? "375px" : "100%"}
+            pb={isMobile && "3rem"}
+            mb={isMobile && "3rem"}
+          >
+            {!!posts?.userPost && (
+              <Post
+                key={posts?.userPost?._id}
+                isUser
+                post={posts?.userPost}
+                setPost={setUserPost}
+                currentlyPlaying={currentlyPlaying}
+                setCurrentlyPlaying={setCurrentlyPlaying}
+                session={session}
+                caption={caption}
+                setCaption={setCaption}
+                badWordsFilter={badWordsFilter}
+                notificationPostId={notificationPostId}
+                notificationCommentId={notificationCommentId}
+                allUsers={allUsers}
+                activePost={activePost}
+                setActivePost={setActivePost}
+              />
+            )}
+          </Flex>
         </Flex>
       </Flex>
     </>
   );
 }
 
-export async function getServerSideProps({ req, res, query }) {
+export async function getServerSideProps({ req, res }) {
   const session = await getSession({ req });
 
   if (!session) {
@@ -357,43 +257,22 @@ export async function getServerSideProps({ req, res, query }) {
   }
 
   try {
-    const { date } = query;
-    const currentDate = dayjs(date);
+    const allUsers = await client.fetch(allUsersQuery);
 
-    if (
-      !date ||
-      !currentDate.isValid() ||
-      !currentDate.isBetween(
-        START_DATE,
-        dayjs().format("YYYY-MM-DD"),
-        "day",
-        "[]"
-      )
-    ) {
-      return {
-        redirect: {
-          destination: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
-          permanent: false,
-        },
-      };
-    }
-
-    const queryClient = new QueryClient();
-    const currentPosts = await queryClient.fetchQuery(
-      ["posts", currentDate.format("YYYY-MM-DD")],
-      () =>
-        getPosts({
-          isClient: false,
-          client,
-          date: currentDate,
-          userId: session?.user?.id,
-        })
-    );
+    const { startDate, endDate } = getDayInterval(dayjs());
+    const currentPosts = await client.fetch(postsQuery, {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      todayStart: startDate.toISOString(),
+      todayEnd: endDate.toISOString(),
+      userId: session?.user?.id,
+    });
 
     if (currentPosts?.hasPostedToday) {
       return {
         props: {
-          dehydratedState: dehydrate(queryClient),
+          currentPosts,
+          allUsers,
           spotifyData: [],
         },
       };
@@ -413,12 +292,9 @@ export async function getServerSideProps({ req, res, query }) {
 
     return {
       props: {
-        dehydratedState: dehydrate(queryClient),
+        currentPosts,
+        allUsers,
         spotifyData,
-      },
-      redirect: !currentDate.isSame(dayjs(), "day") && {
-        destination: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
-        permanent: false,
       },
     };
   } catch {

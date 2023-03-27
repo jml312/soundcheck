@@ -21,6 +21,8 @@ export default async function postSong({
     } = await axios.post("/api/protected/post", {
       ...selectedSong.data,
       userId: session.user.id,
+      accessToken: session.user.accessToken,
+      caption: caption.text,
     });
     setPost({
       ...selectedSong.data,

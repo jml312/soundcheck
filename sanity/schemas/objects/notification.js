@@ -16,11 +16,18 @@ export default {
       type: 'string',
       options: {
         list: [
-          {title: 'Follow', value: 'follow'},
           {title: 'Like', value: 'like'},
           {title: 'Comment', value: 'comment'},
+          {title: 'Follow', value: 'follow'},
         ],
       },
+      validation: (Rule) => Rule.required(),
+    },
+    {
+      name: 'isMention',
+      title: 'Is Mention',
+      type: 'boolean',
+      hidden: ({document}) => document.type !== 'comment',
     },
     {
       name: 'post',
@@ -33,12 +40,14 @@ export default {
       title: 'User',
       type: 'reference',
       to: {type: 'user'},
+      validation: (Rule) => Rule.required(),
     },
     {
       name: 'createdAt',
       title: 'Created At',
       type: 'datetime',
       initialValue: dayjs().toISOString(),
+      validation: (Rule) => Rule.required(),
     },
   ],
 }

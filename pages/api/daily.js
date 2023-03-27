@@ -26,7 +26,7 @@ export default async function handle(req, res) {
   }
 
   try {
-    const sendAt = getRandom9To5();
+    const sendAt = getRandom9To5().unix();
     const userIDs = await client.fetch(`*[_type == "user"] {_id, email}`);
     userIDs.forEach(async ({ _id, email }) => {
       const { startDate: yesterdayStart, endDate: yesterdayEnd } =
@@ -53,7 +53,7 @@ export default async function handle(req, res) {
         subject: "Your daily reminder",
         text: "Your daily reminder",
         html: `<strong>Your daily reminder</strong>`,
-        sendAt: dayjs(testMode === "true" ? undefined : sendAt).unix(),
+        sendAt: testMode === "true" ? undefined : sendAt,
       });
     });
 

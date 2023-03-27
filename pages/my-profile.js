@@ -46,7 +46,7 @@ export async function getServerSideProps({ req, res }) {
   if (!hasPostedToday) {
     return {
       redirect: {
-        destination: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
+        destination: "/feed",
         permanent: false,
       },
     };

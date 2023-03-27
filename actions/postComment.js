@@ -8,15 +8,16 @@ export default async function postComment({
   setPost,
   session,
   badWordsFilter,
-  commentRef,
+  commentScrollRef,
+  setHasBlurredCommentError,
+  allUsers,
 }) {
   if (badWordsFilter.isProfane(comment.text)) {
+    setHasBlurredCommentError(false);
     setComment({
       ...comment,
-      type: comment.type,
       error: "Please do not use profanity.",
     });
-    commentRef.current.focus();
     return;
   }
   const originalComments = post?.comments || [];
@@ -25,53 +26,57 @@ export default async function postComment({
     isLoading: true,
   });
   try {
-    const now = dayjs().toISOString();
-    if (comment.type === "post") {
-      setPost({
-        ...post,
-        comments: [
-          {
-            text: comment.text,
-            createdAt: now,
-            userId: session.user.id,
-            username: session.user.name,
-            userImage: session.user.image,
-          },
-          ...originalComments,
-        ],
-      });
-    } else {
-      setPost({
-        ...post,
-        comments: originalComments
-          .map((c) =>
-            c.createdAt === comment.editedAt
-              ? {
-                  ...c,
-                  text: comment.text,
-                  createdAt: now,
-                }
-              : c
+    const mentions = [
+      ...new Set(
+        comment.text
+          .split(" ")
+          .filter(
+            (word) =>
+              word[0] === "@" &&
+              word.slice(1) !== session.user.name &&
+              allUsers.some((user) => user.username === word.slice(1))
           )
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
-      });
-    }
+          .map(
+            (word) =>
+              allUsers.find((user) => user.username === word.slice(1)).userId
+          )
+      ),
+    ];
+    const now = dayjs().toISOString();
+    setPost({
+      ...post,
+      comments: [
+        ...originalComments,
+        {
+          text: comment.text,
+          createdAt: now,
+          userId: session.user.id,
+          username: session.user.name,
+          userImage: session.user.image,
+        },
+      ],
+    });
     await axios.post("/api/protected/comment", {
       postID: post?._id,
       userId: session?.user?.id,
       postUserId: post?.userId,
       text: comment.text,
-      createdAt: comment.type === "post" ? now : comment.editedAt,
-      type: comment.type,
+      mentions,
+      createdAt: now,
+      type: "post",
     });
     setComment({
       ...comment,
       text: "",
-      originalText: "",
-      type: "",
-      editedAt: "",
       isLoading: false,
     });
+    setTimeout(() => {
+      if (!commentScrollRef.current) return;
+      commentScrollRef.current.scrollTo({
+        top: commentScrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }, 100);
   } catch {
     setPost({
       ...post,
@@ -80,9 +85,6 @@ export default async function postComment({
     setComment({
       ...comment,
       text: "",
-      originalText: "",
-      type: "",
-      editedAt: "",
       isLoading: false,
     });
   }

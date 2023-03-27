@@ -1,6 +1,6 @@
 import Post from "../Post";
-import { useState } from "react";
-import { Modal } from "@mantine/core";
+import { useState, useEffect } from "react";
+import { Modal, LoadingOverlay } from "@mantine/core";
 
 export default function PostModal({
   opened,
@@ -15,26 +15,25 @@ export default function PostModal({
   session,
   numComments,
   badWordsFilter,
+  notificationPostId,
+  notificationCommentId,
+  allUsers,
 }) {
-  const hasCommented = post?.comments?.some(
-    (comment) => comment.userId === session?.user?.id
-  );
   const [comment, setComment] = useState({
     text: "",
-    originalText: "",
-    type: !hasCommented ? "post" : "", // "post" or "edit"
     error: "",
-    editedAt: "",
     isLoading: false,
     isDeleting: false,
-    addedEmoji: false,
+    isMentioning: false,
+    isFocused: false,
   });
+  const [activePost, setActivePost] = useState(null);
 
   return (
     <Modal
-      yOffset={"2vh"}
-      // yOffset={hasCommented && !comment.type ? "2vh" : "5vh"}
-      // centered={!hasCommented || comment.type}
+      // yOffset={"3vh"}
+      // yOffset={"2vh"}
+      centered
       size="auto"
       overlayProps={{
         blur: 3,
@@ -45,13 +44,12 @@ export default function PostModal({
         if (!comment.isLoading && !comment.isDeleting && !caption?.isLoading) {
           setComment({
             text: "",
-            originalText: "",
-            type: numComments === 0 ? "post" : "",
-            editedAt: "",
             isLoading: false,
             isDeleting: false,
-            addedEmoji: false,
+            isMentioning: false,
+            isFocused: false,
           });
+          setActivePost(null);
           close();
         }
       }}
@@ -59,6 +57,12 @@ export default function PostModal({
       padding={0}
       trapFocus={false}
     >
+      <LoadingOverlay
+        visible={comment.isLoading || comment.isDeleting}
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        zIndex={1000}
+      />
       <Post
         post={post}
         setPost={setPost}
@@ -72,6 +76,11 @@ export default function PostModal({
         setCaption={setCaption}
         session={session}
         badWordsFilter={badWordsFilter}
+        notificationPostId={notificationPostId}
+        notificationCommentId={notificationCommentId}
+        allUsers={allUsers}
+        activePost={activePost}
+        setActivePost={setActivePost}
       />
     </Modal>
   );

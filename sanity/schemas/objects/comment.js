@@ -15,6 +15,7 @@ export default {
       title: 'User',
       type: 'reference',
       to: {type: 'user'},
+      validation: (Rule) => Rule.required(),
     },
     {
       name: 'text',
@@ -27,6 +28,7 @@ export default {
       title: 'Created At',
       type: 'datetime',
       initialValue: dayjs().toISOString(),
+      validation: (Rule) => Rule.required(),
     },
   ],
 }

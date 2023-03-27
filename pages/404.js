@@ -9,11 +9,7 @@ export default function Custom404() {
 
   useEffect(() => {
     if (status === "loading") return;
-    router.push(
-      status === "unauthenticated"
-        ? "/"
-        : `/feed?date=${dayjs().format("YYYY-MM-DD")}`
-    );
+    router.push(status === "unauthenticated" ? "/" : "/feed");
   }, []);
 
   return null;

@@ -1,13 +1,12 @@
 import { SessionProvider, useSession } from "next-auth/react";
 import "@/styles/globals.css";
 import Head from "next/head";
-import { MantineProvider } from "@mantine/core";
+import { MantineProvider, Flex, Loader } from "@mantine/core";
 import Navbar from "@/components/Navbar";
-import Loader from "@/components/Loader";
 import { Notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "react-query";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
@@ -101,57 +100,91 @@ export default function App({
 
       <SessionProvider session={session}>
         <QueryClientProvider client={queryClient}>
-          <Hydrate state={pageProps.dehydratedState}>
-            <MantineProvider
-              withGlobalStyles
-              withNormalizeCSS
-              theme={{
-                loader: "bars",
-                colorScheme: "dark",
-                colors: {
-                  spotify: [
-                    ...emptyColors(7),
-                    "rgba(29, 185, 84, 0.9)",
-                    "rgba(29, 185, 84, 1)",
-                  ],
-                  lightWhite: [
-                    ...emptyColors(6),
-                    "#a8a9ad",
-                    "rgba(192, 193, 196, 0.75)",
-                    "#c0c1c4",
-                  ],
-                  lightGray: ["#3C3F42", ...emptyColors(7), "#25262b"],
-                },
-                primaryColor: "spotify",
-                components: {
-                  Button: {
-                    styles: (theme) => ({
-                      root: {
-                        color: "white",
-                        backgroundColor: theme.colors.spotify[6],
-                        "&:hover": {
-                          backgroundColor: theme.colors.spotify[7],
-                        },
+          <MantineProvider
+            withGlobalStyles
+            withNormalizeCSS
+            theme={{
+              loader: "bars",
+              colorScheme: "dark",
+              colors: {
+                spotify: [
+                  ...emptyColors(7),
+                  "rgba(29, 185, 84, 0.9)",
+                  "rgba(29, 185, 84, 1)",
+                ],
+                lightWhite: [
+                  ...emptyColors(6),
+                  "#a8a9ad",
+                  "rgba(192, 193, 196, 0.75)",
+                  "#c0c1c4",
+                ],
+                lightGray: ["#3C3F42", ...emptyColors(7), "#25262b"],
+              },
+              primaryColor: "spotify",
+              components: {
+                Button: {
+                  styles: (theme) => ({
+                    root: {
+                      color: "white",
+                      backgroundColor: theme.colors.spotify[6],
+                      "&:hover": {
+                        backgroundColor: theme.colors.spotify[7],
                       },
-                    }),
-                  },
+                    },
+                  }),
                 },
-              }}
-            >
-              <Notifications />
-              <Auth>
-                <Component {...pageProps} isRouteLoading={isRouteLoading} />
-              </Auth>
-            </MantineProvider>
-          </Hydrate>
+              },
+            }}
+          >
+            <Notifications />
+            <Auth isRouteLoading={isRouteLoading}>
+              <Component {...pageProps} />
+            </Auth>
+          </MantineProvider>
         </QueryClientProvider>
       </SessionProvider>
     </>
   );
 }
 
-function Auth({ children }) {
+function Auth({ children, isRouteLoading }) {
   const { status } = useSession();
-  if (status === "loading") return <Loader />;
-  return status === "authenticated" ? <Navbar>{children}</Navbar> : children;
+  if (status === "loading")
+    return (
+      <Flex mih={"100vh"} align="center" justify="center" direction="column">
+        <Loader size="xl" />
+      </Flex>
+    );
+  return status === "authenticated" ? (
+    <Navbar>
+      {isRouteLoading ? (
+        <Flex
+          style={{
+            height: "calc(100vh - 5rem)",
+          }}
+          justify={"space-between"}
+          align={"stretch"}
+          direction={"column"}
+        >
+          <Flex
+            w={"100%"}
+            h="100%"
+            justify={"center"}
+            align={"center"}
+            style={{
+              transform: "translateY(5rem)",
+            }}
+            direction={"column"}
+            mt={"2.25rem"}
+          >
+            <Loader size="xl" />
+          </Flex>
+        </Flex>
+      ) : (
+        children
+      )}
+    </Navbar>
+  ) : (
+    children
+  );
 }

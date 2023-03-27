@@ -1,82 +1,126 @@
 import client from "@/lib/sanity";
-import dayjs from "dayjs";
 
 export default async function handler(req, res) {
   if (req.method !== "POST" && req.method !== "DELETE") {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { postID, userId, postUserId, text, createdAt, type } = req.body;
+  const { postID, userId, postUserId, text, mentions, createdAt, type } =
+    req.body;
 
-  if (!["post", "edit", "delete"].includes(type)) {
+  if (!["post", "delete"].includes(type)) {
     return res.status(400).json({ message: "Bad request" });
   }
 
+  const isUser = userId === postUserId;
+
   try {
     if (type === "delete") {
+      // delete comment from post
       await client
         .patch(postID)
         .unset([`comments[_key == \"${createdAt}\"]`])
         .commit();
+      // delete comment from user
       await client
         .patch(userId)
         .unset([`comments[_key == \"${createdAt}\"]`])
         .commit();
-      await client
-        .patch(postUserId)
-        .unset([
-          `notifications[type == \"comment\" && post._ref == \"${postID}\" && createdAt == \"${createdAt}\"]`,
-        ]);
-    } else if (["post", "edit"].includes(type)) {
-      let created = createdAt;
-      if (type === "edit") {
+      // delete notification from post user if they are not mentioned
+      if (!isUser && !mentions?.includes(postUserId)) {
         await client
-          .patch(postID)
-          .unset([`comments[_key == \"${createdAt}\"]`])
+          .patch(postUserId)
+          .unset([
+            `notifications[_key == \"${createdAt}\" &&  type == \"comment\" && post._ref == \"${postID}\" && user._ref == \"${userId}\"]`,
+          ])
           .commit();
-        await client
-          .patch(userId)
-          .unset([`comments[_key == \"${createdAt}\"]`])
-          .commit();
-        created = dayjs().toISOString();
       }
+      // delete notification from mentioned users
+      else if (!isUser && mentions?.length > 0) {
+        await Promise.all(
+          mentions.map(async (mentionUserId) => {
+            await client
+              .patch(mentionUserId)
+              .unset([
+                `notifications[_key == \"${createdAt}\" && type == \"comment\" && isMention && post._ref == \"${postID}\" && user._ref == \"${userId}\"]`,
+              ])
+              .commit();
+          })
+        );
+      }
+    } else if (type === "post") {
       const newComment = {
-        _key: created,
+        _key: createdAt,
         _type: "comment",
         text,
         user: {
           _type: "reference",
           _ref: userId,
         },
-        createdAt: created,
+        createdAt: createdAt,
       };
+      // add comment to post
       await client
         .patch(userId)
         .append("comments", [
           {
             _type: "reference",
             _ref: postID,
-            _key: created,
+            _key: createdAt,
           },
         ])
         .commit();
+      // add comment to user
       await client.patch(postID).append("comments", [newComment]).commit();
-      await client.patch(postUserId).append("notifications", [
-        {
-          _type: "notification",
-          _key: created,
-          type: "comment",
-          post: {
-            _type: "reference",
-            _ref: postID,
-          },
-          user: {
-            _type: "reference",
-            _ref: userId,
-          },
-          createdAt: created,
-        },
-      ]);
+      // add notification to post user if they are not mentioned
+      if (!isUser && !mentions?.includes(postUserId)) {
+        await client
+          .patch(postUserId)
+          .append("notifications", [
+            {
+              _type: "notification",
+              _key: createdAt,
+              type: "comment",
+              // isMention,
+              post: {
+                _type: "reference",
+                _ref: postID,
+              },
+              user: {
+                _type: "reference",
+                _ref: userId,
+              },
+              createdAt: createdAt,
+            },
+          ])
+          .commit();
+      }
+      // add notification to mentioned users
+      else if (!isUser && mentions?.length > 0) {
+        await Promise.all(
+          mentions.map(async (mentionUserId) => {
+            await client
+              .patch(mentionUserId)
+              .append("notifications", [
+                {
+                  _type: "notification",
+                  _key: createdAt,
+                  type: "mention",
+                  post: {
+                    _type: "reference",
+                    _ref: postID,
+                  },
+                  user: {
+                    _type: "reference",
+                    _ref: userId,
+                  },
+                  createdAt: createdAt,
+                },
+              ])
+              .commit();
+          })
+        );
+      }
     }
     return res.status(200).json({ message: "Success" });
   } catch {

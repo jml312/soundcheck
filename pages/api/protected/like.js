@@ -20,6 +20,7 @@ export default async function handler(req, res) {
   } = req.body;
 
   try {
+    
     if (type === "like") {
       const session = await getSession({ req });
       const recommendations = await getDiscoverSongs({
@@ -99,7 +100,8 @@ export default async function handler(req, res) {
       await client
         .patch(postUserId)
         .unset([
-          `notifications[type == \"like\" && post._ref == \"${postID}\"]`,
+          `notifications[_key == \"${createdAt}\" &&
+            type == \"like\" && post._ref == \"${postID}\" && user._ref == \"${userId}\"]`,
         ])
         .commit();
 

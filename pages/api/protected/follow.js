@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { type, userId, postUserId, toFollowId } = req.body;
+  const { type, userId,  toFollowId } = req.body;
 
   try {
     if (type === "follow") {
@@ -35,10 +35,6 @@ export default async function handler(req, res) {
             _type: "notification",
             _key: key,
             type: "follow",
-            post: {
-              _type: "reference",
-              _ref: postUserId,
-            },
             user: {
               _type: "reference",
               _ref: userId,

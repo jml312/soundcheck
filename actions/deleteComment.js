@@ -7,7 +7,8 @@ export default async function deleteComment({
   setPost,
   comment,
   setComment,
-  commentsRef,
+  allUsers,
+  session,
 }) {
   const originalPost = post;
   setComment({
@@ -21,23 +22,36 @@ export default async function deleteComment({
         (comment) => comment.createdAt !== createdAt
       ),
     });
+    const mentions = [
+      ...new Set(
+        comment.text
+          .split(" ")
+          .filter(
+            (word) =>
+              word[0] === "@" &&
+              word.slice(1) !== session.user.name &&
+              allUsers.some((user) => user.username === word.slice(1))
+          )
+          .map(
+            (word) =>
+              allUsers.find((user) => user.username === word.slice(1)).userId
+          )
+      ),
+    ];
     await axios.delete("/api/protected/comment", {
       data: {
         postID: post?._id,
-        postUserId: post?.userId,
         userId,
+        postUserId: post?.userId,
+        mentions,
         createdAt,
         type: "delete",
       },
     });
     setComment({
       ...comment,
-      type: originalPost?.comments?.length - 1 === 0 ? "post" : "",
       isDeleting: false,
     });
-    setTimeout(() => {
-      commentsRef?.current?.scrollTo({ top: 0, behavior: "smooth" });
-    }, 100);
   } catch {
     setComment({
       ...comment,

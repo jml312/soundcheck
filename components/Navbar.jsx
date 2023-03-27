@@ -18,12 +18,11 @@ import { CgProfile } from "react-icons/cg";
 import { useState } from "react";
 import Link from "next/link";
 import { useMediaQuery, useDisclosure } from "@mantine/hooks";
-import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { MdOutlineNotifications } from "react-icons/md";
+import NotificationDrawer from "./drawers/NotificationDrawer";
 import { useQuery } from "react-query";
 import { getNotifications } from "@/actions";
-import NotificationModal from "./modals/NotificationModal";
 
 const useStyles = createStyles((theme) => ({
   logoText: {
@@ -40,13 +39,19 @@ function Navbar({ children }) {
   const isMobile = useMediaQuery("(max-width: 480px)");
   const router = useRouter();
 
-  const { data: notifications } = useQuery({
-    queryKey: "notifications",
-    queryFn: () =>
-      getNotifications({
-        userId: session?.user?.id,
-      }),
-  });
+  // const { data: notifications } = useQuery({
+  //   queryKey: "notifications",
+  //   queryFn: () =>
+  //     getNotifications({
+  //       userId: session?.user?.id,
+  //     }),
+  //   enabled: Boolean(session?.user?.id),
+  //   onSuccess: (data) => {
+  //     setCurrentNotifications(data);
+  //   },
+  // });
+
+  const [currentNotifications, setCurrentNotifications] = useState([]);
 
   const [
     notificationOpen,
@@ -55,7 +60,12 @@ function Navbar({ children }) {
 
   return (
     <>
-      <NotificationModal open={notificationOpen} close={closeNotification} />
+      <NotificationDrawer
+        open={notificationOpen}
+        close={closeNotification}
+        currentNotifications={currentNotifications}
+        setCurrentNotifications={setCurrentNotifications}
+      />
       <MantineNavbar
         width="100%"
         height={"5rem"}
@@ -73,7 +83,7 @@ function Navbar({ children }) {
           align={"center"}
           px={16}
         >
-          {router.asPath.includes("/feed") ? (
+          {router.asPath === "/feed" ? (
             <Title
               color="white"
               style={{
@@ -84,7 +94,7 @@ function Navbar({ children }) {
               Soundcheck!
             </Title>
           ) : (
-            <Link href={`/feed?date=${dayjs().format("YYYY-MM-DD")}`} passHref>
+            <Link href={"/feed"} passHref>
               <Title
                 color="white"
                 style={{
@@ -97,22 +107,23 @@ function Navbar({ children }) {
               </Title>
             </Link>
           )}
-          <Group
-            spacing={!notifications || notifications.length === 0 ? 4 : 14}
-          >
+          <Group spacing={currentNotifications?.length === 0 ? 4 : 14}>
             <Group position="center">
               <Indicator
-                label={notifications?.length || 0}
-                disabled={!notifications || notifications.length === 0}
+                label={currentNotifications?.length || 0}
+                disabled={
+                  !currentNotifications || currentNotifications.length === 0
+                }
                 size={"1.1rem"}
                 color={"lightGray"}
-                // color={theme.colors.spotify[8]}
                 inline
                 withBorder
               >
                 <ActionIcon
                   onClick={() => {}}
-                  disabled={!notifications || notifications.length === 0}
+                  disabled={
+                    !currentNotifications || currentNotifications.length === 0
+                  }
                   sx={{
                     "&[data-disabled]": {
                       backgroundColor: "transparent",
@@ -152,7 +163,7 @@ function Navbar({ children }) {
                       src={session?.user?.image}
                       alt={session?.user?.name}
                       radius="xl"
-                      size={27}
+                      size={20}
                       sx={(theme) => ({
                         outline: `1px solid ${theme.colors.lightWhite[8]}`,
                       })}

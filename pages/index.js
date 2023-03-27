@@ -46,14 +46,14 @@ function Index() {
           setIsLoading(true);
           e.preventDefault();
           signIn("spotify", {
-            callbackUrl: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
+            callbackUrl: "/feed",
           });
         }}
         size="md"
         leftIcon={<BsSpotify />}
         loading={isLoading}
       >
-        {isLoading ? "Loading..." : "Continue with Spotify"}
+        {isLoading ? "Logging in..." : "Continue with Spotify"}
       </Button>
     </Flex>
   );
@@ -65,7 +65,7 @@ export async function getServerSideProps({ req }) {
   if (session) {
     return {
       redirect: {
-        destination: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
+        destination: "/feed",
         permanent: false,
       },
     };

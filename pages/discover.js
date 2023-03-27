@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 function Discover({ recommendations }) {
   const { data: session } = useSession();
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const [activePost, setActivePost] = useState(null);
 
   const twoCards = useMediaQuery("(min-width: 745px) and (max-width: 1092px)");
   const threeCards = useMediaQuery(
@@ -96,6 +97,8 @@ function Discover({ recommendations }) {
                 currentlyPlaying={currentlyPlaying}
                 setCurrentlyPlaying={setCurrentlyPlaying}
                 session={session}
+                activePost={activePost}
+                setActivePost={setActivePost}
               />
             ))}
           </Flex>
@@ -131,7 +134,7 @@ export async function getServerSideProps({ req, res }) {
     if (!hasPostedToday) {
       return {
         redirect: {
-          destination: `/feed?date=${dayjs().format("YYYY-MM-DD")}`,
+          destination: "/feed",
           permanent: false,
         },
       };

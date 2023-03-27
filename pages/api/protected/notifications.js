@@ -1,6 +1,5 @@
 import client from "@/lib/sanity";
 import { notificationsQuery } from "@/lib/queries";
-import dayjs from "dayjs";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -13,7 +12,7 @@ export default async function handler(req, res) {
     const userNotifications = await client.fetch(notificationsQuery, {
       userId,
     });
-    return res.status(200).json({ message: "Success", userNotifications });
+    return res.status(200).send(userNotifications);
   } catch {
     return res.status(500).json({ message: "Internal server error" });
   }

@@ -6,10 +6,11 @@ import {
   Avatar,
   Text,
   useMantineTheme,
+  LoadingOverlay,
 } from "@mantine/core";
-import { BsMusicNoteBeamed } from "react-icons/bs";
+import { BsMusicNoteBeamed, BsSpotify } from "react-icons/bs";
 import Post from "../Post";
-import { forwardRef, useState, useEffect } from "react";
+import { forwardRef, useState } from "react";
 import { postSong } from "@/actions";
 
 const SelectItem = forwardRef(
@@ -40,32 +41,28 @@ export default function SelectSongModal({
   caption,
   setCaption,
   badWordsFilter,
+  activePost,
+  setActivePost,
 }) {
   const theme = useMantineTheme();
   const [selectedSong, setSelectedSong] = useState({
-    value: spotifyData ? spotifyData[0]?.songName : "",
-    data: spotifyData ? spotifyData[0] : {},
+    value:
+      spotifyData?.length > 0
+        ? `${spotifyData[0]?.songName} by ${spotifyData[0].artists
+            .map((artist) => artist.name)
+            .join(", ")}`
+        : "",
+    data: spotifyData?.length > 0 ? spotifyData[0] : {},
     isChanged: false,
     isLoading: false,
   });
-
-  useEffect(() => {
-    if (opened) {
-      setSelectedSong({
-        value: spotifyData ? spotifyData[0]?.songName : "",
-        data: spotifyData ? spotifyData[0] : {},
-        isChanged: false,
-        isLoading: false,
-      });
-    }
-  }, [opened]);
+  const [isSelectFocused, setIsSelectFocused] = useState(false);
 
   return (
     <Modal
-      keepMounted
+      opened={opened}
       closeOnEscape={false}
       closeOnOutsideClick={false}
-      opened={opened}
       onClose={() => {}}
       withCloseButton={false}
       centered
@@ -74,61 +71,84 @@ export default function SelectSongModal({
         opacity: 0.55,
       }}
       size="auto"
-      styles={{
-        content: {
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-        },
-      }}
+      padding={6}
     >
+      <LoadingOverlay
+        visible={selectedSong.isLoading}
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        zIndex={1000}
+      />
       <Select
+        onFocus={() => setIsSelectFocused(true)}
+        onBlur={() => setIsSelectFocused(false)}
+        label={
+          <Group noWrap spacing={4}>
+            <Text size="sm">Recently played</Text>
+            <BsSpotify
+              size={13}
+              style={{
+                color: theme.colors.spotify[8],
+              }}
+            />
+          </Group>
+        }
         clearable={false}
-        w={!!selectedSong.value ? "100%" : 375}
+        w={"100%"}
         mb={15}
         radius={"0.25rem"}
         withinPortal
         dropdownPosition="bottom"
         placeholder="Choose a song"
         maxDropdownHeight={350}
-        nothingFound="No songs found"
-        searchable
         defaultValue={selectedSong.value}
         value={selectedSong.value}
         itemComponent={SelectItem}
         data={
-          spotifyData?.map((data) => ({
-            ...data,
-            value: data.songName,
-            label: data.songName,
-          })) || []
-        }
-        filter={(value, item) =>
-          item.songName.toLowerCase().includes(value?.toLowerCase()?.trim()) ||
-          item.albumName.toLowerCase().includes(value?.toLowerCase()?.trim())
+          spotifyData?.map((data) => {
+            const currentSong = `${data?.songName} by ${data?.artists
+              .map((artist) => artist.name)
+              .join(", ")}`;
+            return {
+              ...data,
+              value: currentSong,
+              label: currentSong,
+            };
+          }) || []
         }
         onChange={(value) => {
           setSelectedSong({
             ...selectedSong,
             value,
-            data: spotifyData?.find((data) => data.songName === value),
+            data: spotifyData?.find(
+              (data) => data.songName === value.split(" by ")[0]
+            ),
             isChanged: true,
           });
         }}
-        icon={<BsMusicNoteBeamed />}
         styles={{
+          root: { position: "relative" },
+          label: {
+            position: "absolute",
+            pointerEvents: "none",
+            fontSize: theme.fontSizes.xs,
+            paddingLeft: theme.spacing.sm,
+            paddingTop: `calc(${theme.spacing.sm} / 2)`,
+            zIndex: 1,
+          },
+          input: {
+            height: 57,
+            paddingTop: 21,
+            "&:focus": {
+              borderColor: theme.colors.spotify[8],
+            },
+          },
           item: {
             "&[data-selected]": {
               backgroundColor: theme.colors.spotify[8],
               "&:hover": {
                 backgroundColor: theme.colors.spotify[7],
               },
-            },
-          },
-          input: {
-            "&:focus": {
-              borderColor: theme.colors.spotify[8],
             },
           },
         }}
@@ -159,11 +179,14 @@ export default function SelectSongModal({
           caption={caption}
           setCaption={setCaption}
           badWordsFilter={badWordsFilter}
+          isPosting={selectedSong.isLoading}
+          activePost={activePost}
+          setActivePost={setActivePost}
         />
       )}
 
       <Button
-        w={!!selectedSong.value ? "100%" : 375}
+        w={"100%"}
         onClick={() =>
           postSong({
             selectedSong,
@@ -177,11 +200,12 @@ export default function SelectSongModal({
           })
         }
         fullWidth
-        disabled={!selectedSong.value}
+        disabled={!selectedSong.value || caption.isFocused || isSelectFocused}
         mt={15}
         loading={selectedSong.isLoading}
+        leftIcon={<BsMusicNoteBeamed />}
       >
-        {selectedSong.isLoading ? "Posting..." : "Post this song!"}
+        {selectedSong.isLoading ? "Posting..." : "Post this song"}
       </Button>
     </Modal>
   );
