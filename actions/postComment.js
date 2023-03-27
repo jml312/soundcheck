@@ -32,9 +32,10 @@ export default async function postComment({
           .split(" ")
           .filter(
             (word) =>
-              word[0] === "@" &&
+              word.startsWith("@") &&
               word.slice(1) !== session.user.name &&
-              allUsers.some((user) => user.username === word.slice(1))
+              splitText.slice(0, i).join(" ").length + (i === 0 ? 0 : 1) &&
+              allUsers?.some((user) => user.username === word.slice(1))
           )
           .map(
             (word) =>
@@ -43,6 +44,15 @@ export default async function postComment({
       ),
     ];
     const now = dayjs().toISOString();
+    await axios.post("/api/protected/comment", {
+      postID: post?._id,
+      userId: session?.user?.id,
+      postUserId: post?.userId,
+      text: comment.text,
+      mentions,
+      createdAt: now,
+      type: "post",
+    });
     setPost({
       ...post,
       comments: [
@@ -55,15 +65,6 @@ export default async function postComment({
           userImage: session.user.image,
         },
       ],
-    });
-    await axios.post("/api/protected/comment", {
-      postID: post?._id,
-      userId: session?.user?.id,
-      postUserId: post?.userId,
-      text: comment.text,
-      mentions,
-      createdAt: now,
-      type: "post",
     });
     setComment({
       ...comment,

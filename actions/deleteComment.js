@@ -16,12 +16,6 @@ export default async function deleteComment({
     isDeleting: true,
   });
   try {
-    setPost({
-      ...post,
-      comments: post?.comments?.filter(
-        (comment) => comment.createdAt !== createdAt
-      ),
-    });
     const mentions = [
       ...new Set(
         comment.text
@@ -47,6 +41,12 @@ export default async function deleteComment({
         createdAt,
         type: "delete",
       },
+    });
+    setPost({
+      ...post,
+      comments: post?.comments?.filter(
+        (comment) => comment.createdAt !== createdAt
+      ),
     });
     setComment({
       ...comment,
