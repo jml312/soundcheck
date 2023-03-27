@@ -586,6 +586,7 @@ function Post({
               ref={captionRef}
               w="100%"
               value={caption.text}
+              maxLength={CAPTION_MAX_LENGTH}
               onChange={(e) => {
                 const value = e.target.value;
                 if (value.length > CAPTION_MAX_LENGTH) return;
@@ -884,7 +885,7 @@ function Post({
                     <ScrollArea
                       viewportRef={commentScrollRef}
                       offsetScrollbars
-                      h={"190px"}
+                      h={comment.error ? "177px" : "190px"}
                       w="100%"
                       type={"always"}
                       pb={"0.5rem"}
@@ -987,17 +988,16 @@ function Post({
                             ref={commentInputRef}
                             variant={"unstyled"}
                             placeholder="Add a comment..."
+                            inputWrapperOrder={["error", "input"]}
                             styles={{
                               zIndex: 100,
                               input: {
                                 color: "white",
                                 fontSize: "1rem",
-                              },
-                              description: {
-                                transform: "translateY(.5rem)",
+                                marginBottom: "-.35rem",
                               },
                               error: {
-                                transform: "translateY(-.5rem)",
+                                transform: "translateY(.7rem)",
                               },
                             }}
                             error={comment.error}
@@ -1026,6 +1026,7 @@ function Post({
                                 isFocused: false,
                               });
                             }}
+                            maxLength={COMMENT_MAX_LENGTH}
                             onChange={(e) => {
                               const value = e.target.value;
                               if (value.length > COMMENT_MAX_LENGTH) return;

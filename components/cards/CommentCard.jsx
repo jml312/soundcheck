@@ -97,7 +97,7 @@ export default function CommentCard({
         </Flex>
 
         <Text
-          mt=".1rem"
+          mt=".075rem"
           color="#FFFFFF"
           fz={"1rem"}
           fw="bold"
@@ -112,9 +112,7 @@ export default function CommentCard({
               word.startsWith("@") &&
               text.indexOf(word) ===
                 splitText.slice(0, i).join(" ").length + (i === 0 ? 0 : 1) &&
-              allUsers?.some(
-                (user) => user.username === word.slice(1)
-              );
+              allUsers?.some((user) => user.username === word.slice(1));
             const isEnd = i === splitText.length - 1;
             return isMention ? (
               <>
@@ -135,12 +133,13 @@ export default function CommentCard({
         </Text>
 
         <Flex
-          mt={isUser ? "-.4rem" : "-.2rem"}
+          mt={isUser ? "-.45rem" : "-.1rem"}
           justify="flex-start"
           align="center"
           w={"100%"}
         >
           <UnstyledButton
+            fs={"italic"}
             fz={".75rem"}
             color="#BDBDBD"
             sx={{
@@ -163,6 +162,7 @@ export default function CommentCard({
             <>
               &nbsp;&bull;&nbsp;
               <UnstyledButton
+                fs={"italic"}
                 fz={".75rem"}
                 color="#BDBDBD"
                 sx={{
