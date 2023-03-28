@@ -1,5 +1,4 @@
-import { Flex } from "@mantine/core";
-import { useSession, getSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import { clearAuthCookies, getDayInterval } from "@/utils";
 import client from "@/lib/sanity";
 import { hasPostedTodayQuery, profileQuery } from "@/lib/queries";
@@ -7,21 +6,7 @@ import Profile from "@/components/Profile";
 import dayjs from "dayjs";
 
 function UserProfile({ profile }) {
-  const { data: session } = useSession();
-
-  return (
-    <Flex
-      justify={"center"}
-      align={"center"}
-      direction={"column"}
-      h={"calc(100vh - 5rem)"}
-      style={{
-        transform: "translateY(5rem)",
-      }}
-    >
-      <Profile session={session} />
-    </Flex>
-  );
+  return <Profile profile={profile} />;
 }
 
 export async function getServerSideProps({ req, res, params }) {
@@ -53,7 +38,6 @@ export async function getServerSideProps({ req, res, params }) {
   }
 
   const { userId: profileUserId } = params;
-
   const profile = await client.fetch(profileQuery, {
     userId: profileUserId,
   });
@@ -67,7 +51,6 @@ export async function getServerSideProps({ req, res, params }) {
     };
   }
 
-  // remove follow notification from user
   await client
     .patch(session.user.id)
     .unset([
@@ -75,8 +58,23 @@ export async function getServerSideProps({ req, res, params }) {
     ])
     .commit();
 
+  const genres = new Set();
+  const artists = new Set();
+  profile.stats.forEach((stat) => {
+    stat.genres.forEach((genre) => genres.add(genre));
+    stat.artists.forEach((artist) => artists.add(artist.name));
+  });
+
   return {
-    props: { profile },
+    props: {
+      profile: {
+        ...profile,
+        stats: {
+          genres: [...genres],
+          artists: [...artists],
+        },
+      },
+    },
   };
 }
 

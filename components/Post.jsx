@@ -1119,9 +1119,9 @@ function Post({
                           <ScrollArea
                             viewportRef={commentScrollRef}
                             h={
-                              allUsers.length === 1
+                              allUsers?.length === 1
                                 ? "40px"
-                                : allUsers.length === 2
+                                : allUsers?.length === 2
                                 ? "90px"
                                 : "140px"
                             }

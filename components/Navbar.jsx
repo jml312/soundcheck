@@ -55,7 +55,7 @@ function Navbar({ children }) {
   // });
 
   const [notifications, setNotifications] = useState(
-    [...Array(3)].map((_, i) => ({
+    [...Array(12)].map((_, i) => ({
       _id: i,
       type:
         i % 4 === 0

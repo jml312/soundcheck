@@ -1,5 +1,4 @@
-import { Flex } from "@mantine/core";
-import { useSession, getSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import { clearAuthCookies, getDayInterval } from "@/utils";
 import client from "@/lib/sanity";
 import { hasPostedTodayQuery, profileQuery } from "@/lib/queries";
@@ -7,21 +6,7 @@ import Profile from "@/components/Profile";
 import dayjs from "dayjs";
 
 function MyProfile({ profile }) {
-  const { data: session } = useSession();
-
-  return (
-    <Flex
-      justify={"center"}
-      align={"center"}
-      direction={"column"}
-      h={"calc(100vh - 5rem)"}
-      style={{
-        transform: "translateY(5rem)",
-      }}
-    >
-      <Profile isUser session={session} />
-    </Flex>
-  );
+  return <Profile isUser profile={profile} />;
 }
 
 export async function getServerSideProps({ req, res }) {
@@ -56,8 +41,23 @@ export async function getServerSideProps({ req, res }) {
     userId: session.user.id,
   });
 
+  const genres = new Set();
+  const artists = new Set();
+  profile.stats.forEach((stat) => {
+    stat.genres.forEach((genre) => genres.add(genre));
+    stat.artists.forEach((artist) => artists.add(artist.name));
+  });
+
   return {
-    props: { profile },
+    props: {
+      profile: {
+        ...profile,
+        stats: {
+          genres: [...genres],
+          artists: [...artists],
+        },
+      },
+    },
   };
 }
 
