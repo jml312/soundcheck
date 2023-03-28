@@ -6,6 +6,8 @@ import deleteComment from "./deleteComment";
 import followUser from "./followUser";
 import getDiscoverSongs from "./getDiscoverSongs";
 import getNotifications from "./getNotifications";
+import clearNotification from "./clearNotification";
+import viewNotification from "./viewNotification";
 
 export {
   postSong,
@@ -16,4 +18,6 @@ export {
   followUser,
   getDiscoverSongs,
   getNotifications,
+  clearNotification,
+  viewNotification,
 };

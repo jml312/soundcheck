@@ -117,6 +117,8 @@ export default function SelectSongModal({
           }) || []
         }
         onChange={(value) => {
+          setActivePost(null);
+          setCurrentlyPlaying(null);
           setSelectedSong({
             ...selectedSong,
             value,

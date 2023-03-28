@@ -1,54 +1,55 @@
 import NotificationCard from "../cards/NotificationCard";
-import { IoMdRemoveCircleOutline } from "react-icons/io";
-import dayjs from "dayjs";
-import { Drawer, Modal, ScrollArea, Button, Stack } from "@mantine/core";
+import {
+  Modal,
+  ScrollArea,
+  Button,
+  Stack,
+  LoadingOverlay,
+} from "@mantine/core";
+import { clearNotification } from "@/actions";
+import { useRouter } from "next/router";
 
-export default function NotificationModal({ opened, close }) {
-  const NUM = 12;
+export default function NotificationModal({
+  opened,
+  close,
+  notifications,
+  setNotifications,
+  session,
+  isLoading,
+  setIsLoading,
+}) {
+  const router = useRouter();
   return (
-    <Drawer
+    <Modal
       overlayProps={{
         blur: 3,
         opacity: 0.55,
       }}
-      // opened
-      position="left"
-      // position="bottom"
-      // position="right"
+      opened={opened}
       centered
-      // opened={opened}
-      onClose={close}
-      trapFocus={false}
-      // size="25%"
-      size="21.75rem"
-      withCloseButton={false}
-      title={`${NUM} Notification${NUM > 1 ? "s" : ""}`}
-      styles={
-        {
-          // body: {
-          //   display: "flex",
-          //   flexDirection: "column",
-          //   justifyContent: "center",
-          //   alignItems: "center",
-          //   height: "50%",
-          //   width: "100%",
-          //   position: "fixed",
-          //   top: "50%",
-          //   left: "50%",
-          //   transform: "translate(-50%, -50%)",
-          // },
+      onClose={() => {
+        if (!isLoading) {
+          close();
         }
-      }
+      }}
+      trapFocus={false}
+      size="21.75rem"
+      title={`${notifications.length} Notification${
+        notifications.length !== 1 ? "s" : ""
+      }`}
     >
+      <LoadingOverlay
+        visible={isLoading}
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        zIndex={1000}
+      />
       <Stack w="100%" align={"center"} h="100%">
         <ScrollArea
           w={"100%"}
           type={"always"}
-          // h={NUM === 1 ? "10.1rem" : "20.5rem"}
-          // h="25%"
-          // h="10%"
-          // h={1}
-
+          h="241px"
+          mt={2}
           offsetScrollbars
           styles={{
             scrollbar: {
@@ -60,54 +61,46 @@ export default function NotificationModal({ opened, close }) {
                 backgroundColor: "#474952",
               },
             },
-            viewport: {
-              display: "flex",
-              flexDirection: "column",
-              // rowGap: "10rem",
-              // height: "1rem",
-            },
           }}
         >
-          <Stack
-            spacing={"md"}
-            align={"center"}
-            justify="center"
-            w="100%"
-            // h={1}
-          >
-            {[...Array(NUM)].map((_, i) => (
+          <Stack spacing={"md"} align={"center"} justify="center" w="100%">
+            {notifications.map((notification) => (
               <NotificationCard
-                key={i}
-                type={
-                  i % 3 === 0
-                    ? "like"
-                    : i % 3 === 1
-                    ? "comment"
-                    : i % 3 === 2
-                    ? "follow"
-                    : ""
-                }
-                postId={1}
-                commentId={1}
-                userId={1}
-                username="username"
-                userImage="https://images.unsplash.com/photo-1616161616161-1c1c1c1c1c1c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-                createdAt={"1/2/3"}
-                formattedCreatedAt={dayjs("2021-03-21T20:00:00.000Z").fromNow()}
+                key={notification._id}
+                notification={notification}
+                notifications={notifications}
+                setNotifications={setNotifications}
+                opened={opened}
+                session={session}
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
+                close={close}
+                router={router}
               />
             ))}
           </Stack>
         </ScrollArea>
 
         <Button
+          mt={"-.25rem"}
+          disabled={isLoading}
           fullWidth
           color="red"
           variant={"light"}
-          leftIcon={<IoMdRemoveCircleOutline />}
+          onClick={() =>
+            clearNotification({
+              notificationIDs: notifications.map((n) => n._id),
+              notifications,
+              setNotifications,
+              userId: session?.user?.id,
+              setIsLoading,
+              close,
+            })
+          }
         >
-          Clear all notifications
+          Clear all
         </Button>
       </Stack>
-    </Drawer>
+    </Modal>
   );
 }

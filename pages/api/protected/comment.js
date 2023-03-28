@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         await client
           .patch(postUserId)
           .unset([
-            `notifications[_key == \"${createdAt}\" &&  type == \"comment\" && post._ref == \"${postID}\" && user._ref == \"${userId}\"]`,
+            `notifications[_key == \"${createdAt}\" && type == \"comment\" && post._ref == \"${postID}\" && comment._ref == \"${createdAt}\" && user._ref == \"${userId}\"]`,
           ])
           .commit();
       }
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
             await client
               .patch(mentionUserId)
               .unset([
-                `notifications[_key == \"${createdAt}\" && type == \"comment\" && isMention && post._ref == \"${postID}\" && user._ref == \"${userId}\"]`,
+                `notifications[_key == \"${createdAt}\" && type == \"mention\" && post._ref == \"${postID}\" && comment._ref == \"${createdAt}\" && user._ref == \"${userId}\"]`,
               ])
               .commit();
           })
@@ -81,16 +81,19 @@ export default async function handler(req, res) {
               _type: "notification",
               _key: createdAt,
               type: "comment",
-              // isMention,
               post: {
                 _type: "reference",
                 _ref: postID,
+              },
+              comment: {
+                _type: "reference",
+                _ref: createdAt,
               },
               user: {
                 _type: "reference",
                 _ref: userId,
               },
-              createdAt: createdAt,
+              createdAt,
             },
           ])
           .commit();
@@ -110,11 +113,15 @@ export default async function handler(req, res) {
                     _type: "reference",
                     _ref: postID,
                   },
+                  comment: {
+                    _type: "reference",
+                    _ref: createdAt,
+                  },
                   user: {
                     _type: "reference",
                     _ref: userId,
                   },
-                  createdAt: createdAt,
+                  createdAt,
                 },
               ])
               .commit();

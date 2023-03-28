@@ -68,16 +68,12 @@ export default function App({
   const [isRouteLoading, setIsRouteLoading] = useState(false);
 
   useEffect(() => {
-    router.events.on("routeChangeStart", (url, { shallow }) => {
+    router.events.on("routeChangeStart", (_, { shallow }) => {
       if (!shallow) {
         setIsRouteLoading(true);
       }
     });
-    router.events.on("routeChangeComplete", (url, { shallow }) => {
-      if (!shallow) {
-        setIsRouteLoading(false);
-      }
-    });
+    router.events.on("routeChangeComplete", () => setIsRouteLoading(false));
     return () => {
       router.events.off("routeChangeStart", () => {});
       router.events.off("routeChangeComplete", () => {});

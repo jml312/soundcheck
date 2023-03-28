@@ -10,6 +10,8 @@ import {
   createStyles,
   ActionIcon,
   Indicator,
+  useMantineTheme,
+  Tooltip,
 } from "@mantine/core";
 import { useSession, signOut } from "next-auth/react";
 import { BsChevronDown, BsHeadphones } from "react-icons/bs";
@@ -38,20 +40,42 @@ function Navbar({ children }) {
   const { classes } = useStyles();
   const isMobile = useMediaQuery("(max-width: 480px)");
   const router = useRouter();
+  const theme = useMantineTheme();
 
-  // const { data: notifications } = useQuery({
+  // const { data: currentNotifications } = useQuery({
   //   queryKey: "notifications",
   //   queryFn: () =>
   //     getNotifications({
   //       userId: session?.user?.id,
   //     }),
-  //   enabled: Boolean(session?.user?.id),
+  //   enabled: !!session?.user?.id,
   //   onSuccess: (data) => {
   //     setCurrentNotifications(data);
   //   },
   // });
 
-  const [currentNotifications, setCurrentNotifications] = useState([]);
+  const [notifications, setNotifications] = useState(
+    [...Array(3)].map((_, i) => ({
+      _id: i,
+      type:
+        i % 4 === 0
+          ? "like"
+          : i % 4 === 1
+          ? "comment"
+          : i % 4 === 2
+          ? "follow"
+          : "mention",
+      postID: "7ptQMKgEUeVX2lESrJGuZm",
+      // postID: i,
+      commentID: "2023-03-28T18:40:57.979Z",
+      userId: i,
+      username: "username",
+      userImage: "https://i.pravatar.cc/150?img=7",
+      createdAt: "2023-03-28T18:40:57.979Z",
+      // createdAt: "3/27/23",
+    }))
+  );
+  const [isLoading, setIsLoading] = useState(false);
 
   const [
     notificationOpen,
@@ -61,10 +85,13 @@ function Navbar({ children }) {
   return (
     <>
       <NotificationModal
-        open={notificationOpen}
+        opened={notificationOpen}
         close={closeNotification}
-        currentNotifications={currentNotifications}
-        setCurrentNotifications={setCurrentNotifications}
+        notifications={notifications}
+        setNotifications={setNotifications}
+        session={session}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
       />
       <MantineNavbar
         width="100%"
@@ -107,33 +134,41 @@ function Navbar({ children }) {
               </Title>
             </Link>
           )}
-          <Group spacing={currentNotifications?.length === 0 ? 4 : 14}>
+          <Group spacing={5}>
             <Group position="center">
-              <Indicator
-                label={currentNotifications?.length || 0}
-                disabled={
-                  !currentNotifications || currentNotifications.length === 0
-                }
-                size={"1.1rem"}
-                color={"lightGray"}
-                inline
-                withBorder
+              <Tooltip
+                disabled={!notifications || notifications.length === 0}
+                withinPortal
+                position="bottom-end"
+                label={"View Notifications"}
+                color="dark.7"
+                styles={{
+                  tooltip: {
+                    border: "none",
+                    outline: "1px solid rgba(192, 193, 196, 0.75)",
+                  },
+                }}
               >
-                <ActionIcon
-                  onClick={() => {}}
-                  disabled={
-                    !currentNotifications || currentNotifications.length === 0
-                  }
-                  sx={{
-                    "&[data-disabled]": {
-                      backgroundColor: "transparent",
-                      border: "none",
-                    },
-                  }}
+                <Indicator
+                  disabled={!notifications || notifications.length === 0}
+                  size={".525rem"}
+                  color={theme.colors.spotify[8]}
+                  offset={3.5}
                 >
-                  <MdOutlineNotifications size={"1.5rem"} />
-                </ActionIcon>
-              </Indicator>
+                  <ActionIcon
+                    onClick={openNotification}
+                    disabled={!notifications || notifications.length === 0}
+                    sx={{
+                      "&[data-disabled]": {
+                        backgroundColor: "transparent",
+                        border: "none",
+                      },
+                    }}
+                  >
+                    <MdOutlineNotifications size={"1.5rem"} />
+                  </ActionIcon>
+                </Indicator>
+              </Tooltip>
             </Group>
 
             <Menu

@@ -25,10 +25,12 @@ export default function CommentCard({
   commentInputRef,
   notificationPostId,
   notificationCommentId,
+  type,
   commentScrollRef,
   allUsers,
   isSmall,
   session,
+  router,
 }) {
   const theme = useMantineTheme();
   const commentRef = useRef();
@@ -39,13 +41,24 @@ export default function CommentCard({
   useEffect(() => {
     if (
       notificationPostId === post?._id &&
-      notificationCommentId === createdAt
+      notificationCommentId === createdAt &&
+      ["comment", "mention"].includes(type)
     ) {
-      commentRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center",
-      });
+      router.replace(
+        {
+          pathname: "/feed",
+          query: {},
+        },
+        undefined,
+        { shallow: true }
+      );
+      setTimeout(() => {
+        commentRef?.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "center",
+        });
+      }, 275);
     }
   }, [notificationPostId, notificationCommentId]);
 

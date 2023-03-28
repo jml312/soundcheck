@@ -18,22 +18,25 @@ export default {
         list: [
           {title: 'Like', value: 'like'},
           {title: 'Comment', value: 'comment'},
+          {title: 'Mention', value: 'mention'},
           {title: 'Follow', value: 'follow'},
         ],
       },
       validation: (Rule) => Rule.required(),
     },
     {
-      name: 'isMention',
-      title: 'Is Mention',
-      type: 'boolean',
-      hidden: ({document}) => document.type !== 'comment',
-    },
-    {
       name: 'post',
       title: 'Post',
       type: 'reference',
       to: {type: 'post'},
+      hidden: ({document}) => !['like', 'comment', 'mention'].includes(document?.type),
+    },
+    {
+      name: 'comment',
+      title: 'Comment',
+      type: 'reference',
+      to: {type: 'comment'},
+      hidden: ({document}) => !['comment', 'mention'].includes(document?.type),
     },
     {
       name: 'user',
@@ -41,6 +44,9 @@ export default {
       type: 'reference',
       to: {type: 'user'},
       validation: (Rule) => Rule.required(),
+    },
+    {
+
     },
     {
       name: 'createdAt',

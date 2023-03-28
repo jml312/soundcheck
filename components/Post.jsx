@@ -33,6 +33,7 @@ import { likePost, followUser, captionPost, postComment } from "@/actions";
 import dayjs from "dayjs";
 import { COMMENT_MAX_LENGTH, CAPTION_MAX_LENGTH } from "@/constants";
 import { VscAdd, VscRemove } from "react-icons/vsc";
+import { useRouter } from "next/router";
 
 function Post({
   post,
@@ -51,13 +52,17 @@ function Post({
   caption,
   setCaption,
   badWordsFilter,
-  notificationPostId,
-  notificationCommentId,
   isPosting,
   allUsers,
   activePost,
   setActivePost,
 }) {
+  const router = useRouter();
+  const {
+    postId: notificationPostId,
+    commentId: notificationCommentId,
+    type,
+  } = router.query;
   const audioRef = useRef(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
@@ -69,7 +74,8 @@ function Post({
       !isPostModal &&
         !isSelect &&
         !isDiscover &&
-        notificationPostId === post?._id
+        notificationPostId === post?._id &&
+        type === "like"
     );
   const isActivePost = postModalOpen
     ? isPostModal && activePost === post?._id
@@ -159,6 +165,7 @@ function Post({
   useEffect(() => {
     if (selectedSong?.isChanged) {
       setActivePost(null);
+      setCurrentlyPlaying(null);
       setSelectedSong({
         ...selectedSong,
         isChanged: false,
@@ -180,6 +187,26 @@ function Post({
   useEffect(() => {
     setActivePost(null);
   }, [postModalOpen]);
+  useEffect(() => {
+    if (
+      !isPostModal &&
+      !isSelect &&
+      !isDiscover &&
+      notificationPostId === post?._id
+    ) {
+      openPostModal();
+      if (type === "like") {
+        router.replace(
+          {
+            pathname: "/feed",
+            query: {},
+          },
+          undefined,
+          { shallow: true }
+        );
+      }
+    }
+  }, [notificationPostId]);
 
   return (
     <>
@@ -523,7 +550,7 @@ function Post({
               </Tooltip.Floating>
               {isSelect && !isPosting && (
                 <Tooltip
-                  offset={5.25}
+                  offset={-2}
                   withinPortal
                   position="bottom"
                   label={"Remove"}
@@ -536,8 +563,7 @@ function Post({
                   }}
                 >
                   <ActionIcon
-                    color={"red"}
-                    variant={"subtle"}
+                    variant={"transparent"}
                     onClick={() => {
                       setCaption({
                         ...caption,
@@ -600,7 +626,7 @@ function Post({
               rightSection={
                 caption.text.length > 0 && (
                   <Tooltip
-                    offset={5.25}
+                    offset={-2}
                     withinPortal
                     position="bottom"
                     label={"Add"}
@@ -629,8 +655,9 @@ function Post({
                         caption.text === caption?.originalText ||
                         caption.error
                       }
-                      color={"green"}
-                      variant={"subtle"}
+                      // color={"green"}
+                      variant={"transparent"}
+                      // variant={"subtle"}
                       sx={{
                         "&[data-disabled]": {
                           backgroundColor: "transparent",
@@ -672,6 +699,10 @@ function Post({
             <Image
               onClick={() => {
                 if (currentlyPlaying !== null) return;
+                if (isSelect) {
+                  setActivePost(activePost === post?._id ? null : post?._id);
+                  return;
+                }
                 if (!activePost) {
                   setActivePost(post?._id);
                 } else if (activePost === post?._id) {
@@ -885,7 +916,7 @@ function Post({
                     <ScrollArea
                       viewportRef={commentScrollRef}
                       offsetScrollbars
-                      h={comment.error ? "177px" : "190px"}
+                      h={comment.error ? "154px" : "173px"}
                       w="100%"
                       type={"always"}
                       pb={"0.5rem"}
@@ -948,9 +979,11 @@ function Post({
                                 commentInputRef={commentInputRef}
                                 notificationPostId={notificationPostId}
                                 notificationCommentId={notificationCommentId}
+                                type={type}
                                 commentScrollRef={commentScrollRef}
                                 allUsers={allUsers}
                                 isSmall={isSmall}
+                                router={router}
                               />
                             )
                           )}

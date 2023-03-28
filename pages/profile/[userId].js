@@ -24,7 +24,7 @@ function UserProfile({ profile }) {
   );
 }
 
-export async function getServerSideProps({ req, res }) {
+export async function getServerSideProps({ req, res, params }) {
   const session = await getSession({ req });
 
   if (!session) {
@@ -52,9 +52,28 @@ export async function getServerSideProps({ req, res }) {
     };
   }
 
+  const { userId: profileUserId } = params;
+
   const profile = await client.fetch(profileQuery, {
-    userId: session.user.id,
+    userId: profileUserId,
   });
+
+  if (!profile) {
+    return {
+      redirect: {
+        destination: "/feed",
+        permanent: false,
+      },
+    };
+  }
+
+  // remove follow notification from user
+  await client
+    .patch(session.user.id)
+    .unset([
+      `notifications[type == \"follow\" && user._ref == \"${profileUserId}\"]`,
+    ])
+    .commit();
 
   return {
     props: { profile },

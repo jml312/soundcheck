@@ -6,3 +6,7 @@ div[data-orientation="horizontal"], div[data-orientation="horizontal"]:hover {
   background-color: transparent;
 }
 
+div.mantine-ScrollArea-corner {
+  background-color: transparent;
+}
+

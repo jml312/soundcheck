@@ -1,140 +1,159 @@
-import { Flex, Stack, Avatar, Button, Text, Group } from "@mantine/core";
-import Link from "next/link";
+import {
+  Flex,
+  Stack,
+  Avatar,
+  Text,
+  Space,
+  UnstyledButton,
+} from "@mantine/core";
+import { useMemo } from "react";
 import { truncateText } from "@/utils";
-import { BsCheck, BsEyeFill } from "react-icons/bs";
+import dayjs from "dayjs";
+import { clearNotification, viewNotification } from "@/actions";
 
 export default function NotificationCard({
-  type,
-  postId,
-  commentId,
-  userId,
-  username,
-  userImage,
-  createdAt,
-  formattedCreatedAt,
+  // type,
+  // postId,
+  // commentId,
+  // userId,
+  // username,
+  // userImage,
+  // createdAt,
+  // isSmall,
+  notification,
+  notifications,
+  setNotifications,
+  opened,
+  session,
+  isLoading,
+  setIsLoading,
+  close,
+  router,
 }) {
+  const { type, postId, commentId, userId, username, userImage, createdAt } =
+    notification;
   const getNotificationAction = () => {
     switch (type) {
       case "like":
         return "liked your post";
       case "comment":
         return "commented on your post";
+      case "mention":
+        return "mentioned you in a comment";
       case "follow":
         return "started following you";
       default:
         return "";
     }
   };
+  const formattedDate = useMemo(() => dayjs(createdAt).fromNow(), [opened]);
+
   return (
-    <Stack
-      // w="100%"
-      w={"95%"}
-      p={"xs"}
+    <Flex
+      w={"auto"}
+      pt={1}
+      pl={1}
+      gap={10}
+      align="flex-start"
       style={{
-        borderRadius: "0.5rem",
-        border: "0.75px solid rgba(201, 201, 201, 0.25)",
+        cursor: "default",
+        placeSelf: "flex-start",
+        overflowWrap: "anywhere",
       }}
     >
-      <Flex
-        justify={"space-between"}
-        align={"center"}
-        pb={"xs"}
+      <Avatar
+        size={28}
+        src={userImage}
+        alt={`${username}'s profile`}
+        radius={"xl"}
         style={{
-          borderBottom: "1px solid rgba(201, 201, 201, 0.5)",
+          outline: "1px solid #c0c1c4",
+          transform: "translateY(.225rem)",
         }}
+      />
+      <Stack
+        spacing={1}
+        align={"flex-start"}
+        justify="flex-start"
+        style={{
+          transform: "translateY(-.05rem)",
+        }}
+        w={"100%"}
       >
-        <Link href={`/profile/${userId}`} passHref>
-          <Button
-            ml={"-.5rem"}
-            compact
-            size={"md"}
+        <Flex
+          align="flex-start"
+          style={{
+            transform: "translateY(-.15rem)",
+          }}
+        >
+          <Text fz={".86rem"} color="#F0F0F0">
+            {truncateText(username, 12)}
+          </Text>
+          <Space w={6} />
+          <Text color="#C0C0C0" fz={".84rem"}>
+            {formattedDate}
+          </Text>
+        </Flex>
+
+        <Text
+          mt=".075rem"
+          color="#FFFFFF"
+          fz={"1rem"}
+          fw="bold"
+          style={{
+            transform: "translateY(-.25rem)",
+          }}
+        >
+          {getNotificationAction()}
+        </Text>
+
+        <Flex mt={"-.45rem"} justify="flex-start" align="center" w={"100%"}>
+          <UnstyledButton
+            disabled={isLoading}
+            fs={"italic"}
+            fz={".75rem"}
+            color="#BDBDBD"
             sx={{
-              zIndex: 1,
-              fontSize: "0.85rem",
-              color: "rgba(255, 255, 255, 0.75)",
-              backgroundColor: "transparent !important",
-              cursor: "pointer",
-              "&:active": {
-                transform: "none",
-              },
+              zIndex: 100,
             }}
-            fz={".86rem"}
-            fw={500}
-            component="a"
-            leftIcon={
-              <Avatar
-                size={21}
-                src={userImage}
-                alt={`${username}'s profile`}
-                radius={"xl"}
-                style={{
-                  outline: "1px solid #c0c1c4",
-                }}
-              />
+            onClick={() =>
+              clearNotification({
+                notificationIDs: [notification._id],
+                notifications,
+                setNotifications,
+                userId: session?.user?.id,
+                setIsLoading,
+              })
             }
           >
-            {truncateText(username, 12)}
-          </Button>
-        </Link>
-        <Text
-          sx={{
-            color: "rgba(201, 201, 201, 0.75)",
-            cursor: "default",
-          }}
-          fz={".84rem"}
-        >
-          {formattedCreatedAt}
-        </Text>
-      </Flex>
-
-      <Text align="center">
-        {username} {getNotificationAction()}
-      </Text>
-
-      <Group grow spacing={0} w={"100%"} position="center">
-        <Button
-          // disabled={}
-          fullWidth
-          size={"xs"}
-          variant={"default"}
-          color="blue"
-          sx={{
-            borderTopRightRadius: "0rem",
-            borderBottomRightRadius: "0rem",
-            borderBottomLeftRadius: "0.25rem",
-            borderTopLeftRadius: "0.25rem",
-            "&:hover": {
-              backgroundColor: "rgba(25, 113, 194, 0.2) !important",
-            },
-          }}
-          leftIcon={<BsCheck />}
-          onClick={() => {}}
-        >
-          Clear
-        </Button>
-        {type !== "follow" && (
-          <Button
-            // disabled={}
-            fullWidth
-            size={"xs"}
-            variant={"default"}
-            color="blue"
+            Clear
+          </UnstyledButton>
+          &nbsp;&bull;&nbsp;
+          <UnstyledButton
+            disabled={isLoading}
+            fs={"italic"}
+            fz={".75rem"}
+            color="#BDBDBD"
             sx={{
-              borderTopRightRadius: "0rem",
-              borderBottomRightRadius: "0rem",
-              borderBottomLeftRadius: "0.25rem",
-              borderTopLeftRadius: "0.25rem",
-              "&:hover": {
-                backgroundColor: "rgba(25, 113, 194, 0.2) !important",
-              },
+              zIndex: 100,
             }}
-            leftIcon={<BsEyeFill />}
-            onClick={() => {}}
+            onClick={() =>
+              viewNotification({
+                notification,
+                notifications,
+                setNotifications,
+                userId: session?.user?.id,
+                setIsLoading,
+                close,
+                router,
+                type,
+              })
+            }
           >
             View
-          </Button>
-        )}
-      </Group>
-    </Stack>
+          </UnstyledButton>
+        </Flex>
+      </Stack>
+    </Flex>
   );
 }

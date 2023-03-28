@@ -52,7 +52,7 @@ export default async function handler(req, res) {
         .patch(toFollowId)
         .unset([`followers[_ref == \"${userId}\"]`])
         .unset([
-          `notifications[type == \"follow\" && user._ref == \"${userId}\"]`,
+          `notifications[_key == \"${key}\" && type == \"follow\" && user._ref == \"${userId}\"]`,
         ])
         .commit();
     }

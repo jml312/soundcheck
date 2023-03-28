@@ -13,11 +13,7 @@ import { postsQuery, allUsersQuery } from "@/lib/queries";
 
 function Feed({ currentPosts, spotifyData, allUsers }) {
   const router = useRouter();
-  const {
-    date,
-    postId: notificationPostId,
-    commentId: notificationCommentId,
-  } = router.query;
+  const { date } = router.query;
   const { data: session } = useSession();
   const [posts, setPosts] = useState({
     feedPosts: currentPosts?.feedPosts,
@@ -179,8 +175,6 @@ function Feed({ currentPosts, spotifyData, allUsers }) {
                           caption={caption}
                           setCaption={setCaption}
                           badWordsFilter={badWordsFilter}
-                          notificationPostId={notificationPostId}
-                          notificationCommentId={notificationCommentId}
                           allUsers={allUsers}
                           activePost={activePost}
                           setActivePost={setActivePost}
@@ -229,8 +223,6 @@ function Feed({ currentPosts, spotifyData, allUsers }) {
                 caption={caption}
                 setCaption={setCaption}
                 badWordsFilter={badWordsFilter}
-                notificationPostId={notificationPostId}
-                notificationCommentId={notificationCommentId}
                 allUsers={allUsers}
                 activePost={activePost}
                 setActivePost={setActivePost}
