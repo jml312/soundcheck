@@ -1,4 +1,5 @@
 import client from "@/lib/sanity";
+// import dayjs from "dayjs";
 
 export default async function handler(req, res) {
   if (req.method !== "POST" && req.method !== "DELETE") {
@@ -12,7 +13,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: "Bad request" });
   }
 
-  const isUser = userId === postUserId;
+  const isUserComment = userId === postUserId;
 
   try {
     if (type === "delete") {
@@ -27,22 +28,22 @@ export default async function handler(req, res) {
         .unset([`comments[_key == \"${createdAt}\"]`])
         .commit();
       // delete notification from post user if they are not mentioned
-      if (!isUser && !mentions?.includes(postUserId)) {
+      if (!isUserComment && !mentions?.includes(postUserId)) {
         await client
           .patch(postUserId)
           .unset([
-            `notifications[_key == \"${createdAt}\" && type == \"comment\" && post._ref == \"${postID}\" && comment._ref == \"${createdAt}\" && user._ref == \"${userId}\"]`,
+            `notifications[_key == \"comment.${userId}.${postID}.${createdAt}\"]`,
           ])
           .commit();
       }
       // delete notification from mentioned users
-      else if (!isUser && mentions?.length > 0) {
+      else if (!isUserComment && mentions?.length > 0) {
         await Promise.all(
           mentions.map(async (mentionUserId) => {
             await client
               .patch(mentionUserId)
               .unset([
-                `notifications[_key == \"${createdAt}\" && type == \"mention\" && post._ref == \"${postID}\" && comment._ref == \"${createdAt}\" && user._ref == \"${userId}\"]`,
+                `notifications[_key == \"mention.${userId}.${postID}.${createdAt}\"]`,
               ])
               .commit();
           })
@@ -57,7 +58,7 @@ export default async function handler(req, res) {
           _type: "reference",
           _ref: userId,
         },
-        createdAt: createdAt,
+        createdAt,
       };
       // add comment to post
       await client
@@ -73,33 +74,30 @@ export default async function handler(req, res) {
       // add comment to user
       await client.patch(postID).append("comments", [newComment]).commit();
       // add notification to post user if they are not mentioned
-      if (!isUser && !mentions?.includes(postUserId)) {
+      if (!isUserComment && !mentions?.includes(postUserId)) {
         await client
           .patch(postUserId)
           .append("notifications", [
             {
               _type: "notification",
-              _key: createdAt,
+              _key: `comment.${userId}.${postID}.${createdAt}`,
               type: "comment",
-              post: {
-                _type: "reference",
-                _ref: postID,
-              },
-              comment: {
-                _type: "reference",
-                _ref: createdAt,
-              },
               user: {
                 _type: "reference",
                 _ref: userId,
               },
+              post: {
+                _type: "reference",
+                _ref: postID,
+              },
+              commentId: createdAt,
               createdAt,
             },
           ])
           .commit();
       }
       // add notification to mentioned users
-      else if (!isUser && mentions?.length > 0) {
+      else if (!isUserComment && mentions?.length > 0) {
         await Promise.all(
           mentions.map(async (mentionUserId) => {
             await client
@@ -107,16 +105,13 @@ export default async function handler(req, res) {
               .append("notifications", [
                 {
                   _type: "notification",
-                  _key: createdAt,
+                  _key: `mention.${userId}.${postID}.${createdAt}`,
                   type: "mention",
                   post: {
                     _type: "reference",
                     _ref: postID,
                   },
-                  comment: {
-                    _type: "reference",
-                    _ref: createdAt,
-                  },
+                  commentId: createdAt,
                   user: {
                     _type: "reference",
                     _ref: userId,

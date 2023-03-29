@@ -6,18 +6,18 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { type, userId,  toFollowId } = req.body;
+  const { type, userId, toFollowId } = req.body;
 
   try {
     if (type === "follow") {
-      const key = dayjs().toISOString();
+      const createdAt = dayjs().toISOString();
       await client
         .patch(userId)
         .append("following", [
           {
             _type: "reference",
             _ref: toFollowId,
-            _key: key,
+            _key: createdAt,
           },
         ])
         .commit();
@@ -27,19 +27,19 @@ export default async function handler(req, res) {
           {
             _type: "reference",
             _ref: userId,
-            _key: key,
+            _key: createdAt,
           },
         ])
         .append("notifications", [
           {
             _type: "notification",
-            _key: key,
+            _key: `follow.${userId}`,
             type: "follow",
             user: {
               _type: "reference",
               _ref: userId,
             },
-            createdAt: key,
+            createdAt,
           },
         ])
         .commit();
@@ -51,9 +51,7 @@ export default async function handler(req, res) {
       await client
         .patch(toFollowId)
         .unset([`followers[_ref == \"${userId}\"]`])
-        .unset([
-          `notifications[_key == \"${key}\" && type == \"follow\" && user._ref == \"${userId}\"]`,
-        ])
+        .unset([`notifications[_key == \"${`follow.${userId}`}\"]`])
         .commit();
     }
 

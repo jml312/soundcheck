@@ -51,30 +51,17 @@ export async function getServerSideProps({ req, res, params }) {
     };
   }
 
-  await client
-    .patch(session.user.id)
-    .unset([
-      `notifications[type == \"follow\" && user._ref == \"${profileUserId}\"]`,
-    ])
-    .commit();
-
-  const genres = new Set();
-  const artists = new Set();
-  profile.stats.forEach((stat) => {
-    stat.genres.forEach((genre) => genres.add(genre));
-    stat.artists.forEach((artist) => artists.add(artist.name));
-  });
+  try {
+    await client
+      .patch(session.user.id)
+      .unset([
+        `notifications[type == \"follow\" && user._ref == \"${profileUserId}\"]`,
+      ])
+      .commit();
+  } catch (error) {}
 
   return {
-    props: {
-      profile: {
-        ...profile,
-        stats: {
-          genres: [...genres],
-          artists: [...artists],
-        },
-      },
-    },
+    props: { profile },
   };
 }
 

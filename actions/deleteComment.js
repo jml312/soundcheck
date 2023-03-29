@@ -5,20 +5,21 @@ export default async function deleteComment({
   createdAt,
   post,
   setPost,
-  comment,
+  text,
   setComment,
   allUsers,
   session,
 }) {
   const originalPost = post;
-  setComment({
-    ...comment,
+  setComment((prev) => ({
+    ...prev,
     isDeleting: true,
-  });
+  }));
+
   try {
     const mentions = [
       ...new Set(
-        comment.text
+        text
           .split(" ")
           .filter(
             (word) =>
@@ -44,19 +45,19 @@ export default async function deleteComment({
     });
     setPost({
       ...post,
-      comments: post?.comments?.filter(
-        (comment) => comment.createdAt !== createdAt
-      ),
+      comments: post?.comments?.filter((c) => c.createdAt !== createdAt),
     });
-    setComment({
-      ...comment,
+    setComment((prev) => ({
+      ...prev,
+      text: "",
       isDeleting: false,
-    });
+    }));
   } catch {
-    setComment({
-      ...comment,
+    setComment((prev) => ({
+      ...prev,
+      text,
       isDeleting: false,
-    });
+    }));
     setPost({
       ...originalPost,
     });

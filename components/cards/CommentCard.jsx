@@ -26,7 +26,6 @@ export default function CommentCard({
   notificationPostId,
   notificationCommentId,
   type,
-  commentScrollRef,
   allUsers,
   isSmall,
   session,
@@ -187,9 +186,8 @@ export default function CommentCard({
                     createdAt,
                     post,
                     setPost,
-                    comment,
+                    text,
                     setComment,
-                    commentScrollRef,
                     allUsers,
                     session,
                   })

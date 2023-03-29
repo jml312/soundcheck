@@ -6,7 +6,13 @@ export default {
   type: 'object',
   preview: {
     select: {
-      title: 'type',
+      type: 'type',
+      user: 'user.name',
+    },
+    prepare({type, user}) {
+      return {
+        title: `${type} by ${user}`,
+      }
     },
   },
   fields: [
@@ -25,20 +31,6 @@ export default {
       validation: (Rule) => Rule.required(),
     },
     {
-      name: 'post',
-      title: 'Post',
-      type: 'reference',
-      to: {type: 'post'},
-      hidden: ({document}) => !['like', 'comment', 'mention'].includes(document?.type),
-    },
-    {
-      name: 'comment',
-      title: 'Comment',
-      type: 'reference',
-      to: {type: 'comment'},
-      hidden: ({document}) => !['comment', 'mention'].includes(document?.type),
-    },
-    {
       name: 'user',
       title: 'User',
       type: 'reference',
@@ -46,7 +38,17 @@ export default {
       validation: (Rule) => Rule.required(),
     },
     {
-
+      name: 'post',
+      title: 'Post',
+      type: 'reference',
+      to: {type: 'post'},
+      hidden: ({parent}) => !['like', 'comment', 'mention'].includes(parent?.type),
+    },
+    {
+      name: 'commentId',
+      title: 'Comment ID',
+      type: 'string',
+      hidden: ({parent}) => !['comment', 'mention'].includes(parent?.type),
     },
     {
       name: 'createdAt',

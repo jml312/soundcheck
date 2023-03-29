@@ -8,9 +8,9 @@ export default async function postComment({
   setPost,
   session,
   badWordsFilter,
-  commentScrollRef,
   setHasBlurredCommentError,
   allUsers,
+  setIsCommentCreated,
 }) {
   if (badWordsFilter.isProfane(comment.text)) {
     setHasBlurredCommentError(false);
@@ -32,10 +32,9 @@ export default async function postComment({
           .split(" ")
           .filter(
             (word) =>
-              word.startsWith("@") &&
+              word[0] === "@" &&
               word.slice(1) !== session.user.name &&
-              splitText.slice(0, i).join(" ").length + (i === 0 ? 0 : 1) &&
-              allUsers?.some((user) => user.username === word.slice(1))
+              allUsers.some((user) => user.username === word.slice(1))
           )
           .map(
             (word) =>
@@ -66,17 +65,12 @@ export default async function postComment({
         },
       ],
     });
+    setIsCommentCreated(true);
     setComment({
       ...comment,
       text: "",
       isLoading: false,
     });
-    setTimeout(() => {
-      commentScrollRef?.current?.scrollTo({
-        top: commentScrollRef?.current?.scrollHeight,
-        behavior: "smooth",
-      });
-    }, 100);
   } catch {
     setPost({
       ...post,

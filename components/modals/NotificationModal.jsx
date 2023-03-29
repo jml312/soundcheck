@@ -89,7 +89,7 @@ export default function NotificationModal({
           variant={"light"}
           onClick={() =>
             clearNotification({
-              notificationIDs: notifications.map((n) => n._id),
+              notificationIDs: notifications.map((n) => n._key),
               notifications,
               setNotifications,
               userId: session?.user?.id,

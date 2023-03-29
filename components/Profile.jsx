@@ -9,13 +9,19 @@ import {
   ActionIcon,
   Stack,
   Space,
+  Tooltip,
+  ScrollArea,
+  Anchor,
 } from "@mantine/core";
 import { followUser } from "@/actions";
 import dayjs from "dayjs";
 import { FaUserPlus, FaUserCheck } from "react-icons/fa";
 import { useSession } from "next-auth/react";
-import Post from "./Post";
 import { useState } from "react";
+import { BsSpotify } from "react-icons/bs";
+
+import Post from "./Post";
+import SongCard from "./cards/SongCard";
 
 export default function Profile({ isUser, profile }) {
   const {
@@ -29,7 +35,7 @@ export default function Profile({ isUser, profile }) {
     followers,
     following,
     stats,
-    // playlistID,
+    playlistID,
   } = profile;
   const numFollowers = followers.length;
   const numFollowing = following.length;
@@ -37,19 +43,24 @@ export default function Profile({ isUser, profile }) {
   const numLikes = likes.length;
   const [activePost, setActivePost] = useState(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
   const { data: session } = useSession();
+
+  const [isFollowing, setIsFollowing] = useState(
+    followers.includes(session?.user?.id)
+  );
 
   return (
     <Flex
-      // justify={"center"}
       align={"center"}
+      justify={"space-between"}
       direction={"column"}
       h={"calc(100vh - 5rem)"}
       style={{
         transform: "translateY(5rem)",
       }}
     >
-      <Flex justify={"space-between"} align={"end"} w="90%" gap={10} mt={20}>
+      <Flex justify={"space-between"} align={"center"} w="90%" gap={10} mt={30}>
         <Group>
           <Avatar
             size={40}
@@ -62,33 +73,112 @@ export default function Profile({ isUser, profile }) {
             }}
           />
           <Stack spacing={0}>
-            <Text fz="lg">{name}</Text>
+            <Group spacing={8} align={"end"}>
+              <Text fz="lg">{name}</Text>
+
+              <Tooltip
+                offset={isUser ? 6 : -2}
+                withinPortal
+                position="right"
+                label={
+                  isUser
+                    ? "Open playlist in Spotify"
+                    : isFollowing
+                    ? "Unfollow"
+                    : "Follow"
+                }
+                color="dark.7"
+                styles={{
+                  tooltip: {
+                    border: "none",
+                    outline: "1px solid rgba(192, 193, 196, 0.75)",
+                  },
+                }}
+              >
+                {isUser ? (
+                  <Anchor
+                    href={`https://open.spotify.com/playlist/${playlistID}`}
+                    target="_blank"
+                    fontSize={"1.6rem"}
+                    sx={(theme) => ({
+                      cursor: "pointer !important",
+                      color: theme.colors.spotify[8],
+                    })}
+                  >
+                    <BsSpotify />
+                  </Anchor>
+                ) : (
+                  <ActionIcon
+                    sx={(theme) => ({
+                      // transform: "translateX(.1rem)",
+                      color: isFollowing ? theme.colors.green[6] : "#c1c2c5",
+                      "&[data-disabled]": {
+                        color: isFollowing ? theme.colors.green[6] : "#c1c2c5",
+                      },
+                    })}
+                    variant={"transparent"}
+                    radius="xl"
+                    // onClick={() =>
+                    //   followUser({
+                    //     isFollowing: post?.isFollowing,
+                    //     setIsFollowLoading,
+                    //     post,
+                    //     setPost,
+                    //     session,
+                    //   })
+                    // }
+                  >
+                    {isFollowing ? <FaUserCheck /> : <FaUserPlus />}
+                  </ActionIcon>
+                )}
+              </Tooltip>
+            </Group>
             <Text fz="sm" color="#C0C0C0">
               Joined {dayjs(createdAt).format("MMM YYYY")}
             </Text>
           </Stack>
         </Group>
-        <Group>
-          <Text fz="lg">🔥 {postStreak} days</Text>
+        <Text fz="lg">
+          🔥 {postStreak} day{postStreak === 1 ? "" : "s"}
+        </Text>
+      </Flex>
 
-          {!isUser && (
-            <Button
-              leftIcon={
-                followers.includes(session?.user?.id) ? (
-                  <FaUserCheck />
-                ) : (
-                  <FaUserPlus />
-                )
-              }
-            >
-              Follow
-            </Button>
-          )}
-        </Group>
+      <Flex w={"90%"} justify="space-evenly">
+        <Stack>
+          <Text fz="lg">{numFollowing} Following</Text>
+          <ScrollArea>
+            {following.map((user) => (
+              <Text key={user._id} fz="sm">
+                {user.name}
+              </Text>
+            ))}
+          </ScrollArea>
+        </Stack>
+        <Stack
+          style={{
+            border: "1px solid white",
+            borderRadius: ".5rem",
+          }}
+        >
+          <Text
+            fz="lg"
+            style={{
+              borderBottom: "1px solid white",
+            }}
+          >
+            {numFollowers} Follower{numFollowers === 1 ? "" : "s"}
+          </Text>
+          <ScrollArea>
+            {followers.map((user) => (
+              <Text key={user._id} fz="sm">
+                {user.name}
+              </Text>
+            ))}
+          </ScrollArea>
+        </Stack>
       </Flex>
 
       <Tabs
-        mt={20}
         w="90%"
         style={{
           transform: "translateY(1rem)",
@@ -120,16 +210,17 @@ export default function Profile({ isUser, profile }) {
             // justify="space-between"
             gap={"1rem"}
           >
+            {/* // <Post
+              //   key={post._id}
+              //   post={post}
+              //   activePost={activePost}
+              //   setActivePost={setActivePost}
+              //   currentlyPlaying={currentlyPlaying}
+              //   setCurrentlyPlaying={setCurrentlyPlaying}
+              //   isDiscover
+              // /> */}
             {posts.map((post) => (
-              <Post
-                key={post._id}
-                post={post}
-                activePost={activePost}
-                setActivePost={setActivePost}
-                currentlyPlaying={currentlyPlaying}
-                setCurrentlyPlaying={setCurrentlyPlaying}
-                isDiscover
-              />
+              <SongCard key={post._id} post={post} />
             ))}
           </Flex>
         </Tabs.Panel>
@@ -161,10 +252,10 @@ export default function Profile({ isUser, profile }) {
         </Tabs.Panel>
 
         <Tabs.Panel value="stats" mb="4rem">
-          <Text>
+          {/* <Text>
             Genres: {stats.genres.join(", ")}
           </Text>
-          <Text>Artists: {stats.artists.join(", ")}</Text>
+          <Text>Artists: {stats.artists.join(", ")}</Text> */}
         </Tabs.Panel>
       </Tabs>
     </Flex>

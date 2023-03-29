@@ -8,21 +8,22 @@ export default async function clearNotification({
   setIsLoading,
   close,
 }) {
+  console.log(notificationIDs, notifications);
   const originalNotifications = notifications;
   setIsLoading(true);
   try {
     const newNotifications = notifications.filter(
-      (n) => !notificationIDs.includes(n._id)
+      (n) => !notificationIDs.includes(n._key)
     );
-    // await axios.delete("/api/protected/notifications", {
-    //   data: {
-    //     userId,
-    //     newNotifications,
-    //   },
-    // });
+    await axios.delete("/api/protected/notifications", {
+      data: {
+        userId,
+        newNotifications,
+      },
+    });
     setNotifications(newNotifications);
     setIsLoading(false);
-    if (close) {
+    if (newNotifications.length === 0) {
       close();
     }
   } catch {

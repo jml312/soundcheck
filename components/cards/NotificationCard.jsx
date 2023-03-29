@@ -30,8 +30,14 @@ export default function NotificationCard({
   close,
   router,
 }) {
-  const { type, postId, commentId, userId, username, userImage, createdAt } =
-    notification;
+  const {
+    type,
+    createdAt,
+    userImage: notificationUserImage,
+    username: notificationUsername,
+  } = notification;
+  const formattedDate = useMemo(() => dayjs(createdAt).fromNow(), [opened]);
+
   const getNotificationAction = () => {
     switch (type) {
       case "like":
@@ -46,7 +52,6 @@ export default function NotificationCard({
         return "";
     }
   };
-  const formattedDate = useMemo(() => dayjs(createdAt).fromNow(), [opened]);
 
   return (
     <Flex
@@ -63,8 +68,8 @@ export default function NotificationCard({
     >
       <Avatar
         size={28}
-        src={userImage}
-        alt={`${username}'s profile`}
+        src={notificationUserImage}
+        alt={`${notificationUsername}'s profile`}
         radius={"xl"}
         style={{
           outline: "1px solid #c0c1c4",
@@ -87,7 +92,7 @@ export default function NotificationCard({
           }}
         >
           <Text fz={".86rem"} color="#F0F0F0">
-            {truncateText(username, 12)}
+            {truncateText(notificationUsername, 12)}
           </Text>
           <Space w={6} />
           <Text color="#C0C0C0" fz={".84rem"}>
@@ -118,11 +123,12 @@ export default function NotificationCard({
             }}
             onClick={() =>
               clearNotification({
-                notificationIDs: [notification._id],
+                notificationIDs: [notification._key],
                 notifications,
                 setNotifications,
                 userId: session?.user?.id,
                 setIsLoading,
+                close,
               })
             }
           >

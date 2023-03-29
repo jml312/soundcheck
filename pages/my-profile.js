@@ -41,23 +41,8 @@ export async function getServerSideProps({ req, res }) {
     userId: session.user.id,
   });
 
-  const genres = new Set();
-  const artists = new Set();
-  profile.stats.forEach((stat) => {
-    stat.genres.forEach((genre) => genres.add(genre));
-    stat.artists.forEach((artist) => artists.add(artist.name));
-  });
-
   return {
-    props: {
-      profile: {
-        ...profile,
-        stats: {
-          genres: [...genres],
-          artists: [...artists],
-        },
-      },
-    },
+    props: { profile },
   };
 }
 

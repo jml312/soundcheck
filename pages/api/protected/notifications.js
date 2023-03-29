@@ -6,20 +6,18 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { userId, newNotifications } = req.query;
-
   try {
     switch (req.method) {
       case "GET":
         const userNotifications = await client.fetch(notificationsQuery, {
-          userId,
+          userId: req?.query?.userId,
         });
         return res.status(200).send(userNotifications);
       case "DELETE":
         await client
-          .patch(userId)
+          .patch(req?.body?.userId)
           .set({
-            notifications: newNotifications,
+            notifications: req?.body?.newNotifications,
           })
           .commit();
         return res.status(200).json({ message: "Success" });

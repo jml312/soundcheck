@@ -45,6 +45,8 @@ export default async function handle(req, res) {
         .patch(_id)
         .set(hasPostedYesterday ? {} : { postStreak: 0 })
         .set({ discoverSongs: recommendations })
+        // .unset(["notifications"])
+        // .unset(["notifications[type != 'follow']"])
         .commit();
 
       await sgMail.send({

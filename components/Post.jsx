@@ -19,6 +19,7 @@ import {
   LoadingOverlay,
   Box,
   Popover,
+  Anchor,
 } from "@mantine/core";
 import Link from "next/link";
 import { FaHeart, FaUserPlus, FaUserCheck } from "react-icons/fa";
@@ -86,7 +87,8 @@ function Post({
   const artists = post?.artists?.map((artist) => artist.name)?.join(", ");
   const numComments = post?.comments?.length || 0;
   const commentInputRef = useRef(null);
-  const commentScrollRef = useRef(null);
+  const commentScrollEndRef = useRef(null);
+  const [isCommentCreated, setIsCommentCreated] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const captionRef = useRef(null);
   const theme = useMantineTheme();
@@ -153,7 +155,10 @@ function Post({
   useEffect(() => {
     if (
       commentInputRef?.current &&
-      !post?.comments?.some((comment) => comment.userId === session?.user?.id)
+      (!post?.comments?.some(
+        (comment) => comment.userId === session?.user?.id
+      ) ||
+        ["comment", "mention"].includes(type))
     ) {
       commentInputRef.current.focus();
       setComment({
@@ -190,12 +195,12 @@ function Post({
   useEffect(() => {
     if (
       !isPostModal &&
-      !isSelect &&
       !isDiscover &&
+      !isSelect &&
       notificationPostId === post?._id
     ) {
       openPostModal();
-      if (type === "like") {
+      if (["like", "comment", "mention"].includes(type)) {
         router.replace(
           {
             pathname: "/feed",
@@ -207,6 +212,16 @@ function Post({
       }
     }
   }, [notificationPostId]);
+  useEffect(() => {
+    if (isCommentCreated) {
+      setTimeout(() => {
+        commentScrollEndRef?.current?.scrollIntoView({
+          behavior: "smooth",
+        });
+        setIsCommentCreated(false);
+      }, 100);
+    }
+  }, [isCommentCreated]);
 
   return (
     <>
@@ -410,7 +425,7 @@ function Post({
                   label={post?.isFollowing ? `Unfollow` : `Follow`}
                   position="top"
                   withinPortal
-                  disabled={isFollowLoading || isPostModal}
+                  disabled={isFollowLoading}
                   color="dark.7"
                   styles={{
                     tooltip: {
@@ -433,7 +448,7 @@ function Post({
                     })}
                     variant={"transparent"}
                     radius="xl"
-                    disabled={isFollowLoading || isUser}
+                    disabled={isFollowLoading}
                     onClick={() =>
                       followUser({
                         isFollowing: post?.isFollowing,
@@ -457,7 +472,7 @@ function Post({
                   position="top"
                   zIndex={2}
                   offset={3}
-                  disabled={isLikeLoading || isPostModal}
+                  disabled={isLikeLoading}
                   color="dark.7"
                   styles={{
                     tooltip: {
@@ -478,7 +493,7 @@ function Post({
                         session,
                       })
                     }
-                    disabled={isLikeLoading || isUser}
+                    disabled={isLikeLoading}
                     sx={(theme) => ({
                       color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
                       "&[data-disabled]": {
@@ -542,9 +557,17 @@ function Post({
                     zIndex={999}
                     style={{
                       marginTop: !isSelect ? "-.1rem" : "0",
+                      userSelect: "none",
                     }}
                   >
                     {isUser ? caption?.text : post?.caption}
+                    {/* {(isUser ? caption?.text : post?.caption) || (
+                      <>
+                        <Text as="span" color="rgba(255, 255, 255, 0.75)">
+                          &nbsp;
+                        </Text>
+                      </>
+                    )} */}
                   </Text>
                 </Flex>
               </Tooltip.Floating>
@@ -914,9 +937,8 @@ function Post({
                 >
                   <Stack w="100%" align={"center"} spacing={0}>
                     <ScrollArea
-                      viewportRef={commentScrollRef}
                       offsetScrollbars
-                      h={comment.error ? "154px" : "173px"}
+                      h={!comment.error ? "148px" : "168px"}
                       w="100%"
                       type={"always"}
                       pb={"0.5rem"}
@@ -980,7 +1002,6 @@ function Post({
                                 notificationPostId={notificationPostId}
                                 notificationCommentId={notificationCommentId}
                                 type={type}
-                                commentScrollRef={commentScrollRef}
                                 allUsers={allUsers}
                                 isSmall={isSmall}
                                 router={router}
@@ -989,6 +1010,7 @@ function Post({
                           )}
                         </Stack>
                       )}
+                      <div ref={commentScrollEndRef} />
                     </ScrollArea>
                     <Box
                       sx={{
@@ -1093,7 +1115,7 @@ function Post({
                                       comment.isDeleting
                                     }
                                     variant={"transparent"}
-                                    onMouseDown={() =>
+                                    onMouseDown={() => {
                                       postComment({
                                         comment,
                                         setComment,
@@ -1102,11 +1124,11 @@ function Post({
                                         session,
                                         badWordsFilter,
                                         commentInputRef,
-                                        commentScrollRef,
+                                        setIsCommentCreated,
                                         setHasBlurredCommentError,
                                         allUsers,
-                                      })
-                                    }
+                                      });
+                                    }}
                                   >
                                     <AiOutlineSend />
                                   </ActionIcon>
@@ -1117,7 +1139,6 @@ function Post({
                         </Popover.Target>
                         <Popover.Dropdown>
                           <ScrollArea
-                            viewportRef={commentScrollRef}
                             h={
                               allUsers?.length === 1
                                 ? "40px"

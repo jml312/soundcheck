@@ -20,7 +20,6 @@ import { CgProfile } from "react-icons/cg";
 import { useState } from "react";
 import Link from "next/link";
 import { useMediaQuery, useDisclosure } from "@mantine/hooks";
-import { useRouter } from "next/router";
 import { MdOutlineNotifications } from "react-icons/md";
 import NotificationModal from "./modals/NotificationModal";
 import { useQuery } from "react-query";
@@ -39,42 +38,44 @@ function Navbar({ children }) {
   const [menuHover, setMenuHover] = useState(false);
   const { classes } = useStyles();
   const isMobile = useMediaQuery("(max-width: 480px)");
-  const router = useRouter();
   const theme = useMantineTheme();
 
-  // const { data: currentNotifications } = useQuery({
-  //   queryKey: "notifications",
-  //   queryFn: () =>
-  //     getNotifications({
-  //       userId: session?.user?.id,
-  //     }),
-  //   enabled: !!session?.user?.id,
-  //   onSuccess: (data) => {
-  //     setCurrentNotifications(data);
-  //   },
-  // });
+  const [notifications, setNotifications] = useState([]);
 
-  const [notifications, setNotifications] = useState(
-    [...Array(12)].map((_, i) => ({
-      _id: i,
-      type:
-        i % 4 === 0
-          ? "like"
-          : i % 4 === 1
-          ? "comment"
-          : i % 4 === 2
-          ? "follow"
-          : "mention",
-      postID: "7ptQMKgEUeVX2lESrJGuZm",
-      // postID: i,
-      commentID: "2023-03-28T18:40:57.979Z",
-      userId: i,
-      username: "username",
-      userImage: "https://i.pravatar.cc/150?img=7",
-      createdAt: "2023-03-28T18:40:57.979Z",
-      // createdAt: "3/27/23",
-    }))
-  );
+  useQuery({
+    queryKey: "notifications",
+    queryFn: () =>
+      getNotifications({
+        userId: session?.user?.id,
+      }),
+    enabled: !!session?.user?.id,
+    onSuccess: (data) => {
+      setNotifications(data);
+    },
+  });
+
+  // const [notifications, setNotifications] = useState(
+  //   [...Array(12)].map((_, i) => ({
+  //     _id: i,
+  //     type:
+  //       i % 4 === 0
+  //         ? "like"
+  //         : i % 4 === 1
+  //         ? "comment"
+  //         : i % 4 === 2
+  //         ? "follow"
+  //         : "mention",
+  //     postID: "7ptQMKgEUeVX2lESrJGuZm",
+  //     // postID: i,
+  //     commentID: "2023-03-28T18:40:57.979Z",
+  //     userId: i,
+  //     username: "username",
+  //     userImage: "https://i.pravatar.cc/150?img=7",
+  //     createdAt: "2023-03-28T18:40:57.979Z",
+  //     // createdAt: "3/27/23",
+  //   }))
+  // );
+
   const [isLoading, setIsLoading] = useState(false);
 
   const [
@@ -110,30 +111,18 @@ function Navbar({ children }) {
           align={"center"}
           px={16}
         >
-          {router.asPath === "/feed" ? (
+          <Link href={"/feed"} passHref>
             <Title
               color="white"
               style={{
+                cursor: "pointer",
                 userSelect: "none",
               }}
               className={classes.logoText}
             >
               Soundcheck!
             </Title>
-          ) : (
-            <Link href={"/feed"} passHref>
-              <Title
-                color="white"
-                style={{
-                  cursor: "pointer",
-                  userSelect: "none",
-                }}
-                className={classes.logoText}
-              >
-                Soundcheck!
-              </Title>
-            </Link>
-          )}
+          </Link>
           <Group spacing={5}>
             <Group position="center">
               <Tooltip
@@ -203,9 +192,16 @@ function Navbar({ children }) {
                         outline: `1px solid ${theme.colors.lightWhite[8]}`,
                       })}
                     />
-                    <Text weight={500} size="sm" sx={{ lineHeight: 1 }} mr={3}>
-                      {session?.user?.name}
-                    </Text>
+                    {!isMobile && (
+                      <Text
+                        weight={500}
+                        size="sm"
+                        sx={{ lineHeight: 1 }}
+                        mr={3}
+                      >
+                        {session?.user?.name}
+                      </Text>
+                    )}
                     <BsChevronDown size={"1rem"} stroke={1.5} />
                   </Group>
                 </UnstyledButton>

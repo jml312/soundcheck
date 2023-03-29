@@ -1,6 +1,7 @@
 import client from "@/lib/sanity";
 import axios from "axios";
 import { getDiscoverSongs } from "@/actions";
+import dayjs from "dayjs";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -57,7 +58,7 @@ export default async function handler(req, res) {
         .append("notifications", [
           {
             _type: "notification",
-            _key: createdAt,
+            _key: `like.${userId}.${postID}`,
             type: "like",
             post: {
               _type: "reference",
@@ -67,7 +68,7 @@ export default async function handler(req, res) {
               _type: "reference",
               _ref: userId,
             },
-            createdAt,
+            createdAt: dayjs().toISOString(),
           },
         ])
         .commit();
@@ -95,10 +96,7 @@ export default async function handler(req, res) {
         .commit();
       await client
         .patch(postUserId)
-        .unset([
-          `notifications[_key == \"${createdAt}\" &&
-            type == \"like\" && post._ref == \"${postID}\" && user._ref == \"${userId}\"]`,
-        ])
+        .unset([`notifications[_key == \"${`like.${userId}.${postID}`}\"]`])
         .commit();
 
       try {

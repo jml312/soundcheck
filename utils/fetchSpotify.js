@@ -115,7 +115,7 @@ export const fetchSpotify = async ({ session, client }) => {
       })
       .commit();
 
-    return allData;
+    return allData.slice(0, 10);
   } catch {
     return [];
   }
