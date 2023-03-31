@@ -111,23 +111,6 @@ function Post({
   };
 
   useEffect(() => {
-    audioRef.current.addEventListener("play", () => {
-      setCurrentlyPlaying(post?._id);
-      setActivePost(post?._id);
-      setIsAudioPlaying(true);
-    });
-    audioRef.current.addEventListener("pause", () => {
-      if (audioRef?.current?.currentTime) {
-        audioRef.current.currentTime = 0;
-      }
-      setIsAudioPlaying(false);
-      if (currentlyPlaying === post?._id) {
-        setCurrentlyPlaying(null);
-        setActivePost(post?._id);
-      } else {
-        setActivePost(currentlyPlaying);
-      }
-    });
     audioRef.current.addEventListener("timeupdate", () => {
       if (!audioRef.current) return;
       const percent =
@@ -150,8 +133,10 @@ function Post({
     });
   }, [currentlyPlaying, activePost, post?._id]);
   useEffect(() => {
-    if (currentlyPlaying !== post?._id) {
+    if (!audioRef?.current?.paused && currentlyPlaying !== post?._id) {
       audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsAudioPlaying(false);
     }
   }, [currentlyPlaying]);
   useEffect(() => {
@@ -735,9 +720,7 @@ function Post({
               if (currentlyPlaying !== null) return;
               if (isSelect) {
                 setActivePost(activePost === post?._id ? null : post?._id);
-                return;
-              }
-              if (!activePost) {
+              } else if (!activePost) {
                 setActivePost(post?._id);
               } else if (activePost === post?._id) {
                 setActivePost(null);
@@ -789,12 +772,19 @@ function Post({
                       <ActionIcon
                         onClick={() => {
                           audioRef.current.currentTime = 0;
-                          if (!isAudioPlaying) {
+                          if (
+                            currentlyPlaying === null ||
+                            currentlyPlaying !== post?._id
+                          ) {
                             audioRef.current.play();
                             setIsAudioPlaying(true);
-                          } else {
+                            setActivePost(post?._id);
+                            setCurrentlyPlaying(post?._id);
+                          } else if (currentlyPlaying === post?._id) {
                             audioRef.current.pause();
                             setIsAudioPlaying(false);
+                            setActivePost(post?._id);
+                            setCurrentlyPlaying(null);
                           }
                         }}
                         title={isAudioPlaying ? "Pause" : "Play"}

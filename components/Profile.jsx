@@ -60,7 +60,7 @@ export default function Profile({ isUser, profile }) {
     useDisclosure(false);
 
   const BODY_WIDTH = "87.5%";
-  const BODY_MAX_WIDTH = "950px";
+  const BODY_MAX_WIDTH = "925px";
   // const BODY_MAX_WIDTH = "1000px";
   return (
     <Flex
@@ -198,6 +198,7 @@ export default function Profile({ isUser, profile }) {
         </Modal>
         <Group>
           <UnstyledButton
+            title="View Followers"
             disabled={numFollowers === 0}
             onClick={openFollowers}
             p={10}
@@ -207,6 +208,8 @@ export default function Profile({ isUser, profile }) {
               // }`,
               // border: "1px solid #c0c1c4",
               // borderRadius: ".5rem",
+              color:
+                numFollowers === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)",
               cursor: numFollowers === 0 ? "default" : "pointer",
               fontSize: "1.05rem",
               fontWeight: numFollowers === 0 ? 300 : 500,
@@ -260,6 +263,7 @@ export default function Profile({ isUser, profile }) {
         </Modal>
         <Group>
           <UnstyledButton
+            title="View Following"
             disabled={numFollowing === 0}
             onClick={openFollowing}
             p={10}
@@ -269,6 +273,8 @@ export default function Profile({ isUser, profile }) {
               // }`,
               // border: "1px solid #c0c1c4",
               // borderRadius: ".5rem",
+              color:
+                numFollowing === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)",
               cursor: numFollowing === 0 ? "default" : "pointer",
               fontSize: "1.05rem",
               fontWeight: numFollowing === 0 ? 300 : 500,
@@ -320,6 +326,8 @@ export default function Profile({ isUser, profile }) {
           ) : (
             <Stack>
               <ScrollArea
+                offsetScrollbars
+                mt="1.5rem"
                 type="always"
                 // w={getScrollAreaWidth()}
                 // h={"565px"}
@@ -391,6 +399,8 @@ export default function Profile({ isUser, profile }) {
           ) : (
             <Stack>
               <ScrollArea
+                offsetScrollbars
+                mt="1.5rem"
                 type="always"
                 // w={getScrollAreaWidth()}
                 // h={"565px"}
