@@ -12,6 +12,8 @@ import {
   Tooltip,
   ScrollArea,
   Anchor,
+  Modal,
+  UnstyledButton
 } from "@mantine/core";
 import { followUser } from "@/actions";
 import dayjs from "dayjs";
@@ -22,6 +24,9 @@ import { BsSpotify } from "react-icons/bs";
 
 import Post from "./Post";
 import SongCard from "./cards/SongCard";
+import { useEffect } from "react";
+import { useDisclosure } from "@mantine/hooks";
+import Link from "next/link";
 
 export default function Profile({ isUser, profile }) {
   const {
@@ -37,8 +42,8 @@ export default function Profile({ isUser, profile }) {
     stats,
     playlistID,
   } = profile;
-  const numFollowers = followers.length;
-  const numFollowing = following.length;
+  const numFollowers = followers?.length;
+  const numFollowing = following?.length;
   const numPosts = posts.length;
   const numLikes = likes.length;
   const [activePost, setActivePost] = useState(null);
@@ -47,11 +52,32 @@ export default function Profile({ isUser, profile }) {
   const { data: session } = useSession();
 
   const [isFollowing, setIsFollowing] = useState(
-    followers.includes(session?.user?.id)
+    followers?.includes(session?.user?.id)
   );
 
-  const BODY_WIDTH = "70%";
+  const [followersOpened, { open: openFollowers, close: closeFollowers }] = useDisclosure(false);
+  const [followingOpened, { open: openFollowing, close: closeFollowing }] = useDisclosure(false);
 
+  useEffect(() => {
+    return () => {
+      if (!followersOpened)
+        openFollowers;
+      else
+        closeFollowers;
+    };
+  }, [followersOpened])
+
+  useEffect(() => {
+    return () => {
+      if (!followingOpened)
+        openFollowing;
+      else
+        closeFollowing;
+    };
+  }, [followingOpened])
+
+  const BODY_WIDTH = "70%";
+  console.log(followers)
   return (
     <Flex
       align={"center"}
@@ -99,8 +125,8 @@ export default function Profile({ isUser, profile }) {
                   isUser
                     ? "View your Soundcheck playlist"
                     : isFollowing
-                    ? "Unfollow"
-                    : "Follow"
+                      ? "Unfollow"
+                      : "Follow"
                 }
                 color="dark.7"
                 styles={{
@@ -133,15 +159,15 @@ export default function Profile({ isUser, profile }) {
                     })}
                     variant={"transparent"}
                     radius="xl"
-                    // onClick={() =>
-                    //   followUser({
-                    //     isFollowing: post?.isFollowing,
-                    //     setIsFollowLoading,
-                    //     post,
-                    //     setPost,
-                    //     session,
-                    //   })
-                    // }
+                  // onClick={() =>
+                  //   followUser({
+                  //     isFollowing: post?.isFollowing,
+                  //     setIsFollowLoading,
+                  //     post,
+                  //     setPost,
+                  //     session,
+                  //   })
+                  // }
                   >
                     {isFollowing ? <FaUserCheck /> : <FaUserPlus />}
                   </ActionIcon>
@@ -159,7 +185,73 @@ export default function Profile({ isUser, profile }) {
       </Flex>
 
       <Flex w={BODY_WIDTH} justify="space-evenly" style={{ flexGrow: 0 }}>
-        <Stack>
+        <Modal opened={followersOpened} onClose={closeFollowers} title={"Followers"} centered>
+          {followers?.map((user) => (
+            <Text key={user._id} fz="sm">
+              {user._ref}
+            </Text>
+          ))}
+        </Modal>
+        <Group>
+          <UnstyledButton
+            onClick={openFollowers}
+            style={{
+              border: "1px solid white", border: "1px solid white",
+              borderRadius: ".5rem",
+              padding: "1rem",
+            }}
+          >
+            {numFollowers} Follower{numFollowers === 1 ? "" : "s"}
+          </UnstyledButton>
+        </Group>
+        <Modal opened={followingOpened} onClose={closeFollowing} title={"Following"} centered>
+          {following.map((user) => (
+            <Link href={`/profile/${user?.userId}`} passHref
+              key={user.userId}
+              w="100%"
+              sx={{
+                borderRadius: "0.5rem !important",
+                transition: "all 0.1s ease-in-out",
+                "&:hover": {
+                  // backgroundColor: theme.colors.dark[5],
+                  backgroundColor: "#141517",
+                },
+              }}
+            >
+              <Flex
+                justify="start"
+                align="center"
+                p="0.5rem 0.5rem 0.5rem .7rem"
+                gap="0.65rem"
+              >
+                <Avatar
+                  src={user.userImage} 
+                  name={user.username}
+                  radius="xl"
+                  style={{
+                    outline: "1px solid #c0c1c4",
+                  }}
+                  size={24}
+                />
+                <Text color="white" fz={"0.95rem"}>
+                  {user.username}
+                </Text>
+              </Flex>
+            </Link>
+          ))}
+        </Modal>
+        <Group>
+          <UnstyledButton
+            onClick={openFollowing}
+            style={{
+              border: "1px solid white", border: "1px solid white",
+              borderRadius: ".5rem",
+              padding: "1rem",
+            }}>
+            {numFollowing} Following
+          </UnstyledButton>
+        </Group>
+        {/* <Stack>
           <Text fz="lg">{numFollowing} Following</Text>
           <ScrollArea>
             {following.map((user) => (
@@ -190,7 +282,7 @@ export default function Profile({ isUser, profile }) {
               </Text>
             ))}
           </ScrollArea>
-        </Stack>
+        </Stack> */}
       </Flex>
 
       <Tabs
@@ -200,7 +292,7 @@ export default function Profile({ isUser, profile }) {
           flexGrow: 2,
         }}
         defaultValue="posts"
-        // variant="pills"
+      // variant="pills"
       >
         <Tabs.List grow>
           <Tabs.Tab label="Posts" value="posts">
