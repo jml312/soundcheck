@@ -207,6 +207,7 @@ export default function SelectSongModal({
         }
         fullWidth
         disabled={!selectedSong.value || caption.isFocused || isSelectFocused}
+        // disabled={!selectedSong.value || caption.value.length === 0}
         mt={15}
         loading={selectedSong.isLoading}
         leftIcon={<BsMusicNoteBeamed />}

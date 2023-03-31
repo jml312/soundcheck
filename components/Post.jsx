@@ -509,6 +509,7 @@ function Post({
             justify={"center"}
             direction={"column"}
             maw={375}
+            w={"100%"}
           >
             {!isSelect || isPosting || !caption.isEditing ? (
               <Flex
@@ -534,7 +535,7 @@ function Post({
                   <Flex
                     w={"100%"}
                     justify={"space-between"}
-                    align={"center"}
+                    align={"start"}
                     style={{
                       cursor: isSelect ? "pointer" : "default",
                     }}

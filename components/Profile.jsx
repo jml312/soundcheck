@@ -19,7 +19,7 @@ import { followUser } from "@/actions";
 import dayjs from "dayjs";
 import { FaUserPlus, FaUserCheck } from "react-icons/fa";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { BsSpotify } from "react-icons/bs";
 
 import Post from "./Post";
@@ -41,6 +41,42 @@ export default function Profile({ isUser, profile }) {
     stats,
     playlistID,
   } = profile;
+
+  const { artists, genres } = useMemo(
+    () =>
+      stats.reduce(
+        (acc, stat) => {
+          const { artists, genres } = stat;
+          artists.forEach((artist) => {
+            const artistIndex = acc.artists.findIndex(
+              (item) => item.name === artist
+            );
+            if (artistIndex === -1) {
+              acc.artists.push({ name: artist, count: 1 });
+            } else {
+              acc.artists[artistIndex].count++;
+            }
+          });
+          genres.forEach((genre) => {
+            const genreIndex = acc.genres.findIndex(
+              (item) => item.name === genre
+            );
+            if (genreIndex === -1) {
+              acc.genres.push({ name: genre, count: 1 });
+            } else {
+              acc.genres[genreIndex].count++;
+            }
+          });
+          return acc;
+        },
+        {
+          artists: [],
+          genres: [],
+        }
+      ),
+    []
+  );
+
   const numFollowers = followers?.length;
   const numFollowing = following?.length;
   const numPosts = posts.length;
@@ -108,7 +144,7 @@ export default function Profile({ isUser, profile }) {
                 position="right"
                 label={
                   isUser
-                    ? "View your Soundcheck playlist"
+                    ? "your soundcheck playlist"
                     : isFollowing
                     ? "Unfollow"
                     : "Follow"
@@ -320,7 +356,7 @@ export default function Profile({ isUser, profile }) {
               h="58vh"
             >
               <Text fz="lg" color="#c0c1c4">
-                No posts yet
+                No posts yet...
               </Text>
             </Flex>
           ) : (
@@ -393,7 +429,7 @@ export default function Profile({ isUser, profile }) {
               // bg="green"
             >
               <Text fz="lg" color="#c0c1c4">
-                No likes yet
+                No likes yet...
               </Text>
             </Flex>
           ) : (
@@ -454,10 +490,20 @@ export default function Profile({ isUser, profile }) {
         </Tabs.Panel>
 
         <Tabs.Panel value="stats" mb="4rem">
-          {/* <Text>
-            Genres: {stats.genres.join(", ")}
-          </Text>
-          <Text>Artists: {stats.artists.join(", ")}</Text> */}
+          stats:
+          {artists.map((artist) => (
+            <Text key={artist.name}>
+              {artist.name} - {artist.count}
+            </Text>
+          ))}
+          <hr />
+          genres:
+          {genres.map((genre) => (
+            <Text key={genre.name}>
+              {genre.name} - {genre.count}
+            </Text>
+          ))}
+          {/* stats graphs go here */}
         </Tabs.Panel>
       </Tabs>
     </Flex>

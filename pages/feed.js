@@ -1,12 +1,12 @@
 import { getSession, useSession } from "next-auth/react";
 import { clearAuthCookies } from "@/utils";
 import Post from "@/components/Post";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery, useDidUpdate } from "@mantine/hooks";
 import dayjs from "dayjs";
 import SelectSongModal from "@/components/modals/SelectSongModal";
 import Filter from "bad-words";
 import { useRouter } from "next/router";
-import { Flex, Text, ScrollArea, Stack } from "@mantine/core";
+import { Flex, Text, ScrollArea, Stack, SegmentedControl } from "@mantine/core";
 import { useState, useEffect } from "react";
 import client from "@/lib/sanity";
 import { allUsersQuery } from "@/lib/queries";
@@ -17,7 +17,7 @@ function Feed({ spotifyData, allUsers }) {
   const router = useRouter();
   const { date } = router.query;
   const { data: session } = useSession();
-
+  const [postType, setPostType] = useState("everyone");
   const [posts, setPosts] = useState();
   const { data: currentPosts } = useQuery({
     queryKey: ["feed", dayjs().format("YYYY-MM-DD")],
@@ -102,6 +102,20 @@ function Feed({ spotifyData, allUsers }) {
     });
   }, [currentPosts]);
 
+  useDidUpdate(() => {
+    if (postType === "everyone") {
+      setPosts({
+        ...posts,
+        feedPosts: currentPosts?.feedPosts,
+      });
+    } else if (postType === "following") {
+      setPosts({
+        ...posts,
+        feedPosts: currentPosts?.feedPosts.filter((post) => post.isFollowing),
+      });
+    }
+  }, [postType]);
+
   return (
     <>
       <SelectSongModal
@@ -155,18 +169,22 @@ function Feed({ spotifyData, allUsers }) {
             ) : (
               <>
                 {/* feed posts */}
-                {posts?.feedPosts?.length > 0 ? (
+                {currentPosts?.feedPosts?.length > 0 ? (
                   <Stack>
-                    {/* <Text
-                      fz={"lg"}
-                      fw={"bold"}
-                      style={{
-                        cursor: "default",
-                        transform: isMobile && "translateY(2.4rem)",
-                      }}
+                    <Flex
+                      w={getScrollAreaWidth()}
+                      justify="center"
+                      align="center"
                     >
-                      {formattedDate}
-                    </Text> */}
+                      <SegmentedControl
+                        value={postType}
+                        onChange={setPostType}
+                        data={[
+                          { label: "Everyone", value: "everyone" },
+                          { label: "Following", value: "following" },
+                        ]}
+                      />
+                    </Flex>
                     <ScrollArea
                       type="always"
                       w={getScrollAreaWidth()}
