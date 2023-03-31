@@ -13,7 +13,7 @@ import {
   ScrollArea,
   Anchor,
   Modal,
-  UnstyledButton
+  UnstyledButton,
 } from "@mantine/core";
 import { followUser } from "@/actions";
 import dayjs from "dayjs";
@@ -23,7 +23,6 @@ import { useState } from "react";
 import { BsSpotify } from "react-icons/bs";
 
 import Post from "./Post";
-import SongCard from "./cards/SongCard";
 import { useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
@@ -55,29 +54,14 @@ export default function Profile({ isUser, profile }) {
     followers?.includes(session?.user?.id)
   );
 
-  const [followersOpened, { open: openFollowers, close: closeFollowers }] = useDisclosure(false);
-  const [followingOpened, { open: openFollowing, close: closeFollowing }] = useDisclosure(false);
+  const [followersOpened, { open: openFollowers, close: closeFollowers }] =
+    useDisclosure(false);
+  const [followingOpened, { open: openFollowing, close: closeFollowing }] =
+    useDisclosure(false);
 
-  useEffect(() => {
-    return () => {
-      if (!followersOpened)
-        openFollowers;
-      else
-        closeFollowers;
-    };
-  }, [followersOpened])
-
-  useEffect(() => {
-    return () => {
-      if (!followingOpened)
-        openFollowing;
-      else
-        closeFollowing;
-    };
-  }, [followingOpened])
-
-  const BODY_WIDTH = "70%";
-  console.log(followers)
+  const BODY_WIDTH = "87.5%";
+  const BODY_MAX_WIDTH = "950px";
+  // const BODY_MAX_WIDTH = "1000px";
   return (
     <Flex
       align={"center"}
@@ -94,12 +78,14 @@ export default function Profile({ isUser, profile }) {
         justify={"space-between"}
         align={"end"}
         w={BODY_WIDTH}
+        maw={BODY_MAX_WIDTH}
         gap={10}
         mt={30}
         pb={12}
         style={{
           borderBottom: "1px solid #c0c1c4",
           flexGrow: 0,
+          // flexBasis: "25%",
         }}
       >
         <Group spacing={10}>
@@ -116,7 +102,6 @@ export default function Profile({ isUser, profile }) {
           <Stack spacing={0}>
             <Group spacing={8} align={"end"}>
               <Text fz="sm">{name}</Text>
-
               <Tooltip
                 offset={isUser ? 6 : -2}
                 withinPortal
@@ -125,8 +110,8 @@ export default function Profile({ isUser, profile }) {
                   isUser
                     ? "View your Soundcheck playlist"
                     : isFollowing
-                      ? "Unfollow"
-                      : "Follow"
+                    ? "Unfollow"
+                    : "Follow"
                 }
                 color="dark.7"
                 styles={{
@@ -144,6 +129,7 @@ export default function Profile({ isUser, profile }) {
                     sx={(theme) => ({
                       cursor: "pointer !important",
                       color: theme.colors.spotify[8],
+                      transform: "translateX(-.15rem) translateY(.12rem)",
                     })}
                   >
                     <BsSpotify />
@@ -152,6 +138,7 @@ export default function Profile({ isUser, profile }) {
                   <ActionIcon
                     sx={(theme) => ({
                       // transform: "translateX(.1rem)",
+                      transform: "translateX(-.3rem) translateY(.12rem)",
                       color: isFollowing ? theme.colors.green[6] : "#c1c2c5",
                       "&[data-disabled]": {
                         color: isFollowing ? theme.colors.green[6] : "#c1c2c5",
@@ -159,15 +146,15 @@ export default function Profile({ isUser, profile }) {
                     })}
                     variant={"transparent"}
                     radius="xl"
-                  // onClick={() =>
-                  //   followUser({
-                  //     isFollowing: post?.isFollowing,
-                  //     setIsFollowLoading,
-                  //     post,
-                  //     setPost,
-                  //     session,
-                  //   })
-                  // }
+                    // onClick={() =>
+                    //   followUser({
+                    //     isFollowing: post?.isFollowing,
+                    //     setIsFollowLoading,
+                    //     post,
+                    //     setPost,
+                    //     session,
+                    //   })
+                    // }
                   >
                     {isFollowing ? <FaUserCheck /> : <FaUserPlus />}
                   </ActionIcon>
@@ -184,8 +171,25 @@ export default function Profile({ isUser, profile }) {
         </Text>
       </Flex>
 
-      <Flex w={BODY_WIDTH} justify="space-evenly" style={{ flexGrow: 0 }}>
-        <Modal opened={followersOpened} onClose={closeFollowers} title={"Followers"} centered>
+      <Flex
+        w={BODY_WIDTH}
+        maw={"450px"}
+        my={20}
+        justify="space-evenly"
+        // justify="center"
+        // gap={"2.5rem"}
+        // style={{ flexGrow: 0 }}
+        style={{
+          // flexBasis: "25%",
+          flexGrow: 0,
+        }}
+      >
+        <Modal
+          opened={followersOpened}
+          onClose={closeFollowers}
+          title={"Followers"}
+          centered
+        >
           {followers?.map((user) => (
             <Text key={user._id} fz="sm">
               {user._ref}
@@ -194,19 +198,33 @@ export default function Profile({ isUser, profile }) {
         </Modal>
         <Group>
           <UnstyledButton
+            disabled={numFollowers === 0}
             onClick={openFollowers}
+            p={10}
             style={{
-              border: "1px solid white", border: "1px solid white",
-              borderRadius: ".5rem",
-              padding: "1rem",
+              // borderBottom: `.5px solid ${
+              //   numFollowers === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)"
+              // }`,
+              // border: "1px solid #c0c1c4",
+              // borderRadius: ".5rem",
+              cursor: numFollowers === 0 ? "default" : "pointer",
+              fontSize: "1.05rem",
+              fontWeight: numFollowers === 0 ? 300 : 500,
             }}
           >
             {numFollowers} Follower{numFollowers === 1 ? "" : "s"}
           </UnstyledButton>
         </Group>
-        <Modal opened={followingOpened} onClose={closeFollowing} title={"Following"} centered>
+        <Modal
+          opened={followingOpened}
+          onClose={closeFollowing}
+          title={"Following"}
+          centered
+        >
           {following.map((user) => (
-            <Link href={`/profile/${user?.userId}`} passHref
+            <Link
+              href={`/profile/${user?.userId}`}
+              passHref
               key={user.userId}
               w="100%"
               sx={{
@@ -225,8 +243,8 @@ export default function Profile({ isUser, profile }) {
                 gap="0.65rem"
               >
                 <Avatar
-                  src={user.userImage} 
-                  name={user.username}
+                  src={user.userImage}
+                  alt={user.username}
                   radius="xl"
                   style={{
                     outline: "1px solid #c0c1c4",
@@ -242,57 +260,37 @@ export default function Profile({ isUser, profile }) {
         </Modal>
         <Group>
           <UnstyledButton
+            disabled={numFollowing === 0}
             onClick={openFollowing}
+            p={10}
             style={{
-              border: "1px solid white", border: "1px solid white",
-              borderRadius: ".5rem",
-              padding: "1rem",
-            }}>
+              // borderBottom: `.5px solid ${
+              //   numFollowing === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)"
+              // }`,
+              // border: "1px solid #c0c1c4",
+              // borderRadius: ".5rem",
+              cursor: numFollowing === 0 ? "default" : "pointer",
+              fontSize: "1.05rem",
+              fontWeight: numFollowing === 0 ? 300 : 500,
+            }}
+          >
             {numFollowing} Following
           </UnstyledButton>
         </Group>
-        {/* <Stack>
-          <Text fz="lg">{numFollowing} Following</Text>
-          <ScrollArea>
-            {following.map((user) => (
-              <Text key={user._id} fz="sm">
-                {user.name}
-              </Text>
-            ))}
-          </ScrollArea>
-        </Stack>
-        <Stack
-          style={{
-            // border: "1px solid white",
-            borderRadius: ".5rem",
-          }}
-        >
-          <Text
-            fz="lg"
-            style={{
-              // borderBottom: "1px solid white",
-            }}
-          >
-            {numFollowers} Follower{numFollowers === 1 ? "" : "s"}
-          </Text>
-          <ScrollArea>
-            {followers.map((user) => (
-              <Text key={user._id} fz="sm">
-                {user.name}
-              </Text>
-            ))}
-          </ScrollArea>
-        </Stack> */}
       </Flex>
 
       <Tabs
         w={BODY_WIDTH}
+        maw={BODY_MAX_WIDTH}
         style={{
           // transform: "translateY(1rem)",
+          // flexGrow: 2,
+          // flexBasis: "50%",
           flexGrow: 2,
         }}
         defaultValue="posts"
-      // variant="pills"
+        // variant="pills"
+        // bg="red"
       >
         <Tabs.List grow>
           <Tabs.Tab label="Posts" value="posts">
@@ -307,47 +305,142 @@ export default function Profile({ isUser, profile }) {
         </Tabs.List>
 
         <Tabs.Panel value="posts" mb="4rem">
-          <Flex
-            // direction="column"
-            w="100%"
-            style={{
-              transform: "translateY(4rem)",
-            }}
-            wrap="wrap"
-            justify="center"
-            // justify="space-between"
-            gap={"1rem"}
-          >
-            {posts.map((post) => (
-              <SongCard key={post._id} post={post} />
-            ))}
-          </Flex>
+          {posts.length === 0 ? (
+            <Flex
+              justify="center"
+              align="center"
+              w="100%"
+              // h="100%"
+              h="58vh"
+            >
+              <Text fz="lg" color="#c0c1c4">
+                No posts yet
+              </Text>
+            </Flex>
+          ) : (
+            <Stack>
+              <ScrollArea
+                type="always"
+                // w={getScrollAreaWidth()}
+                // h={"565px"}
+                h="58vh"
+                // mt={isMobile && "1.5rem"}
+                // mb={isMobile && "1rem"}
+                style={
+                  {
+                    // transform: !isMobile && "translateY(2.8rem)",
+                  }
+                }
+                styles={{
+                  scrollbar: {
+                    "&, &:hover": {
+                      backgroundColor: "transparent",
+                      borderRadius: "0.5rem",
+                    },
+                    '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
+                      {
+                        backgroundColor: "#474952",
+                      },
+                  },
+                  corner: {
+                    display: "none",
+                  },
+                }}
+              >
+                <Flex
+                  justify={"center"}
+                  align={"end"}
+                  w={"100%"}
+                  h={"100%"}
+                  wrap={"wrap"}
+                  gap="1.5rem"
+                  // mt={"2rem"}
+                >
+                  {posts.map((post) => (
+                    <Post
+                      key={post._id}
+                      post={post}
+                      activePost={activePost}
+                      setActivePost={setActivePost}
+                      currentlyPlaying={currentlyPlaying}
+                      setCurrentlyPlaying={setCurrentlyPlaying}
+                      isDiscover
+                    />
+                  ))}
+                </Flex>
+              </ScrollArea>
+            </Stack>
+          )}
         </Tabs.Panel>
 
         <Tabs.Panel value="likes" mb="4rem">
-          <Flex
-            // direction="column"
-            w="100%"
-            style={{
-              transform: "translateY(1rem)",
-            }}
-            wrap="wrap"
-            justify="center"
-            // justify="space-between"
-            gap={"1rem"}
-          >
-            {likes.map((post) => (
-              <Post
-                key={post._id}
-                post={post}
-                activePost={activePost}
-                setActivePost={setActivePost}
-                currentlyPlaying={currentlyPlaying}
-                setCurrentlyPlaying={setCurrentlyPlaying}
-                isDiscover
-              />
-            ))}
-          </Flex>
+          {likes.length === 0 ? (
+            <Flex
+              justify="center"
+              align="center"
+              w="100%"
+              h="58vh"
+              // h="100%"
+              // style={{ flexGrow: 1 }}
+              // bg="green"
+            >
+              <Text fz="lg" color="#c0c1c4">
+                No likes yet
+              </Text>
+            </Flex>
+          ) : (
+            <Stack>
+              <ScrollArea
+                type="always"
+                // w={getScrollAreaWidth()}
+                // h={"565px"}
+                h="58vh"
+                // mt={isMobile && "1.5rem"}
+                // mb={isMobile && "1rem"}
+                style={
+                  {
+                    // transform: !isMobile && "translateY(2.8rem)",
+                  }
+                }
+                styles={{
+                  scrollbar: {
+                    "&, &:hover": {
+                      backgroundColor: "transparent",
+                      borderRadius: "0.5rem",
+                    },
+                    '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
+                      {
+                        backgroundColor: "#474952",
+                      },
+                  },
+                  corner: {
+                    display: "none",
+                  },
+                }}
+              >
+                <Flex
+                  justify={"center"}
+                  align={"end"}
+                  w={"100%"}
+                  h={"100%"}
+                  wrap={"wrap"}
+                  gap="1.5rem"
+                >
+                  {likes.map((post) => (
+                    <Post
+                      key={post._id}
+                      post={post}
+                      activePost={activePost}
+                      setActivePost={setActivePost}
+                      currentlyPlaying={currentlyPlaying}
+                      setCurrentlyPlaying={setCurrentlyPlaying}
+                      isDiscover
+                    />
+                  ))}
+                </Flex>
+              </ScrollArea>
+            </Stack>
+          )}
         </Tabs.Panel>
 
         <Tabs.Panel value="stats" mb="4rem">

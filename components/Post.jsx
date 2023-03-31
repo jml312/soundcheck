@@ -515,73 +515,26 @@ function Post({
         )}
 
         {/* caption */}
-        <Flex align="center" justify={"center"} direction={"column"} maw={375}>
-          {!isSelect || isPosting || !caption.isEditing ? (
-            <Flex
-              w={"100%"}
-              justify={"space-between"}
-              align={"center"}
-              mt="-.5rem"
-              mb={"0.2rem"}
-            >
-              <Tooltip.Floating
-                offset={17.5}
-                position="bottom"
-                disabled={!isSelect}
-                label={"Edit"}
-                color="dark.7"
-                styles={{
-                  tooltip: {
-                    border: "none",
-                    outline: "1px solid rgba(192, 193, 196, 0.75)",
-                  },
-                }}
+        {!isDiscover && (
+          <Flex
+            align="center"
+            justify={"center"}
+            direction={"column"}
+            maw={375}
+          >
+            {!isSelect || isPosting || !caption.isEditing ? (
+              <Flex
+                w={"100%"}
+                justify={"space-between"}
+                align={"center"}
+                mt="-.5rem"
+                mb={"0.2rem"}
               >
-                <Flex
-                  w={"100%"}
-                  justify={"space-between"}
-                  align={"center"}
-                  style={{
-                    cursor: isSelect ? "pointer" : "default",
-                  }}
-                  onClick={() => {
-                    if (!isSelect) return;
-                    setCaption({
-                      ...caption,
-                      isEditing: isSelect ? true : !isPostModal,
-                      isFocused: isSelect ? true : !isPostModal,
-                    });
-                    setTimeout(() => {
-                      captionRef?.current?.focus();
-                    }, 0);
-                  }}
-                >
-                  <Text
-                    color="white"
-                    fw={"bold"}
-                    zIndex={999}
-                    style={{
-                      marginTop: !isSelect ? "-.1rem" : "0",
-                      userSelect: "none",
-                    }}
-                  >
-                    {isUser ? caption?.text : post?.caption}
-                    {/* {(isUser ? caption?.text : post?.caption) || (
-                      <>
-                        <Text as="span" color="rgba(255, 255, 255, 0.75)">
-                          &nbsp;
-                        </Text>
-                      </>
-                    )} */}
-                  </Text>
-                </Flex>
-              </Tooltip.Floating>
-              {isSelect && !isPosting && (
-                <Tooltip
-                  offset={-2}
-                  withinPortal
+                <Tooltip.Floating
+                  offset={17.5}
                   position="bottom"
-                  label={"Remove"}
+                  disabled={!isSelect}
+                  label={"Edit"}
                   color="dark.7"
                   styles={{
                     tooltip: {
@@ -590,74 +543,51 @@ function Post({
                     },
                   }}
                 >
-                  <ActionIcon
-                    variant={"transparent"}
+                  <Flex
+                    w={"100%"}
+                    justify={"space-between"}
+                    align={"center"}
+                    style={{
+                      cursor: isSelect ? "pointer" : "default",
+                    }}
                     onClick={() => {
+                      if (!isSelect) return;
                       setCaption({
                         ...caption,
-                        text: "",
-                        originalText: "",
-                        isEditing: true,
-                        isFocused: false,
+                        isEditing: isSelect ? true : !isPostModal,
+                        isFocused: isSelect ? true : !isPostModal,
                       });
+                      setTimeout(() => {
+                        captionRef?.current?.focus();
+                      }, 0);
                     }}
                   >
-                    <VscRemove fontSize="0.75rem" />
-                  </ActionIcon>
-                </Tooltip>
-              )}
-            </Flex>
-          ) : (
-            <TextInput
-              data-autoFocus
-              onFocus={() => {
-                setCaption({
-                  ...caption,
-                  isFocused: true,
-                });
-              }}
-              onBlur={() => {
-                if (caption.error && !hasBlurredCaptionError) {
-                  setHasBlurredCaptionError(true);
-                  setCaption({
-                    ...caption,
-                    isEditing: true,
-                    isFocused: true,
-                  });
-                  setTimeout(() => {
-                    captionRef?.current?.focus();
-                  }, 0);
-                  return;
-                }
-                setCaption({
-                  ...caption,
-                  text: caption?.originalText || "",
-                  error: "",
-                  isEditing: caption?.originalText?.length === 0,
-                  isFocused: false,
-                });
-              }}
-              ref={captionRef}
-              w="100%"
-              value={caption.text}
-              maxLength={CAPTION_MAX_LENGTH}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value.length > CAPTION_MAX_LENGTH) return;
-                setCaption({
-                  ...caption,
-                  text: value,
-                  error: "",
-                });
-              }}
-              placeholder="Add a caption..."
-              rightSection={
-                caption.text.length > 0 && (
+                    <Text
+                      color="white"
+                      fw={"bold"}
+                      zIndex={999}
+                      style={{
+                        marginTop: !isSelect ? "-.1rem" : "0",
+                        userSelect: "none",
+                      }}
+                    >
+                      {isUser ? caption?.text : post?.caption}
+                      {/* {(isUser ? caption?.text : post?.caption) || (
+                            <>
+                              <Text as="span" color="rgba(255, 255, 255, 0.75)">
+                                &nbsp;
+                              </Text>
+                            </>
+                          )} */}
+                    </Text>
+                  </Flex>
+                </Tooltip.Floating>
+                {isSelect && !isPosting && (
                   <Tooltip
                     offset={-2}
                     withinPortal
                     position="bottom"
-                    label={"Add"}
+                    label={"Remove"}
                     color="dark.7"
                     styles={{
                       tooltip: {
@@ -667,593 +597,668 @@ function Post({
                     }}
                   >
                     <ActionIcon
-                      onMouseDown={() =>
-                        captionPost({
-                          post,
-                          setPost,
-                          caption,
-                          setCaption,
-                          badWordsFilter,
-                          setHasBlurredCaptionError,
-                        })
-                      }
-                      disabled={
-                        (caption.text.length === 0 &&
-                          caption?.originalText?.length === 0) ||
-                        caption.text === caption?.originalText ||
-                        caption.error
-                      }
-                      // color={"green"}
                       variant={"transparent"}
-                      // variant={"subtle"}
-                      sx={{
-                        "&[data-disabled]": {
-                          backgroundColor: "transparent",
+                      onClick={() => {
+                        setCaption({
+                          ...caption,
+                          text: "",
+                          originalText: "",
+                          isEditing: true,
+                          isFocused: false,
+                        });
+                      }}
+                    >
+                      <VscRemove fontSize="0.75rem" />
+                    </ActionIcon>
+                  </Tooltip>
+                )}
+              </Flex>
+            ) : (
+              <TextInput
+                data-autoFocus
+                onFocus={() => {
+                  setCaption({
+                    ...caption,
+                    isFocused: true,
+                  });
+                }}
+                onBlur={() => {
+                  if (caption.error && !hasBlurredCaptionError) {
+                    setHasBlurredCaptionError(true);
+                    setCaption({
+                      ...caption,
+                      isEditing: true,
+                      isFocused: true,
+                    });
+                    setTimeout(() => {
+                      captionRef?.current?.focus();
+                    }, 0);
+                    return;
+                  }
+                  setCaption({
+                    ...caption,
+                    text: caption?.originalText || "",
+                    error: "",
+                    isEditing: caption?.originalText?.length === 0,
+                    isFocused: false,
+                  });
+                }}
+                ref={captionRef}
+                w="100%"
+                value={caption.text}
+                maxLength={CAPTION_MAX_LENGTH}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.length > CAPTION_MAX_LENGTH) return;
+                  setCaption({
+                    ...caption,
+                    text: value,
+                    error: "",
+                  });
+                }}
+                placeholder="Add a caption..."
+                rightSection={
+                  caption.text.length > 0 && (
+                    <Tooltip
+                      offset={-2}
+                      withinPortal
+                      position="bottom"
+                      label={"Add"}
+                      color="dark.7"
+                      styles={{
+                        tooltip: {
                           border: "none",
+                          outline: "1px solid rgba(192, 193, 196, 0.75)",
                         },
                       }}
                     >
-                      <VscAdd fontSize="0.75rem" />
-                    </ActionIcon>
-                  </Tooltip>
-                )
-              }
-              variant={"unstyled"}
-              mt="-.8rem"
-              error={caption.error}
-              styles={{
-                zIndex: 100,
-                input: {
-                  color: "white",
-                  fontSize: "1rem",
-                },
-                description: {
-                  transform: "translateY(.5rem)",
-                },
-                error: {
-                  transform: "translateY(-.5rem)",
-                },
-              }}
-            />
-          )}
+                      <ActionIcon
+                        onMouseDown={() =>
+                          captionPost({
+                            post,
+                            setPost,
+                            caption,
+                            setCaption,
+                            badWordsFilter,
+                            setHasBlurredCaptionError,
+                          })
+                        }
+                        disabled={
+                          (caption.text.length === 0 &&
+                            caption?.originalText?.length === 0) ||
+                          caption.text === caption?.originalText ||
+                          caption.error
+                        }
+                        variant={"transparent"}
+                        sx={{
+                          "&[data-disabled]": {
+                            backgroundColor: "transparent",
+                            border: "none",
+                          },
+                        }}
+                      >
+                        <VscAdd fontSize="0.75rem" />
+                      </ActionIcon>
+                    </Tooltip>
+                  )
+                }
+                variant={"unstyled"}
+                mt="-.8rem"
+                error={caption.error}
+                styles={{
+                  zIndex: 100,
+                  input: {
+                    color: "white",
+                    fontSize: "1rem",
+                  },
+                  description: {
+                    transform: "translateY(.5rem)",
+                  },
+                  error: {
+                    transform: "translateY(-.5rem)",
+                  },
+                }}
+              />
+            )}
+          </Flex>
+        )}
 
-          {/* image + audio */}
-          <div
-            style={{
-              position: "relative",
+        {/* image + audio */}
+        <div
+          style={{
+            position: "relative",
+          }}
+          ref={imageRef}
+        >
+          <Image
+            onClick={() => {
+              if (currentlyPlaying !== null) return;
+              if (isSelect) {
+                setActivePost(activePost === post?._id ? null : post?._id);
+                return;
+              }
+              if (!activePost) {
+                setActivePost(post?._id);
+              } else if (activePost === post?._id) {
+                setActivePost(null);
+              } else {
+                setActivePost(post?._id);
+              }
             }}
-            ref={imageRef}
-          >
-            <Image
-              onClick={() => {
-                if (currentlyPlaying !== null) return;
-                if (isSelect) {
-                  setActivePost(activePost === post?._id ? null : post?._id);
-                  return;
-                }
-                if (!activePost) {
-                  setActivePost(post?._id);
-                } else if (activePost === post?._id) {
-                  setActivePost(null);
-                } else {
-                  setActivePost(post?._id);
-                }
-              }}
-              src={post?.albumImage}
-              alt={post?.albumName}
-              radius={"0.25rem"}
-              width={!isPostModal ? 275 : isSmall ? "75vw" : 375}
-              height={!isPostModal ? 275 : isSmall ? "75vw" : 375}
-              withPlaceholder
-              placeholder={
-                <Stack align="center">
-                  <Text>{post?.albumName}</Text>
-                  <Text>{artists}</Text>
-                </Stack>
-              }
-              style={{
-                opacity: imageFocused ? 0.3 : 1,
-                transition: "opacity 0.2s ease-in-out",
-                zIndex: 1,
-                cursor: "pointer",
-              }}
-            />
+            src={post?.albumImage}
+            alt={post?.albumName}
+            radius={"0.25rem"}
+            width={!isPostModal ? 275 : isSmall ? "75vw" : 375}
+            height={!isPostModal ? 275 : isSmall ? "75vw" : 375}
+            withPlaceholder
+            placeholder={
+              <Stack align="center">
+                <Text>{post?.albumName}</Text>
+                <Text>{artists}</Text>
+              </Stack>
+            }
+            style={{
+              opacity: imageFocused ? 0.3 : 1,
+              transition: "opacity 0.2s ease-in-out",
+              zIndex: 1,
+              cursor: "pointer",
+            }}
+          />
 
-            {imageFocused &&
-              (!!post?.previewUrl ? (
-                <>
-                  <RingProgress
-                    sx={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      transform: "translate(-50%, -50%)",
-                    }}
-                    title={isAudioPlaying ? "Pause" : "Play"}
-                    sections={[
-                      {
-                        value: audioProgress,
-                        color: theme.colors.spotify[8],
-                      },
-                    ]}
-                    size={isPostModal ? 105 : 90}
-                    thickness={isPostModal ? 7.5 : 7.5}
-                    label={
-                      <Center>
-                        <ActionIcon
-                          onClick={() => {
-                            audioRef.current.currentTime = 0;
-                            if (!isAudioPlaying) {
-                              audioRef.current.play();
-                              setIsAudioPlaying(true);
-                            } else {
-                              audioRef.current.pause();
-                              setIsAudioPlaying(false);
-                            }
-                          }}
-                          title={isAudioPlaying ? "Pause" : "Play"}
-                          size={isPostModal ? "4.5rem" : "3.75rem"}
-                          sx={{
-                            "&:hover": {
-                              backgroundColor: "transparent !important",
-                            },
-                          }}
-                        >
-                          {!isAudioPlaying ? (
-                            <BsPlayCircleFill
-                              style={{
-                                cursor: "pointer",
-                              }}
-                              fontSize={isPostModal ? "4.5rem" : "3.75rem"}
-                            />
-                          ) : (
-                            <BsPauseCircleFill
-                              style={{
-                                cursor: "pointer",
-                              }}
-                              fontSize={isPostModal ? "4.5rem" : "3.75rem"}
-                            />
-                          )}
-                        </ActionIcon>
-                      </Center>
-                    }
-                  />
-                  <ActionIcon
-                    title="Listen on Spotify"
-                    component="a"
-                    href={post?.songUrl}
-                    target="_blank"
-                    radius={"xl"}
-                    size={isPostModal ? "2rem" : "1.6rem"}
-                    variant={"transparent"}
-                    sx={{
-                      cursor: "pointer !important",
-                      position: "absolute",
-                      top: "0.6rem",
-                      right: "0.6rem",
-                    }}
-                    onClick={() => {
-                      audioRef.current.pause();
-                      setIsAudioPlaying(false);
-                    }}
-                  >
-                    <BsSpotify
-                      fontSize={isPostModal ? "2rem" : "1.6rem"}
-                      style={{
-                        cursor: "pointer !important",
-                        color: theme.colors.spotify[8],
-                      }}
-                    />
-                  </ActionIcon>
-                </>
-              ) : (
-                <Center
+          {imageFocused &&
+            (!!post?.previewUrl ? (
+              <>
+                <RingProgress
                   sx={{
                     position: "absolute",
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
                   }}
-                >
-                  <ActionIcon
-                    title="Listen on Spotify"
-                    component="a"
-                    href={post?.songUrl}
-                    target="_blank"
-                    radius={"xl"}
-                    size={"3.75rem"}
-                    variant={"transparent"}
-                    sx={{
-                      "&:hover": {
-                        backgroundColor: "transparent !important",
-                      },
-                    }}
-                    onClick={() => {
-                      audioRef.current.pause();
-                      setIsAudioPlaying(false);
-                    }}
-                  >
-                    <BsSpotify
-                      fontSize={"3.75rem"}
-                      style={{
-                        cursor: "pointer !important",
-                        color: theme.colors.spotify[8],
-                      }}
-                    />
-                  </ActionIcon>
-                </Center>
-              ))}
-          </div>
-
-          <audio src={post?.previewUrl} type="audio/mpeg" ref={audioRef} />
-
-          {/* song info */}
-          <Flex
-            direction={"column"}
-            mt={8}
-            mb={(isDiscover || isSelect) && "0.5rem"}
-            w={!isPostModal ? 275 : isSmall ? "75vw" : 375}
-            style={{
-              textAlign: "center",
-            }}
-          >
-            <Title
-              order={3}
-              color="white"
-              sx={{
-                cursor: "default",
-              }}
-              truncate
-            >
-              {post?.songName}
-            </Title>
-            <Text
-              color="rgba(255, 255, 255, 0.8)"
-              sx={{
-                cursor: "default",
-              }}
-              truncate
-            >
-              {artists}
-            </Text>
-          </Flex>
-
-          {/* comments */}
-          {!isSelect && !isDiscover && (
-            <Flex
-              w="100%"
-              gap={"0.4rem"}
-              justify={"space-between"}
-              align={"start"}
-              direction={"column"}
-              pt="0.25rem"
-              sx={{
-                transform: "translateY(-0.3rem)",
-                borderTop: `1px solid ${theme.colors.lightWhite[7]}`,
-              }}
-            >
-              {isPostModal ? (
-                <Stack
-                  w="100%"
-                  mt={"0.5rem"}
-                  align={"center"}
-                  justify={"center"}
-                  maw={375}
-                >
-                  <Stack w="100%" align={"center"} spacing={0}>
-                    <ScrollArea
-                      offsetScrollbars
-                      h={!comment.error ? "148px" : "168px"}
-                      w="100%"
-                      type={"always"}
-                      pb={"0.5rem"}
-                      styles={{
-                        scrollbar: {
-                          "&, &:hover": {
-                            background: "transparent",
-                            borderRadius: "0.5rem",
-                          },
-                          '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
-                            {
-                              backgroundColor: "#474952",
-                            },
-                        },
-                      }}
-                    >
-                      {numComments === 0 ? (
-                        <Text
-                          color="white"
-                          sx={{
-                            cursor: "default",
-                          }}
-                          mb={"1.5rem"}
-                          align={"center"}
-                          fz={"0.95rem"}
-                        >
-                          No comments yet...
-                        </Text>
-                      ) : (
-                        <Stack
-                          w="100%"
-                          align="center"
-                          justify="center"
-                          spacing={"md"}
-                          style={{
-                            zIndex: 1,
-                          }}
-                        >
-                          {post?.comments?.map(
-                            ({
-                              text,
-                              username,
-                              userId,
-                              userImage,
-                              createdAt,
-                            }) => (
-                              <CommentCard
-                                key={createdAt}
-                                text={text}
-                                createdAt={createdAt}
-                                userId={userId}
-                                username={username}
-                                userImage={userImage}
-                                session={session}
-                                post={post}
-                                setPost={setPost}
-                                comment={comment}
-                                setComment={setComment}
-                                numComments={numComments}
-                                commentInputRef={commentInputRef}
-                                notificationPostId={notificationPostId}
-                                notificationCommentId={notificationCommentId}
-                                type={type}
-                                allUsers={allUsers}
-                                isSmall={isSmall}
-                                router={router}
-                              />
-                            )
-                          )}
-                        </Stack>
-                      )}
-                      <div ref={commentScrollEndRef} />
-                    </ScrollArea>
-                    <Box
-                      sx={{
-                        borderTop: `1px solid ${theme.colors.lightWhite[7]}`,
-                        width: "100%",
-                      }}
-                      mb={"0.25rem"}
-                    >
-                      <Popover
-                        position="top"
-                        opened={comment.isMentioning && comment.isFocused}
-                        width="target"
-                        offset={1}
-                        withinPortal
-                        color="dark.7"
-                        styles={{
-                          dropdown: {
-                            zIndex: 100,
-                            border: "none",
-                            outline: "1px solid rgba(192, 193, 196, 0.75)",
+                  title={isAudioPlaying ? "Pause" : "Play"}
+                  sections={[
+                    {
+                      value: audioProgress,
+                      color: theme.colors.spotify[8],
+                    },
+                  ]}
+                  size={isPostModal ? 105 : 90}
+                  thickness={isPostModal ? 7.5 : 7.5}
+                  label={
+                    <Center>
+                      <ActionIcon
+                        onClick={() => {
+                          audioRef.current.currentTime = 0;
+                          if (!isAudioPlaying) {
+                            audioRef.current.play();
+                            setIsAudioPlaying(true);
+                          } else {
+                            audioRef.current.pause();
+                            setIsAudioPlaying(false);
+                          }
+                        }}
+                        title={isAudioPlaying ? "Pause" : "Play"}
+                        size={isPostModal ? "4.5rem" : "3.75rem"}
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "transparent !important",
                           },
                         }}
                       >
-                        <Popover.Target>
-                          <Textarea
-                            autosize
-                            minRows={1}
-                            maxRows={1}
-                            disabled={comment.isLoading || comment.isDeleting}
-                            ref={commentInputRef}
-                            variant={"unstyled"}
-                            placeholder="Add a comment..."
-                            inputWrapperOrder={["error", "input"]}
-                            styles={{
-                              zIndex: 100,
-                              input: {
-                                color: "white",
-                                fontSize: "1rem",
-                                marginBottom: "-.35rem",
-                              },
-                              error: {
-                                transform: "translateY(.7rem)",
-                              },
+                        {!isAudioPlaying ? (
+                          <BsPlayCircleFill
+                            style={{
+                              cursor: "pointer",
                             }}
-                            error={comment.error}
-                            value={comment.text}
-                            onFocus={() => {
+                            fontSize={isPostModal ? "4.5rem" : "3.75rem"}
+                          />
+                        ) : (
+                          <BsPauseCircleFill
+                            style={{
+                              cursor: "pointer",
+                            }}
+                            fontSize={isPostModal ? "4.5rem" : "3.75rem"}
+                          />
+                        )}
+                      </ActionIcon>
+                    </Center>
+                  }
+                />
+                <ActionIcon
+                  title="Listen on Spotify"
+                  component="a"
+                  href={post?.songUrl}
+                  target="_blank"
+                  radius={"xl"}
+                  size={isPostModal ? "2rem" : "1.6rem"}
+                  variant={"transparent"}
+                  sx={{
+                    cursor: "pointer !important",
+                    position: "absolute",
+                    top: "0.6rem",
+                    right: "0.6rem",
+                  }}
+                  onClick={() => {
+                    audioRef.current.pause();
+                    setIsAudioPlaying(false);
+                  }}
+                >
+                  <BsSpotify
+                    fontSize={isPostModal ? "2rem" : "1.6rem"}
+                    style={{
+                      cursor: "pointer !important",
+                      color: theme.colors.spotify[8],
+                    }}
+                  />
+                </ActionIcon>
+              </>
+            ) : (
+              <Center
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                <ActionIcon
+                  title="Listen on Spotify"
+                  component="a"
+                  href={post?.songUrl}
+                  target="_blank"
+                  radius={"xl"}
+                  size={"3.75rem"}
+                  variant={"transparent"}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "transparent !important",
+                    },
+                  }}
+                  onClick={() => {
+                    audioRef.current.pause();
+                    setIsAudioPlaying(false);
+                  }}
+                >
+                  <BsSpotify
+                    fontSize={"3.75rem"}
+                    style={{
+                      cursor: "pointer !important",
+                      color: theme.colors.spotify[8],
+                    }}
+                  />
+                </ActionIcon>
+              </Center>
+            ))}
+        </div>
+
+        <audio src={post?.previewUrl} type="audio/mpeg" ref={audioRef} />
+
+        {/* song info */}
+        <Flex
+          direction={"column"}
+          mt={8}
+          mb={(isDiscover || isSelect) && "0.5rem"}
+          w={!isPostModal ? 275 : isSmall ? "75vw" : 375}
+          style={{
+            textAlign: "center",
+          }}
+        >
+          <Title
+            order={3}
+            color="white"
+            sx={{
+              cursor: "default",
+            }}
+            truncate
+          >
+            {post?.songName}
+          </Title>
+          <Text
+            color="rgba(255, 255, 255, 0.8)"
+            sx={{
+              cursor: "default",
+            }}
+            truncate
+          >
+            {artists}
+          </Text>
+        </Flex>
+
+        {/* comments */}
+        {!isSelect && !isDiscover && (
+          <Flex
+            w="100%"
+            gap={"0.4rem"}
+            justify={"space-between"}
+            align={"start"}
+            direction={"column"}
+            pt="0.25rem"
+            sx={{
+              transform: "translateY(-0.3rem)",
+              borderTop: `1px solid ${theme.colors.lightWhite[7]}`,
+            }}
+          >
+            {isPostModal ? (
+              <Stack
+                w="100%"
+                mt={"0.5rem"}
+                align={"center"}
+                justify={"center"}
+                maw={375}
+              >
+                <Stack w="100%" align={"center"} spacing={0}>
+                  <ScrollArea
+                    offsetScrollbars
+                    h={!comment.error ? "148px" : "168px"}
+                    w="100%"
+                    type={"always"}
+                    pb={"0.5rem"}
+                    styles={{
+                      scrollbar: {
+                        "&, &:hover": {
+                          background: "transparent",
+                          borderRadius: "0.5rem",
+                        },
+                        '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
+                          {
+                            backgroundColor: "#474952",
+                          },
+                      },
+                    }}
+                  >
+                    {numComments === 0 ? (
+                      <Text
+                        color="white"
+                        sx={{
+                          cursor: "default",
+                        }}
+                        mb={"1.5rem"}
+                        align={"center"}
+                        fz={"0.95rem"}
+                      >
+                        No comments yet...
+                      </Text>
+                    ) : (
+                      <Stack
+                        w="100%"
+                        align="center"
+                        justify="center"
+                        spacing={"md"}
+                        style={{
+                          zIndex: 1,
+                        }}
+                      >
+                        {post?.comments?.map(
+                          ({
+                            text,
+                            username,
+                            userId,
+                            userImage,
+                            createdAt,
+                          }) => (
+                            <CommentCard
+                              key={createdAt}
+                              text={text}
+                              createdAt={createdAt}
+                              userId={userId}
+                              username={username}
+                              userImage={userImage}
+                              session={session}
+                              post={post}
+                              setPost={setPost}
+                              comment={comment}
+                              setComment={setComment}
+                              numComments={numComments}
+                              commentInputRef={commentInputRef}
+                              notificationPostId={notificationPostId}
+                              notificationCommentId={notificationCommentId}
+                              type={type}
+                              allUsers={allUsers}
+                              isSmall={isSmall}
+                              router={router}
+                            />
+                          )
+                        )}
+                      </Stack>
+                    )}
+                    <div ref={commentScrollEndRef} />
+                  </ScrollArea>
+                  <Box
+                    sx={{
+                      borderTop: `1px solid ${theme.colors.lightWhite[7]}`,
+                      width: "100%",
+                    }}
+                    mb={"0.25rem"}
+                  >
+                    <Popover
+                      position="top"
+                      opened={comment.isMentioning && comment.isFocused}
+                      width="target"
+                      offset={1}
+                      withinPortal
+                      color="dark.7"
+                      styles={{
+                        dropdown: {
+                          zIndex: 100,
+                          border: "none",
+                          outline: "1px solid rgba(192, 193, 196, 0.75)",
+                        },
+                      }}
+                    >
+                      <Popover.Target>
+                        <Textarea
+                          autosize
+                          minRows={1}
+                          maxRows={1}
+                          disabled={comment.isLoading || comment.isDeleting}
+                          ref={commentInputRef}
+                          variant={"unstyled"}
+                          placeholder="Add a comment..."
+                          inputWrapperOrder={["error", "input"]}
+                          styles={{
+                            zIndex: 100,
+                            input: {
+                              color: "white",
+                              fontSize: "1rem",
+                              marginBottom: "-.35rem",
+                            },
+                            error: {
+                              transform: "translateY(.7rem)",
+                            },
+                          }}
+                          error={comment.error}
+                          value={comment.text}
+                          onFocus={() => {
+                            setComment({
+                              ...comment,
+                              isFocused: true,
+                            });
+                          }}
+                          onBlur={() => {
+                            if (comment.error && !hasBlurredCommentError) {
+                              setHasBlurredCommentError(true);
                               setComment({
                                 ...comment,
                                 isFocused: true,
                               });
-                            }}
-                            onBlur={() => {
-                              if (comment.error && !hasBlurredCommentError) {
-                                setHasBlurredCommentError(true);
-                                setComment({
-                                  ...comment,
-                                  isFocused: true,
-                                });
-                                setTimeout(() => {
-                                  commentInputRef.current?.focus();
-                                }, 0);
-                                return;
-                              }
-                              setComment({
-                                ...comment,
-                                error: "",
-                                isFocused: false,
-                              });
-                            }}
-                            maxLength={COMMENT_MAX_LENGTH}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value.length > COMMENT_MAX_LENGTH) return;
-                              setComment({
-                                ...comment,
-                                text: value,
-                                error: "",
-                                isMentioning: value.slice(-1) === "@",
-                              });
-                            }}
-                            rightSection={
-                              comment.text.length > 0 && (
-                                <Tooltip
-                                  offset={-2}
-                                  withinPortal
-                                  position="top"
-                                  label={"Post"}
-                                  color="dark.7"
-                                  styles={{
-                                    tooltip: {
-                                      border: "none",
-                                      outline:
-                                        "1px solid rgba(192, 193, 196, 0.75)",
-                                    },
-                                  }}
-                                >
-                                  <ActionIcon
-                                    disabled={
-                                      !!comment.error ||
-                                      comment.isLoading ||
-                                      comment.isDeleting
-                                    }
-                                    variant={"transparent"}
-                                    onMouseDown={() => {
-                                      postComment({
-                                        comment,
-                                        setComment,
-                                        post,
-                                        setPost,
-                                        session,
-                                        badWordsFilter,
-                                        commentInputRef,
-                                        setIsCommentCreated,
-                                        setHasBlurredCommentError,
-                                        allUsers,
-                                      });
-                                    }}
-                                  >
-                                    <AiOutlineSend />
-                                  </ActionIcon>
-                                </Tooltip>
-                              )
+                              setTimeout(() => {
+                                commentInputRef.current?.focus();
+                              }, 0);
+                              return;
                             }
-                          />
-                        </Popover.Target>
-                        <Popover.Dropdown>
-                          <ScrollArea
-                            h={
-                              allUsers?.length === 1
-                                ? "40px"
-                                : allUsers?.length === 2
-                                ? "90px"
-                                : "140px"
-                            }
-                            type={"always"}
-                            styles={{
-                              scrollbar: {
-                                "&, &:hover": {
-                                  background: "transparent",
-                                  borderRadius: "0.5rem",
-                                },
-                                '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
-                                  {
-                                    backgroundColor: "#474952",
+                            setComment({
+                              ...comment,
+                              error: "",
+                              isFocused: false,
+                            });
+                          }}
+                          maxLength={COMMENT_MAX_LENGTH}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value.length > COMMENT_MAX_LENGTH) return;
+                            setComment({
+                              ...comment,
+                              text: value,
+                              error: "",
+                              isMentioning: value.slice(-1) === "@",
+                            });
+                          }}
+                          rightSection={
+                            comment.text.length > 0 && (
+                              <Tooltip
+                                offset={-2}
+                                withinPortal
+                                position="top"
+                                label={"Post"}
+                                color="dark.7"
+                                styles={{
+                                  tooltip: {
+                                    border: "none",
+                                    outline:
+                                      "1px solid rgba(192, 193, 196, 0.75)",
                                   },
-                              },
-                            }}
-                          >
-                            <Stack w="100%" spacing={"xs"}>
-                              {allUsers?.map((user) => (
-                                <UnstyledButton
-                                  key={user.userId}
-                                  onClick={() => {
-                                    const newText = `${comment.text.slice(
-                                      0,
-                                      comment.text.length - 1
-                                    )}@${user.username} `;
-                                    setComment({
-                                      ...comment,
-                                      text: newText,
-                                      isMentioning: false,
+                                }}
+                              >
+                                <ActionIcon
+                                  disabled={
+                                    !!comment.error ||
+                                    comment.isLoading ||
+                                    comment.isDeleting
+                                  }
+                                  variant={"transparent"}
+                                  onMouseDown={() => {
+                                    postComment({
+                                      comment,
+                                      setComment,
+                                      post,
+                                      setPost,
+                                      session,
+                                      badWordsFilter,
+                                      commentInputRef,
+                                      setIsCommentCreated,
+                                      setHasBlurredCommentError,
+                                      allUsers,
                                     });
-                                    setTimeout(() => {
-                                      commentInputRef.current.focus();
-                                    }, 0);
-                                  }}
-                                  w="100%"
-                                  sx={{
-                                    borderRadius: "0.5rem !important",
-                                    transition: "all 0.1s ease-in-out",
-                                    "&:hover": {
-                                      // backgroundColor: theme.colors.dark[5],
-                                      backgroundColor: "#141517",
-                                    },
                                   }}
                                 >
-                                  <Flex
-                                    justify="start"
-                                    align="center"
-                                    p="0.5rem 0.5rem 0.5rem .7rem"
-                                    gap="0.65rem"
-                                  >
-                                    <Avatar
-                                      src={user.userImage}
-                                      name={user.username}
-                                      radius="xl"
-                                      style={{
-                                        outline: "1px solid #c0c1c4",
-                                      }}
-                                      size={24}
-                                    />
-                                    <Text color="white" fz={"0.95rem"}>
-                                      {user.username}
-                                    </Text>
-                                  </Flex>
-                                </UnstyledButton>
-                              ))}
-                            </Stack>
-                          </ScrollArea>
-                        </Popover.Dropdown>
-                      </Popover>
-                    </Box>
-                  </Stack>
+                                  <AiOutlineSend />
+                                </ActionIcon>
+                              </Tooltip>
+                            )
+                          }
+                        />
+                      </Popover.Target>
+                      <Popover.Dropdown>
+                        <ScrollArea
+                          h={
+                            allUsers?.length === 1
+                              ? "40px"
+                              : allUsers?.length === 2
+                              ? "90px"
+                              : "140px"
+                          }
+                          type={"always"}
+                          styles={{
+                            scrollbar: {
+                              "&, &:hover": {
+                                background: "transparent",
+                                borderRadius: "0.5rem",
+                              },
+                              '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
+                                {
+                                  backgroundColor: "#474952",
+                                },
+                            },
+                          }}
+                        >
+                          <Stack w="100%" spacing={"xs"}>
+                            {allUsers?.map((user) => (
+                              <UnstyledButton
+                                key={user.userId}
+                                onClick={() => {
+                                  const newText = `${comment.text.slice(
+                                    0,
+                                    comment.text.length - 1
+                                  )}@${user.username} `;
+                                  setComment({
+                                    ...comment,
+                                    text: newText,
+                                    isMentioning: false,
+                                  });
+                                  setTimeout(() => {
+                                    commentInputRef.current.focus();
+                                  }, 0);
+                                }}
+                                w="100%"
+                                sx={{
+                                  borderRadius: "0.5rem !important",
+                                  transition: "all 0.1s ease-in-out",
+                                  "&:hover": {
+                                    // backgroundColor: theme.colors.dark[5],
+                                    backgroundColor: "#141517",
+                                  },
+                                }}
+                              >
+                                <Flex
+                                  justify="start"
+                                  align="center"
+                                  p="0.5rem 0.5rem 0.5rem .7rem"
+                                  gap="0.65rem"
+                                >
+                                  <Avatar
+                                    src={user.userImage}
+                                    name={user.username}
+                                    radius="xl"
+                                    style={{
+                                      outline: "1px solid #c0c1c4",
+                                    }}
+                                    size={24}
+                                  />
+                                  <Text color="white" fz={"0.95rem"}>
+                                    {user.username}
+                                  </Text>
+                                </Flex>
+                              </UnstyledButton>
+                            ))}
+                          </Stack>
+                        </ScrollArea>
+                      </Popover.Dropdown>
+                    </Popover>
+                  </Box>
                 </Stack>
-              ) : (
-                <Flex
-                  w="100%"
-                  justify={"space-between"}
-                  align={"center"}
-                  mt={".3rem"}
+              </Stack>
+            ) : (
+              <Flex
+                w="100%"
+                justify={"space-between"}
+                align={"center"}
+                mt={".3rem"}
+              >
+                <UnstyledButton
+                  onClick={() => {
+                    setCurrentlyPlaying(null);
+                    openPostModal();
+                  }}
+                  c="dimmed"
+                  sx={{
+                    transform: "translateX(.25rem) translateY(-.25rem)",
+                  }}
                 >
-                  <UnstyledButton
-                    onClick={() => {
-                      setCurrentlyPlaying(null);
-                      openPostModal();
-                    }}
-                    c="dimmed"
-                    sx={{
-                      transform: "translateX(.25rem) translateY(-.25rem)",
-                    }}
-                  >
-                    {getViewCommentText()}
-                  </UnstyledButton>
-                  <Text
-                    c="dimmed"
-                    sx={{
-                      transform: "translateX(-.15rem) translateY(-.25rem)",
-                      cursor: "default",
-                    }}
-                  >
-                    {formattedPostedAt}
-                  </Text>
-                </Flex>
-              )}
-            </Flex>
-          )}
-        </Flex>
+                  {getViewCommentText()}
+                </UnstyledButton>
+                <Text
+                  c="dimmed"
+                  sx={{
+                    transform: "translateX(-.15rem) translateY(-.25rem)",
+                    cursor: "default",
+                  }}
+                >
+                  {formattedPostedAt}
+                </Text>
+              </Flex>
+            )}
+          </Flex>
+        )}
       </Flex>
     </>
   );
