@@ -84,7 +84,7 @@ export default function SelectSongModal({
         onBlur={() => setIsSelectFocused(false)}
         label={
           <Group noWrap spacing={4}>
-            <Text size="sm">Recently played</Text>
+            <Text size="sm">Your songs</Text>
             <BsSpotify
               size={13}
               style={{
@@ -105,7 +105,7 @@ export default function SelectSongModal({
         value={selectedSong.value}
         itemComponent={SelectItem}
         data={
-          spotifyData?.map((data) => {
+          spotifyData?.map((data, idx) => {
             const currentSong = `${data?.songName} by ${data?.artists
               .map((artist) => artist.name)
               .join(", ")}`;
@@ -113,6 +113,10 @@ export default function SelectSongModal({
               ...data,
               value: currentSong,
               label: currentSong,
+              group: data.isCurrentlyPlaying
+                ? "Currently playing"
+                : "Recently played",
+              // group: idx === 0 ? "Most Recent" : "Recently played",
             };
           }) || []
         }

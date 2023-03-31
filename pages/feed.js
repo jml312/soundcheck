@@ -1,25 +1,43 @@
 import { getSession, useSession } from "next-auth/react";
-import { clearAuthCookies, fetchSpotify, getDayInterval } from "@/utils";
+import { clearAuthCookies } from "@/utils";
 import Post from "@/components/Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import dayjs from "dayjs";
 import SelectSongModal from "@/components/modals/SelectSongModal";
 import Filter from "bad-words";
 import { useRouter } from "next/router";
-import { Flex, Text, ScrollArea, Stack, Box } from "@mantine/core";
+import { Flex, Text, ScrollArea, Stack } from "@mantine/core";
 import { useState, useEffect } from "react";
 import client from "@/lib/sanity";
-import { postsQuery, allUsersQuery } from "@/lib/queries";
+import { allUsersQuery } from "@/lib/queries";
+import { dehydrate, QueryClient, useQuery } from "react-query";
+import { getPosts, getSpotify } from "@/actions";
 
-function Feed({ currentPosts, spotifyData, allUsers }) {
+function Feed({ spotifyData, allUsers }) {
   const router = useRouter();
   const { date } = router.query;
   const { data: session } = useSession();
-  const [posts, setPosts] = useState({
-    feedPosts: currentPosts?.feedPosts,
-    userPost: currentPosts?.userPost,
-    hasPostedToday: currentPosts?.hasPostedToday,
+
+  const [posts, setPosts] = useState();
+  const { data: currentPosts } = useQuery({
+    queryKey: ["feed", dayjs().format("YYYY-MM-DD")],
+    queryFn: () =>
+      getPosts({
+        isClient: true,
+        client,
+        date: dayjs(),
+        userId: session?.user?.id,
+      }),
+    onSuccess: (data) => {
+      setPosts({
+        feedPosts: data.feedPosts,
+        userPost: data.userPost,
+        hasPostedToday: data.hasPostedToday,
+      });
+    },
+    refetchOnMount: false,
   });
+
   const isToday = dayjs(date).isSame(dayjs(), "day");
   const [caption, setCaption] = useState({
     text: currentPosts?.userPost?.caption || "",
@@ -125,77 +143,94 @@ function Feed({ currentPosts, spotifyData, allUsers }) {
             justify="center"
             w={isMobile ? "100%" : "calc(100% - 375px)"}
           >
-            {
+            {selectSongOpened ? (
+              <Text
+                fz={"lg"}
+                fw={"bold"}
+                style={{
+                  cursor: "default",
+                  transform: isMobile && "translateY(2.4rem)",
+                }}
+              >{`-`}</Text>
+            ) : (
               <>
-                {/* <Box></Box> */}
-
                 {/* feed posts */}
                 {posts?.feedPosts?.length > 0 ? (
-                  <ScrollArea
-                    type="always"
-                    w={getScrollAreaWidth()}
-                    h={"565px"}
-                    mt={isMobile && "1.5rem"}
-                    mb={isMobile && "1rem"}
-                    style={{
-                      transform: !isMobile && "translateY(2.8rem)",
-                    }}
-                    styles={{
-                      scrollbar: {
-                        "&, &:hover": {
-                          backgroundColor: "transparent",
-                          borderRadius: "0.5rem",
-                        },
-                        '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
-                          {
-                            backgroundColor: "#474952",
-                          },
-                      },
-                      corner: {
-                        display: "none",
-                      },
-                    }}
-                  >
-                    <Flex
-                      justify={"center"}
-                      align={"end"}
-                      w={"100%"}
-                      h={"100%"}
-                      wrap={"wrap"}
-                      gap="1.5rem"
+                  <Stack>
+                    {/* <Text
+                      fz={"lg"}
+                      fw={"bold"}
+                      style={{
+                        cursor: "default",
+                        transform: isMobile && "translateY(2.4rem)",
+                      }}
                     >
-                      {posts?.feedPosts?.map((post) => (
-                        <Post
-                          key={post._id}
-                          post={post}
-                          setPost={setFeedPost}
-                          currentlyPlaying={currentlyPlaying}
-                          setCurrentlyPlaying={setCurrentlyPlaying}
-                          session={session}
-                          caption={caption}
-                          setCaption={setCaption}
-                          badWordsFilter={badWordsFilter}
-                          allUsers={allUsers}
-                          activePost={activePost}
-                          setActivePost={setActivePost}
-                        />
-                      ))}
-                    </Flex>
-                  </ScrollArea>
+                      {formattedDate}
+                    </Text> */}
+                    <ScrollArea
+                      type="always"
+                      w={getScrollAreaWidth()}
+                      h={"565px"}
+                      mt={isMobile && "1.5rem"}
+                      mb={isMobile && "1rem"}
+                      style={{
+                        transform: !isMobile && "translateY(2.8rem)",
+                      }}
+                      styles={{
+                        scrollbar: {
+                          "&, &:hover": {
+                            backgroundColor: "transparent",
+                            borderRadius: "0.5rem",
+                          },
+                          '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
+                            {
+                              backgroundColor: "#474952",
+                            },
+                        },
+                        corner: {
+                          display: "none",
+                        },
+                      }}
+                    >
+                      <Flex
+                        justify={"center"}
+                        align={"end"}
+                        w={"100%"}
+                        h={"100%"}
+                        wrap={"wrap"}
+                        gap="1.5rem"
+                      >
+                        {posts?.feedPosts?.map((post) => (
+                          <Post
+                            key={post._id}
+                            post={post}
+                            setPost={setFeedPost}
+                            currentlyPlaying={currentlyPlaying}
+                            setCurrentlyPlaying={setCurrentlyPlaying}
+                            session={session}
+                            caption={caption}
+                            setCaption={setCaption}
+                            badWordsFilter={badWordsFilter}
+                            allUsers={allUsers}
+                            activePost={activePost}
+                            setActivePost={setActivePost}
+                          />
+                        ))}
+                      </Flex>
+                    </ScrollArea>
+                  </Stack>
                 ) : (
                   <Text
                     fz={"lg"}
                     fw={"bold"}
                     style={{
                       cursor: "default",
-                      transform: isMobile && "translateY(2.4rem)",
+                      transform: isMobile && "translateY(1rem)",
                     }}
                   >{`No posts on ${formattedDate}`}</Text>
                 )}
-
-                {/* <Box></Box> */}
               </>
-            }
+            )}
           </Stack>
 
           {/* user post */}
@@ -211,22 +246,41 @@ function Feed({ currentPosts, spotifyData, allUsers }) {
             pb={isMobile && "3rem"}
             mb={isMobile && "3rem"}
           >
-            {!!posts?.userPost && (
-              <Post
-                key={posts?.userPost?._id}
-                isUser
-                post={posts?.userPost}
-                setPost={setUserPost}
-                currentlyPlaying={currentlyPlaying}
-                setCurrentlyPlaying={setCurrentlyPlaying}
-                session={session}
-                caption={caption}
-                setCaption={setCaption}
-                badWordsFilter={badWordsFilter}
-                allUsers={allUsers}
-                activePost={activePost}
-                setActivePost={setActivePost}
-              />
+            {selectSongOpened ? (
+              <Text
+                fz={"lg"}
+                fw={"bold"}
+                style={{
+                  cursor: "default",
+                  transform: isMobile && "translateY(2.4rem)",
+                }}
+              >{`-`}</Text>
+            ) : (
+              <Stack>
+                <Text
+                  fz={"lg"}
+                  fw={"bold"}
+                  align={"center"}
+                  style={{
+                    cursor: "default",
+                  }}
+                >{`Your post`}</Text>
+                <Post
+                  key={posts?.userPost?._id}
+                  isUser
+                  post={posts?.userPost}
+                  setPost={setUserPost}
+                  currentlyPlaying={currentlyPlaying}
+                  setCurrentlyPlaying={setCurrentlyPlaying}
+                  session={session}
+                  caption={caption}
+                  setCaption={setCaption}
+                  badWordsFilter={badWordsFilter}
+                  allUsers={allUsers}
+                  activePost={activePost}
+                  setActivePost={setActivePost}
+                />
+              </Stack>
             )}
           </Flex>
         </Flex>
@@ -251,26 +305,29 @@ export async function getServerSideProps({ req, res }) {
   try {
     const allUsers = await client.fetch(allUsersQuery);
 
-    const { startDate, endDate } = getDayInterval(dayjs());
-    const currentPosts = await client.fetch(postsQuery, {
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      todayStart: startDate.toISOString(),
-      todayEnd: endDate.toISOString(),
-      userId: session?.user?.id,
+    const queryClient = new QueryClient();
+    const currentPosts = await queryClient.fetchQuery({
+      queryKey: ["feed", dayjs().format("YYYY-MM-DD")],
+      queryFn: () =>
+        getPosts({
+          isClient: false,
+          client,
+          date: dayjs(),
+          userId: session?.user?.id,
+        }),
     });
 
     if (currentPosts?.hasPostedToday) {
       return {
         props: {
-          currentPosts,
+          dehydratedState: dehydrate(queryClient),
           allUsers,
           spotifyData: [],
         },
       };
     }
 
-    const spotifyData = await fetchSpotify({ session, client });
+    const spotifyData = await getSpotify({ session, client });
 
     if (!spotifyData?.length) {
       clearAuthCookies(res);
@@ -284,7 +341,7 @@ export async function getServerSideProps({ req, res }) {
 
     return {
       props: {
-        currentPosts,
+        dehydratedState: dehydrate(queryClient),
         allUsers,
         spotifyData,
       },

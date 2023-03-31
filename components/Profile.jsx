@@ -50,18 +50,33 @@ export default function Profile({ isUser, profile }) {
     followers.includes(session?.user?.id)
   );
 
+  const BODY_WIDTH = "70%";
+
   return (
     <Flex
       align={"center"}
       justify={"space-between"}
       direction={"column"}
       h={"calc(100vh - 5rem)"}
+      gap={40}
       style={{
         transform: "translateY(5rem)",
+        overflow: "hidden",
       }}
     >
-      <Flex justify={"space-between"} align={"center"} w="90%" gap={10} mt={30}>
-        <Group>
+      <Flex
+        justify={"space-between"}
+        align={"end"}
+        w={BODY_WIDTH}
+        gap={10}
+        mt={30}
+        pb={12}
+        style={{
+          borderBottom: "1px solid #c0c1c4",
+          flexGrow: 0,
+        }}
+      >
+        <Group spacing={10}>
           <Avatar
             size={40}
             src={image}
@@ -74,7 +89,7 @@ export default function Profile({ isUser, profile }) {
           />
           <Stack spacing={0}>
             <Group spacing={8} align={"end"}>
-              <Text fz="lg">{name}</Text>
+              <Text fz="sm">{name}</Text>
 
               <Tooltip
                 offset={isUser ? 6 : -2}
@@ -82,7 +97,7 @@ export default function Profile({ isUser, profile }) {
                 position="right"
                 label={
                   isUser
-                    ? "Open playlist in Spotify"
+                    ? "View your Soundcheck playlist"
                     : isFollowing
                     ? "Unfollow"
                     : "Follow"
@@ -133,7 +148,7 @@ export default function Profile({ isUser, profile }) {
                 )}
               </Tooltip>
             </Group>
-            <Text fz="sm" color="#C0C0C0">
+            <Text fz="xs" color="#C0C0C0">
               Joined {dayjs(createdAt).format("MMM YYYY")}
             </Text>
           </Stack>
@@ -143,7 +158,7 @@ export default function Profile({ isUser, profile }) {
         </Text>
       </Flex>
 
-      <Flex w={"90%"} justify="space-evenly">
+      <Flex w={BODY_WIDTH} justify="space-evenly" style={{ flexGrow: 0 }}>
         <Stack>
           <Text fz="lg">{numFollowing} Following</Text>
           <ScrollArea>
@@ -156,14 +171,14 @@ export default function Profile({ isUser, profile }) {
         </Stack>
         <Stack
           style={{
-            border: "1px solid white",
+            // border: "1px solid white",
             borderRadius: ".5rem",
           }}
         >
           <Text
             fz="lg"
             style={{
-              borderBottom: "1px solid white",
+              // borderBottom: "1px solid white",
             }}
           >
             {numFollowers} Follower{numFollowers === 1 ? "" : "s"}
@@ -179,9 +194,10 @@ export default function Profile({ isUser, profile }) {
       </Flex>
 
       <Tabs
-        w="90%"
+        w={BODY_WIDTH}
         style={{
-          transform: "translateY(1rem)",
+          // transform: "translateY(1rem)",
+          flexGrow: 2,
         }}
         defaultValue="posts"
         // variant="pills"
@@ -203,22 +219,13 @@ export default function Profile({ isUser, profile }) {
             // direction="column"
             w="100%"
             style={{
-              transform: "translateY(1rem)",
+              transform: "translateY(4rem)",
             }}
             wrap="wrap"
             justify="center"
             // justify="space-between"
             gap={"1rem"}
           >
-            {/* // <Post
-              //   key={post._id}
-              //   post={post}
-              //   activePost={activePost}
-              //   setActivePost={setActivePost}
-              //   currentlyPlaying={currentlyPlaying}
-              //   setCurrentlyPlaying={setCurrentlyPlaying}
-              //   isDiscover
-              // /> */}
             {posts.map((post) => (
               <SongCard key={post._id} post={post} />
             ))}

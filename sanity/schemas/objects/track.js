@@ -90,5 +90,11 @@ export default {
       of: [{type: 'string'}],
       hidden: ({document}) => !document?.genres,
     },
+    {
+      name: 'isCurrentlyPlaying',
+      title: 'Is Currently Playing',
+      type: 'boolean',
+      initialValue: false,
+    },
   ],
 }

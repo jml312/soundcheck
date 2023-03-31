@@ -123,8 +123,10 @@ function Post({
       setIsAudioPlaying(false);
       if (currentlyPlaying === post?._id) {
         setCurrentlyPlaying(null);
+        setActivePost(post?._id);
+      } else {
+        setActivePost(currentlyPlaying);
       }
-      setActivePost(currentlyPlaying);
     });
     audioRef.current.addEventListener("timeupdate", () => {
       if (!audioRef.current) return;
@@ -146,7 +148,7 @@ function Post({
         setIsAudioPlaying(false);
       }
     });
-  }, []);
+  }, [currentlyPlaying, activePost, post?._id]);
   useEffect(() => {
     if (currentlyPlaying !== post?._id) {
       audioRef.current.pause();
@@ -246,15 +248,6 @@ function Post({
         setActivePost={setActivePost}
       />
 
-      {/* <LoadingOverlay
-        visible={
-          comment?.isLoading || comment?.isDeleting || caption?.isLoading
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        zIndex={1000}
-      /> */}
-
       <Flex
         bg="lightGray"
         justify={"center"}
@@ -266,8 +259,19 @@ function Post({
         mah={"100%"}
         sx={{
           borderRadius: "0.5rem !important",
+          position: "relative",
         }}
       >
+        <LoadingOverlay
+          visible={
+            comment?.isLoading ||
+            comment?.isDeleting ||
+            isLikeLoading ||
+            isFollowLoading
+          }
+          overlayOpacity={0.55}
+          overlayBlur={3}
+        />
         {/* like + follow */}
         {!isDiscover && (
           <Flex
@@ -283,6 +287,7 @@ function Post({
           >
             <Tooltip
               disabled={isSelect || isUser}
+              // disabled={isSelect}
               color="dark.7"
               styles={{
                 tooltip: {

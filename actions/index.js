@@ -8,6 +8,8 @@ import getDiscoverSongs from "./getDiscoverSongs";
 import getNotifications from "./getNotifications";
 import clearNotification from "./clearNotification";
 import viewNotification from "./viewNotification";
+import getPosts from "./getPosts";
+import getSpotify from "./getSpotify";
 
 export {
   postSong,
@@ -20,4 +22,6 @@ export {
   getNotifications,
   clearNotification,
   viewNotification,
+  getPosts,
+  getSpotify,
 };

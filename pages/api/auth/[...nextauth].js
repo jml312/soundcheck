@@ -14,8 +14,9 @@ export default NextAuth({
       if (account.provider !== "spotify") return false;
       const { id, name, email, image } = user;
       const { access_token } = account;
+      let newUserId;
       try {
-        const { playlistID } = await client.createIfNotExists({
+        const { _id, playlistID } = await client.createIfNotExists({
           _type: "user",
           _id: id,
           name,
@@ -33,6 +34,7 @@ export default NextAuth({
           followers: [],
           notifications: [],
         });
+        newUserId = _id;
 
         let followsSoundcheck = false;
         try {
@@ -67,6 +69,19 @@ export default NextAuth({
             }
           );
 
+          // add image to playlist
+          // await axios.put(
+          //   `https://api.spotify.com/v1/playlists/${_playlistID}/images`,
+          //   {
+          //     url: "",
+          //   },
+          //   {
+          //     headers: {
+          //       Authorization: `Bearer ${access_token}`,
+          //     },
+          //   }
+          // );
+
           await client.patch(id).set({ playlistID: _playlistID }).commit();
           user.playlistID = _playlistID;
         }
@@ -75,6 +90,7 @@ export default NextAuth({
 
         return true;
       } catch {
+        await client.delete(newUserId).commit();
         return false;
       }
     },

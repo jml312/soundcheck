@@ -2,9 +2,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { recentlyPlayedQuery } from "@/lib/queries";
 
-// import client from "@/lib/sanity";
-
-export const fetchSpotify = async ({ session, client }) => {
+export default async function getSpotify({ session, client }) {
   const { accessToken, id } = session.user;
 
   try {
@@ -46,6 +44,7 @@ export const fetchSpotify = async ({ session, client }) => {
         albumUrl: currentlyPlaying.item.album.external_urls.spotify,
         albumImage: currentlyPlaying.item.album.images[0].url,
         songID: currentlyPlaying.item.id,
+        isCurrentlyPlaying: true,
       });
     }
 
@@ -82,30 +81,32 @@ export const fetchSpotify = async ({ session, client }) => {
       .sort((a, b) => (a.playedAt < b.playedAt ? 1 : -1));
 
     const allData = await Promise.all(
-      [...spotifyData, ...filteredRecentlyPlayed].map(async (item) => {
-        const genres = await Promise.all(
-          item.artists.map(async (artist) => {
-            const { data } = await axios.get(
-              `https://api.spotify.com/v1/artists/${artist.id}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                },
-              }
-            );
-            return data.genres;
-          })
-        );
-        return {
-          ...item,
-          _key: item.songID,
-          artists: item.artists.map((artist) => ({
-            ...artist,
-            _key: artist.id,
-          })),
-          genres: [...new Set(genres.flat())],
-        };
-      })
+      [...spotifyData, ...filteredRecentlyPlayed]
+        .slice(0, 10)
+        .map(async (item) => {
+          const genres = await Promise.all(
+            item.artists.map(async (artist) => {
+              const { data } = await axios.get(
+                `https://api.spotify.com/v1/artists/${artist.id}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                  },
+                }
+              );
+              return data.genres;
+            })
+          );
+          return {
+            ...item,
+            _key: item.songID,
+            artists: item.artists.map((artist) => ({
+              ...artist,
+              _key: artist.id,
+            })),
+            genres: [...new Set(genres.flat())],
+          };
+        })
     );
 
     await client
@@ -115,8 +116,8 @@ export const fetchSpotify = async ({ session, client }) => {
       })
       .commit();
 
-    return allData.slice(0, 10);
+    return allData;
   } catch {
     return [];
   }
-};
+}
