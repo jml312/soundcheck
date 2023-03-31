@@ -125,7 +125,10 @@ function Post({
     });
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
-        audioRef?.current?.pause();
+        if (audioRef?.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
         setActivePost(null);
         setCurrentlyPlaying(null);
         setIsAudioPlaying(false);
