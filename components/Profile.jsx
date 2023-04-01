@@ -20,12 +20,14 @@ import dayjs from "dayjs";
 import { FaUserPlus, FaUserCheck } from "react-icons/fa";
 import { useSession } from "next-auth/react";
 import { useState, useMemo } from "react";
-import { BsSpotify } from "react-icons/bs";
-
+import { BsSpotify, BsHeadphones } from "react-icons/bs";
 import Post from "./Post";
 import { useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
+
+import { Pie, Bar } from "react-chartjs-2";
+import Chart from "chart.js/auto";
 
 export default function Profile({ isUser, profile }) {
   const {
@@ -164,11 +166,12 @@ export default function Profile({ isUser, profile }) {
                     fontSize={"1.6rem"}
                     sx={(theme) => ({
                       cursor: "pointer !important",
-                      color: theme.colors.spotify[8],
+                      // color: theme.colors.spotify[8],
                       transform: "translateX(-.15rem) translateY(.12rem)",
                     })}
                   >
-                    <BsSpotify />
+                    <BsHeadphones />
+                    {/* <BsSpotify /> */}
                   </Anchor>
                 ) : (
                   <ActionIcon
@@ -202,9 +205,7 @@ export default function Profile({ isUser, profile }) {
             </Text>
           </Stack>
         </Group>
-        <Text fz="lg">
-          🔥 {postStreak} day{postStreak === 1 ? "" : "s"}
-        </Text>
+        <Text fz="lg">🔥 {postStreak} day streak</Text>
       </Flex>
 
       <Flex
@@ -490,7 +491,7 @@ export default function Profile({ isUser, profile }) {
         </Tabs.Panel>
 
         <Tabs.Panel value="stats" mb="4rem">
-          stats:
+          {/* stats:
           {artists.map((artist) => (
             <Text key={artist.name}>
               {artist.name} - {artist.count}
@@ -502,7 +503,7 @@ export default function Profile({ isUser, profile }) {
             <Text key={genre.name}>
               {genre.name} - {genre.count}
             </Text>
-          ))}
+          ))} */}
           {/* stats graphs go here */}
         </Tabs.Panel>
       </Tabs>

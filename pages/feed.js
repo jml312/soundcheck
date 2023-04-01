@@ -47,7 +47,7 @@ function Feed({ spotifyData, allUsers }) {
     isFocused: false,
   });
   const [activePost, setActivePost] = useState(null);
-  const formattedDate = dayjs(date).format("MMMM D, YYYY");
+  // const formattedDate = dayjs(date).format("MMMM D, YYYY");
   const [selectSongOpened, { close: closeSelectSong, open: openSelectSong }] =
     useDisclosure(
       typeof currentPosts?.hasPostedToday === "boolean" &&
@@ -111,7 +111,7 @@ function Feed({ spotifyData, allUsers }) {
     } else if (postType === "following") {
       setPosts({
         ...posts,
-        feedPosts: currentPosts?.feedPosts.filter((post) => post.isFollowing),
+        feedPosts: currentPosts?.feedPosts?.filter((post) => post.isFollowing),
       });
     }
   }, [postType]);
@@ -168,23 +168,29 @@ function Feed({ spotifyData, allUsers }) {
               >{`-`}</Text>
             ) : (
               <>
+                <Flex
+                  w={getScrollAreaWidth()}
+                  justify="center"
+                  align="center"
+                  style={{
+                    transform:
+                      posts?.feedPosts?.length > 0
+                        ? "translateY(2.8rem)"
+                        : "translateY(0)",
+                  }}
+                >
+                  <SegmentedControl
+                    value={postType}
+                    onChange={setPostType}
+                    data={[
+                      { label: "Everyone", value: "everyone" },
+                      { label: "Following", value: "following" },
+                    ]}
+                  />
+                </Flex>
                 {/* feed posts */}
-                {currentPosts?.feedPosts?.length > 0 ? (
-                  <Stack>
-                    <Flex
-                      w={getScrollAreaWidth()}
-                      justify="center"
-                      align="center"
-                    >
-                      <SegmentedControl
-                        value={postType}
-                        onChange={setPostType}
-                        data={[
-                          { label: "Everyone", value: "everyone" },
-                          { label: "Following", value: "following" },
-                        ]}
-                      />
-                    </Flex>
+                {posts?.feedPosts?.length > 0 ? (
+                  <Stack spacing={0}>
                     <ScrollArea
                       type="always"
                       w={getScrollAreaWidth()}
@@ -245,7 +251,16 @@ function Feed({ spotifyData, allUsers }) {
                       cursor: "default",
                       transform: isMobile && "translateY(1rem)",
                     }}
-                  >{`No posts on ${formattedDate}`}</Text>
+                  >
+                    {postType === "everyone"
+                      ? "No posts yet"
+                      : "No following posts yet"}
+
+                    {/* //   `No posts
+                  // for ${
+                  //   postType === "everyone" ? "everyone" : "following"
+                  // } on ${formattedDate}`} */}
+                  </Text>
                 )}
               </>
             )}

@@ -13,7 +13,7 @@ export default async function viewNotification({
     _key,
     type,
     commentId,
-    post: { _ref: postId },
+    post,
     userId: notificationUserId,
   } = notification;
 
@@ -35,12 +35,12 @@ export default async function viewNotification({
     let pathname, shallow;
     switch (type) {
       case "like":
-        pathname = `/feed?postId=${postId}&type=like`;
+        pathname = `/feed?postId=${post?._ref}&type=like`;
         shallow = router.pathname === "/feed";
         break;
       case "comment":
       case "mention":
-        pathname = `/feed?postId=${postId}&commentId=${commentId}&type=${type}`;
+        pathname = `/feed?postId=${post?._ref}&commentId=${commentId}&type=${type}`;
         shallow = router.pathname === "/feed";
         break;
       case "follow":
@@ -48,8 +48,7 @@ export default async function viewNotification({
         shallow = false;
     }
     router.push(pathname, undefined, { shallow });
-  } catch (e) {
-    console.log(e);
+  } catch {
     setIsLoading(false);
     setNotifications(originalNotifications);
   }

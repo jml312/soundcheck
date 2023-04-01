@@ -6,6 +6,13 @@ import axios from "axios";
 export default async function getPosts({ isClient, client, date, userId }) {
   const { startDate, endDate } = getDayInterval(date);
   const { startDate: todayStart, endDate: todayEnd } = getDayInterval(dayjs());
+  console.log(
+    startDate.toISOString(),
+    endDate.toISOString(),
+    todayStart.toISOString(),
+    todayEnd.toISOString(),
+    userId
+  );
   if (isClient) {
     const { data } = await axios.get("/api/protected/posts", {
       params: { userId },

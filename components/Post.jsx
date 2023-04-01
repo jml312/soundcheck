@@ -91,6 +91,7 @@ function Post({
   const [isCommentCreated, setIsCommentCreated] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const captionRef = useRef(null);
+  const followRef = useRef(null);
   const theme = useMantineTheme();
   const [hasBlurredCaptionError, setHasBlurredCaptionError] = useState(false);
   const [hasBlurredCommentError, setHasBlurredCommentError] = useState(false);
@@ -274,7 +275,8 @@ function Post({
             })}
           >
             <Tooltip
-              disabled={isSelect || isUser}
+              disabled={isSelect || isUser || isPostModal}
+              // disabled={isSelect || isUser}
               // disabled={isSelect}
               color="dark.7"
               styles={{
@@ -414,10 +416,16 @@ function Post({
             {!isUser && (
               <Flex justify={"center"} align="center">
                 <Tooltip
-                  offset={3}
-                  label={post?.isFollowing ? `Unfollow` : `Follow`}
-                  position="top"
+                  events={{
+                    hover: true,
+                    focus: false,
+                    touch: false,
+                  }}
                   withinPortal
+                  label={post?.isFollowing ? "Unfollow" : "Follow"}
+                  position="top"
+                  zIndex={2}
+                  offset={3}
                   disabled={isFollowLoading}
                   color="dark.7"
                   styles={{
@@ -428,8 +436,22 @@ function Post({
                   }}
                 >
                   <ActionIcon
+                    mr={"-.2rem"}
+                    ref={followRef}
+                    variant={"transparent"}
+                    radius="xl"
+                    onClick={() => {
+                      followUser({
+                        isFollowing: post?.isFollowing,
+                        setIsFollowLoading,
+                        post,
+                        setPost,
+                        session,
+                      });
+                      followRef.current.blur();
+                    }}
+                    disabled={isFollowLoading}
                     sx={(theme) => ({
-                      transform: "translateX(.1rem)",
                       color: post?.isFollowing
                         ? theme.colors.green[6]
                         : "#c1c2c5",
@@ -439,27 +461,16 @@ function Post({
                           : "#c1c2c5",
                       },
                     })}
-                    variant={"transparent"}
-                    radius="xl"
-                    disabled={isFollowLoading}
-                    onClick={() =>
-                      followUser({
-                        isFollowing: post?.isFollowing,
-                        setIsFollowLoading,
-                        post,
-                        setPost,
-                        session,
-                      })
-                    }
                   >
-                    {post?.isFollowing ? (
-                      <FaUserCheck fontSize="1.175rem" />
-                    ) : (
-                      <FaUserPlus fontSize="1.175rem" />
-                    )}
+                    {post?.isFollowing ? <FaUserCheck /> : <FaUserPlus />}
                   </ActionIcon>
                 </Tooltip>
                 <Tooltip
+                  events={{
+                    hover: true,
+                    focus: false,
+                    touch: false,
+                  }}
                   withinPortal
                   label={post?.isLiked ? "Unlike" : "Like"}
                   position="top"
