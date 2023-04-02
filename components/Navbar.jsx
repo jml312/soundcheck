@@ -54,28 +54,6 @@ function Navbar({ children }) {
     },
   });
 
-  // const [notifications, setNotifications] = useState(
-  //   [...Array(12)].map((_, i) => ({
-  //     _id: i,
-  //     type:
-  //       i % 4 === 0
-  //         ? "like"
-  //         : i % 4 === 1
-  //         ? "comment"
-  //         : i % 4 === 2
-  //         ? "follow"
-  //         : "mention",
-  //     postID: "7ptQMKgEUeVX2lESrJGuZm",
-  //     // postID: i,
-  //     commentID: "2023-03-28T18:40:57.979Z",
-  //     userId: i,
-  //     username: "username",
-  //     userImage: "https://i.pravatar.cc/150?img=7",
-  //     createdAt: "2023-03-28T18:40:57.979Z",
-  //     // createdAt: "3/27/23",
-  //   }))
-  // );
-
   const [isLoading, setIsLoading] = useState(false);
 
   const [

@@ -21,7 +21,7 @@ import { FaUserPlus, FaUserCheck } from "react-icons/fa";
 import { useSession } from "next-auth/react";
 import { useState, useMemo } from "react";
 import { BsSpotify, BsHeadphones } from "react-icons/bs";
-import Post from "./Post";
+import Post from "../Post/Post";
 import { useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
@@ -201,7 +201,7 @@ export default function Profile({ isUser, profile }) {
               </Tooltip>
             </Group>
             <Text fz="xs" color="#C0C0C0">
-              Joined {dayjs(createdAt).format("MMM YYYY")}
+              {dayjs(createdAt).format("MMM D, YYYY")}
             </Text>
           </Stack>
         </Group>

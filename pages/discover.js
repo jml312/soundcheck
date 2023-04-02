@@ -1,7 +1,7 @@
 import { getSession, useSession } from "next-auth/react";
 import { Flex, ScrollArea, Title, Text, Stack } from "@mantine/core";
 import { getDayInterval, clearAuthCookies } from "@/utils";
-import Post from "@/components/Post";
+import Post from "@/components/Post/Post";
 import { useState } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import client from "@/lib/sanity";

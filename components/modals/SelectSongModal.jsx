@@ -9,7 +9,7 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { BsMusicNoteBeamed, BsSpotify } from "react-icons/bs";
-import Post from "../Post";
+import Post from "../Post/Post";
 import { forwardRef, useState } from "react";
 import { postSong } from "@/actions";
 
@@ -71,7 +71,8 @@ export default function SelectSongModal({
         opacity: 0.55,
       }}
       size="auto"
-      padding={6}
+      padding={16}
+      // padding={6}
     >
       <LoadingOverlay
         visible={selectedSong.isLoading}
@@ -207,7 +208,7 @@ export default function SelectSongModal({
         }
         fullWidth
         // disabled={!selectedSong.value || caption.isFocused || isSelectFocused}
-        disabled={!selectedSong.value || caption.text.length === 0}
+        disabled={caption.text.length === 0}
         mt={15}
         loading={selectedSong.isLoading}
         leftIcon={<BsMusicNoteBeamed />}

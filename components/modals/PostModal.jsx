@@ -1,4 +1,4 @@
-import Post from "../Post";
+import Post from "../Post/Post";
 import { useState, useEffect } from "react";
 import { Modal, LoadingOverlay } from "@mantine/core";
 
@@ -8,12 +8,11 @@ export default function PostModal({
   post,
   setPost,
   isUser = false,
+  session,
   currentlyPlaying,
   setCurrentlyPlaying,
   caption,
   setCaption,
-  session,
-  numComments,
   badWordsFilter,
   notificationPostId,
   notificationCommentId,
@@ -31,8 +30,6 @@ export default function PostModal({
 
   return (
     <Modal
-      // yOffset={"3vh"}
-      // yOffset={"2vh"}
       centered
       size="auto"
       overlayProps={{

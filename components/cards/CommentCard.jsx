@@ -18,6 +18,7 @@ export default function CommentCard({
   userId,
   username,
   userImage,
+  session,
   post,
   setPost,
   comment,
@@ -27,9 +28,8 @@ export default function CommentCard({
   notificationCommentId,
   type,
   allUsers,
-  isSmall,
-  session,
   router,
+  isSmall,
 }) {
   const theme = useMantineTheme();
   const commentRef = useRef();

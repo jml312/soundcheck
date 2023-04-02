@@ -2,7 +2,7 @@ import { getSession } from "next-auth/react";
 import { clearAuthCookies, getDayInterval } from "@/utils";
 import client from "@/lib/sanity";
 import { hasPostedTodayQuery, profileQuery } from "@/lib/queries";
-import Profile from "@/components/Profile";
+import Profile from "@/components/Profile/Profile";
 import dayjs from "dayjs";
 
 function MyProfile({ profile }) {

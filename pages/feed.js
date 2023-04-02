@@ -1,6 +1,6 @@
 import { getSession, useSession } from "next-auth/react";
 import { clearAuthCookies } from "@/utils";
-import Post from "@/components/Post";
+import Post from "@/components/Post/Post";
 import { useDisclosure, useMediaQuery, useDidUpdate } from "@mantine/hooks";
 import dayjs from "dayjs";
 import SelectSongModal from "@/components/modals/SelectSongModal";
