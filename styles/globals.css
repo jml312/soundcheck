@@ -9,3 +9,11 @@ input::placeholder {
 div[data-orientation="horizontal"], div[data-orientation="horizontal"]:hover, div.mantine-ScrollArea-corner {
   background-color: transparent;
 }
+
+.profile-modal div[data-orientation="vertical"] {
+  background-color: #1a1b1e !important;
+}
+
+.profile-modal div.mantine-ScrollArea-thumb, .profile-modal div.mantine-ScrollArea-thumb:hover {
+  background-color: #474952 !important;
+}

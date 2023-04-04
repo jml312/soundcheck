@@ -3,26 +3,22 @@ import {
   Avatar,
   Tabs,
   Text,
-  Title,
   Group,
-  Button,
   ActionIcon,
   Stack,
-  Space,
   Tooltip,
   ScrollArea,
   Anchor,
   Modal,
-  UnstyledButton,
+  Button,
 } from "@mantine/core";
 import { followUser } from "@/actions";
 import dayjs from "dayjs";
 import { FaUserPlus, FaUserCheck } from "react-icons/fa";
 import { useSession } from "next-auth/react";
 import { useState, useMemo } from "react";
-import { BsSpotify, BsHeadphones } from "react-icons/bs";
+import { BsSpotify } from "react-icons/bs";
 import Post from "./Post/Post";
-import { useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
 
@@ -38,7 +34,8 @@ export default function Profile({ isUser, profile }) {
     postStreak,
     likes,
     posts,
-    followers,
+    followers: followersProp,
+    isFollowing: isFollowingProp,
     following,
     stats,
     playlistID,
@@ -79,26 +76,23 @@ export default function Profile({ isUser, profile }) {
     []
   );
 
-  const numFollowers = followers?.length;
-  const numFollowing = following?.length;
-  const numPosts = posts.length;
-  const numLikes = likes.length;
+  const { data: session } = useSession();
   const [activePost, setActivePost] = useState(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
-  const [isFollowLoading, setIsFollowLoading] = useState(false);
-  const { data: session } = useSession();
-
   const [isFollowing, setIsFollowing] = useState(
-    followers?.includes(session?.user?.id)
+    !!followersProp.find((follower) => follower.userId === session?.user?.id)
   );
+  const [followers, setFollowers] = useState(followersProp || []);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [followersOpened, { open: openFollowers, close: closeFollowers }] =
     useDisclosure(false);
   const [followingOpened, { open: openFollowing, close: closeFollowing }] =
     useDisclosure(false);
-
+  const numFollowers = followers?.length;
+  const numFollowing = following?.length;
   const BODY_WIDTH = "87.5%";
   const BODY_MAX_WIDTH = "925px";
-  // const BODY_MAX_WIDTH = "1000px";
+
   return (
     <Flex
       align={"center"}
@@ -108,6 +102,7 @@ export default function Profile({ isUser, profile }) {
       gap={40}
       style={{
         transform: "translateY(5rem)",
+        userSelect: "none",
         overflow: "hidden",
       }}
     >
@@ -118,18 +113,16 @@ export default function Profile({ isUser, profile }) {
         maw={BODY_MAX_WIDTH}
         gap={10}
         mt={30}
-        pb={12}
+        pb={11}
         style={{
-          borderBottom: "1px solid #c0c1c4",
+          borderBottom: "1px solid rgba(192, 193, 196, 0.65)",
           flexGrow: 0,
-          // flexBasis: "25%",
         }}
       >
         <Group spacing={10}>
           <Avatar
-            size={40}
+            size={32}
             src={image}
-            alt={`${name}'s profile`}
             radius={"50%"}
             style={{
               outline: "1px solid #c0c1c4",
@@ -137,67 +130,98 @@ export default function Profile({ isUser, profile }) {
             }}
           />
           <Stack spacing={0}>
-            <Group spacing={8} align={"end"}>
+            <Group
+              spacing={8}
+              align={"end"}
+              style={{
+                transform: "translateY(.05rem)",
+              }}
+            >
               <Text fz="sm">{name}</Text>
-              <Tooltip
-                offset={isUser ? 6 : -2}
-                withinPortal
-                position="right"
-                label={
-                  isUser
-                    ? "your soundcheck playlist"
-                    : isFollowing
-                    ? "Unfollow"
-                    : "Follow"
-                }
-                color="dark.7"
-                styles={{
-                  tooltip: {
-                    border: "none",
-                    outline: "1px solid rgba(192, 193, 196, 0.75)",
-                  },
-                }}
-              >
-                {isUser ? (
+              {isUser ? (
+                <Tooltip
+                  offset={6}
+                  withinPortal
+                  position="right"
+                  disabled={isFollowLoading}
+                  label={"your soundcheck playlist"}
+                  color="dark.7"
+                  styles={{
+                    tooltip: {
+                      border: "none",
+                      outline: "1px solid rgba(192, 193, 196, 0.75)",
+                    },
+                  }}
+                >
                   <Anchor
                     href={`https://open.spotify.com/playlist/${playlistID}`}
                     target="_blank"
                     fontSize={"1.6rem"}
                     sx={(theme) => ({
                       cursor: "pointer !important",
-                      // color: theme.colors.spotify[8],
+                      color: theme.colors.spotify[8],
                       transform: "translateX(-.15rem) translateY(.12rem)",
                     })}
                   >
-                    <BsHeadphones />
-                    {/* <BsSpotify /> */}
+                    <BsSpotify />
                   </Anchor>
-                ) : (
+                </Tooltip>
+              ) : isFollowLoading ? (
+                <ActionIcon
+                  sx={{
+                    transform: "translateX(-.375rem) translateY(.12rem)",
+                    color: "#b3b6b9",
+                  }}
+                  disabled
+                  variant={"transparent"}
+                  radius="xl"
+                >
+                  {isFollowing ? <FaUserCheck /> : <FaUserPlus />}
+                </ActionIcon>
+              ) : (
+                <Tooltip
+                  offset={-2}
+                  withinPortal
+                  position="right"
+                  disabled={isFollowLoading}
+                  label={isFollowing ? "Unfollow" : "Follow"}
+                  color="dark.7"
+                  styles={{
+                    tooltip: {
+                      border: "none",
+                      outline: "1px solid rgba(192, 193, 196, 0.75)",
+                    },
+                  }}
+                >
                   <ActionIcon
                     sx={(theme) => ({
-                      // transform: "translateX(.1rem)",
-                      transform: "translateX(-.3rem) translateY(.12rem)",
+                      transform: "translateX(-.375rem) translateY(.12rem)",
+                      "&:active": {
+                        transform: "translateX(-.375rem) translateY(.2rem)",
+                      },
                       color: isFollowing ? theme.colors.green[6] : "#c1c2c5",
                       "&[data-disabled]": {
                         color: isFollowing ? theme.colors.green[6] : "#c1c2c5",
                       },
                     })}
+                    disabled={isFollowLoading}
                     variant={"transparent"}
                     radius="xl"
-                    // onClick={() =>
-                    //   followUser({
-                    //     isFollowing: post?.isFollowing,
-                    //     setIsFollowLoading,
-                    //     post,
-                    //     setPost,
-                    //     session,
-                    //   })
-                    // }
+                    onClick={() =>
+                      followUser({
+                        session,
+                        toFollowId: _id,
+                        isFollowing,
+                        setIsFollowing,
+                        setIsFollowLoading,
+                        setFollowers,
+                      })
+                    }
                   >
                     {isFollowing ? <FaUserCheck /> : <FaUserPlus />}
                   </ActionIcon>
-                )}
-              </Tooltip>
+                </Tooltip>
+              )}
             </Group>
             <Text fz="xs" color="#C0C0C0">
               {dayjs(createdAt).format("MMM D, YYYY")}
@@ -210,14 +234,11 @@ export default function Profile({ isUser, profile }) {
       <Flex
         w={BODY_WIDTH}
         maw={"450px"}
-        my={20}
+        my={40}
         justify="space-evenly"
-        // justify="center"
-        // gap={"2.5rem"}
-        // style={{ flexGrow: 0 }}
         style={{
-          // flexBasis: "25%",
           flexGrow: 0,
+          transform: "translateY(-.1rem)",
         }}
       >
         <Modal
@@ -225,42 +246,13 @@ export default function Profile({ isUser, profile }) {
           onClose={closeFollowers}
           title={"Followers"}
           centered
+          className="profile-modal"
+          overlayProps={{
+            blur: 3,
+            opacity: 0.55,
+          }}
         >
-          {followers?.map((user) => (
-            <Text key={user._id} fz="sm">
-              {user._ref}
-            </Text>
-          ))}
-        </Modal>
-        <Group>
-          <UnstyledButton
-            title="View Followers"
-            disabled={numFollowers === 0}
-            onClick={openFollowers}
-            p={10}
-            style={{
-              // borderBottom: `.5px solid ${
-              //   numFollowers === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)"
-              // }`,
-              // border: "1px solid #c0c1c4",
-              // borderRadius: ".5rem",
-              color:
-                numFollowers === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)",
-              cursor: numFollowers === 0 ? "default" : "pointer",
-              fontSize: "1.05rem",
-              fontWeight: numFollowers === 0 ? 300 : 500,
-            }}
-          >
-            {numFollowers} Follower{numFollowers === 1 ? "" : "s"}
-          </UnstyledButton>
-        </Group>
-        <Modal
-          opened={followingOpened}
-          onClose={closeFollowing}
-          title={"Following"}
-          centered
-        >
-          {following.map((user) => (
+          {followers.map((user) => (
             <Link
               href={`/profile/${user?.userId}`}
               passHref
@@ -270,7 +262,6 @@ export default function Profile({ isUser, profile }) {
                 borderRadius: "0.5rem !important",
                 transition: "all 0.1s ease-in-out",
                 "&:hover": {
-                  // backgroundColor: theme.colors.dark[5],
                   backgroundColor: "#141517",
                 },
               }}
@@ -287,6 +278,7 @@ export default function Profile({ isUser, profile }) {
                   radius="xl"
                   style={{
                     outline: "1px solid #c0c1c4",
+                    zIndex: -1,
                   }}
                   size={24}
                 />
@@ -298,26 +290,100 @@ export default function Profile({ isUser, profile }) {
           ))}
         </Modal>
         <Group>
-          <UnstyledButton
-            title="View Following"
+          <Button
+            size="md"
+            variant="light"
+            color="gray"
+            title={numFollowers > 0 && "View Followers"}
+            disabled={numFollowers === 0}
+            onClick={openFollowers}
+            p={10}
+            sx={{
+              color:
+                numFollowers === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)",
+              cursor: numFollowers === 0 ? "default" : "pointer",
+              fontSize: "1rem",
+              fontWeight: "400",
+              "&[data-disabled]": {
+                backgroundColor: "transparent",
+                color: "#919397",
+              },
+            }}
+          >
+            {numFollowers} Follower{numFollowers === 1 ? "" : "s"}
+          </Button>
+        </Group>
+        <Modal
+          opened={followingOpened}
+          onClose={closeFollowing}
+          title={"Following"}
+          centered
+          className="profile-modal"
+          overlayProps={{
+            blur: 3,
+            opacity: 0.55,
+          }}
+        >
+          {following.map((user) => (
+            <Link
+              href={`/profile/${user?.userId}`}
+              passHref
+              key={user.userId}
+              w="100%"
+              sx={{
+                borderRadius: "0.5rem !important",
+                transition: "all 0.1s ease-in-out",
+                "&:hover": {
+                  backgroundColor: "#141517",
+                },
+              }}
+            >
+              <Flex
+                justify="start"
+                align="center"
+                p="0.5rem 0.5rem 0.5rem .7rem"
+                gap="0.65rem"
+              >
+                <Avatar
+                  src={user.userImage}
+                  alt={user.username}
+                  radius="xl"
+                  style={{
+                    outline: "1px solid #c0c1c4",
+                    zIndex: -1,
+                  }}
+                  size={24}
+                />
+                <Text color="white" fz={"0.95rem"}>
+                  {user.username}
+                </Text>
+              </Flex>
+            </Link>
+          ))}
+        </Modal>
+        <Group>
+          <Button
+            size="md"
+            variant="light"
+            color="gray"
+            title={numFollowing > 0 && "View Following"}
             disabled={numFollowing === 0}
             onClick={openFollowing}
             p={10}
-            style={{
-              // borderBottom: `.5px solid ${
-              //   numFollowing === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)"
-              // }`,
-              // border: "1px solid #c0c1c4",
-              // borderRadius: ".5rem",
+            sx={{
               color:
                 numFollowing === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)",
               cursor: numFollowing === 0 ? "default" : "pointer",
-              fontSize: "1.05rem",
-              fontWeight: numFollowing === 0 ? 300 : 500,
+              fontSize: "1rem",
+              fontWeight: "400",
+              "&[data-disabled]": {
+                backgroundColor: "transparent",
+                color: "#919397",
+              },
             }}
           >
             {numFollowing} Following
-          </UnstyledButton>
+          </Button>
         </Group>
       </Flex>
 
@@ -325,14 +391,10 @@ export default function Profile({ isUser, profile }) {
         w={BODY_WIDTH}
         maw={BODY_MAX_WIDTH}
         style={{
-          // transform: "translateY(1rem)",
-          // flexGrow: 2,
-          // flexBasis: "50%",
           flexGrow: 2,
+          transform: "translateY(-.5rem)",
         }}
         defaultValue="posts"
-        // variant="pills"
-        // bg="red"
       >
         <Tabs.List grow>
           <Tabs.Tab label="Posts" value="posts">
@@ -347,86 +409,68 @@ export default function Profile({ isUser, profile }) {
         </Tabs.List>
 
         <Tabs.Panel value="posts" mb="4rem">
-          {posts.length === 0 ? (
-            <Flex
-              justify="center"
-              align="center"
+          <Stack>
+            <ScrollArea
+              offsetScrollbars
+              mt="1.25rem"
+              type="always"
               w="100%"
-              // h="100%"
-              h="58vh"
-            >
-              <Text fz="lg" color="#c0c1c4">
-                No posts yet...
-              </Text>
-            </Flex>
-          ) : (
-            <Stack>
-              <ScrollArea
-                offsetScrollbars
-                mt="1.5rem"
-                type="always"
-                // w={getScrollAreaWidth()}
-                // h={"565px"}
-                h="58vh"
-                // mt={isMobile && "1.5rem"}
-                // mb={isMobile && "1rem"}
-                style={
-                  {
-                    // transform: !isMobile && "translateY(2.8rem)",
-                  }
-                }
-                styles={{
-                  scrollbar: {
-                    "&, &:hover": {
-                      backgroundColor: "transparent",
-                      borderRadius: "0.5rem",
+              styles={{
+                scrollbar: {
+                  "&, &:hover": {
+                    backgroundColor: "transparent",
+                    borderRadius: "0.5rem",
+                  },
+                  '&[data-orientation="horizontal"]': {
+                    backgroundColor: "transparent !important",
+                  },
+                  '&[data-orientation="horizontal"]:hover': {
+                    backgroundColor: "transparent !important",
+                  },
+                  '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb':
+                    {
+                      backgroundColor: "#474952",
                     },
-                    '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
-                      {
-                        backgroundColor: "#474952",
-                      },
-                  },
-                  corner: {
-                    display: "none",
-                  },
-                }}
+                },
+                corner: {
+                  display: "none",
+                },
+                viewport: {
+                  paddingBottom: "1.075rem",
+                },
+              }}
+            >
+              <Flex
+                justify={"center"}
+                align={"end"}
+                w={"100%"}
+                h={"100%"}
+                gap="1.5rem"
               >
-                <Flex
-                  justify={"center"}
-                  align={"end"}
-                  w={"100%"}
-                  h={"100%"}
-                  wrap={"wrap"}
-                  gap="1.5rem"
-                  // mt={"2rem"}
-                >
-                  {posts.map((post) => (
-                    <Post
-                      key={post._id}
-                      post={post}
-                      activePost={activePost}
-                      setActivePost={setActivePost}
-                      currentlyPlaying={currentlyPlaying}
-                      setCurrentlyPlaying={setCurrentlyPlaying}
-                      isDiscover
-                    />
-                  ))}
-                </Flex>
-              </ScrollArea>
-            </Stack>
-          )}
+                {posts?.map((post) => (
+                  <Post
+                    key={post._id}
+                    post={post}
+                    activePost={activePost}
+                    setActivePost={setActivePost}
+                    currentlyPlaying={currentlyPlaying}
+                    setCurrentlyPlaying={setCurrentlyPlaying}
+                    isDiscover
+                  />
+                ))}
+              </Flex>
+            </ScrollArea>
+          </Stack>
         </Tabs.Panel>
 
         <Tabs.Panel value="likes" mb="4rem">
-          {likes.length === 0 ? (
+          {likes.length !== 0 ? (
             <Flex
               justify="center"
               align="center"
               w="100%"
-              h="58vh"
-              // h="100%"
-              // style={{ flexGrow: 1 }}
-              // bg="green"
+              mt="1.25rem"
+              h="45vh"
             >
               <Text fz="lg" color="#c0c1c4">
                 No likes yet...
@@ -436,31 +480,31 @@ export default function Profile({ isUser, profile }) {
             <Stack>
               <ScrollArea
                 offsetScrollbars
-                mt="1.5rem"
+                mt="1.25rem"
                 type="always"
-                // w={getScrollAreaWidth()}
-                // h={"565px"}
-                h="58vh"
-                // mt={isMobile && "1.5rem"}
-                // mb={isMobile && "1rem"}
-                style={
-                  {
-                    // transform: !isMobile && "translateY(2.8rem)",
-                  }
-                }
+                w="100%"
                 styles={{
                   scrollbar: {
                     "&, &:hover": {
                       backgroundColor: "transparent",
                       borderRadius: "0.5rem",
                     },
-                    '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
+                    '&[data-orientation="horizontal"]': {
+                      backgroundColor: "transparent !important",
+                    },
+                    '&[data-orientation="horizontal"]:hover': {
+                      backgroundColor: "transparent !important",
+                    },
+                    '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb':
                       {
                         backgroundColor: "#474952",
                       },
                   },
                   corner: {
                     display: "none",
+                  },
+                  viewport: {
+                    paddingBottom: "1.075rem",
                   },
                 }}
               >
@@ -469,10 +513,9 @@ export default function Profile({ isUser, profile }) {
                   align={"end"}
                   w={"100%"}
                   h={"100%"}
-                  wrap={"wrap"}
                   gap="1.5rem"
                 >
-                  {likes.map((post) => (
+                  {likes?.map((post) => (
                     <Post
                       key={post._id}
                       post={post}

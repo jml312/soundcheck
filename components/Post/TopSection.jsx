@@ -110,7 +110,8 @@ export default function TopSection({
                       opacity: 0.9,
                     }}
                   >
-                    <b>{post?.numFollowing || 0}</b> Following
+                    <b>{post?.numFollowers || 0}</b> Follower
+                    {post?.numFollowers !== 1 && "s"}
                   </Text>
                   <Text
                     size="sm"
@@ -119,8 +120,7 @@ export default function TopSection({
                       opacity: 0.9,
                     }}
                   >
-                    <b>{post?.numFollowers || 0}</b> Follower
-                    {post?.numFollowers !== 1 && "s"}
+                    <b>{post?.numFollowing || 0}</b> Following
                   </Text>
                 </Group>
               </>
@@ -198,11 +198,12 @@ export default function TopSection({
                   radius="xl"
                   onClick={() => {
                     followUser({
+                      session,
+                      toFollowId: post?.userId,
                       isFollowing: post?.isFollowing,
                       setIsFollowLoading,
                       post,
                       setPost,
-                      session,
                     });
                   }}
                   disabled={isFollowLoading}
@@ -241,11 +242,12 @@ export default function TopSection({
                     radius="xl"
                     onClick={() => {
                       followUser({
+                        session,
+                        toFollowId: post?.userId,
                         isFollowing: post?.isFollowing,
                         setIsFollowLoading,
                         post,
                         setPost,
-                        session,
                       });
                     }}
                     disabled={isFollowLoading}
