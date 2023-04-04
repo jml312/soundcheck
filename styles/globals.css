@@ -2,11 +2,10 @@ a {
   text-decoration: none;
 }
 
-div[data-orientation="horizontal"], div[data-orientation="horizontal"]:hover {
-  background-color: transparent;
+input::placeholder {
+  font-weight: normal !important;
 }
 
-div.mantine-ScrollArea-corner {
+div[data-orientation="horizontal"], div[data-orientation="horizontal"]:hover, div.mantine-ScrollArea-corner {
   background-color: transparent;
 }
-

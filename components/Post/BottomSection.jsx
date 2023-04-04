@@ -10,6 +10,7 @@ import {
   ActionIcon,
   UnstyledButton,
   Avatar,
+  Group,
 } from "@mantine/core";
 import CommentCard from "../cards/CommentCard";
 import { AiOutlineSend } from "react-icons/ai";
@@ -20,19 +21,29 @@ import dayjs from "dayjs";
 import EmojiPicker from "../EmojiPicker";
 
 export default function BottomSection({
+  isPostModal,
   isSelect,
   isDiscover,
+  isSmall,
   post,
+  setPost,
   comment,
   setComment,
   session,
   allUsers,
   isLikeLoading,
   isFollowLoading,
+  setCurrentlyPlaying,
+  openPostModal,
+  badWordsFilter,
+  notificationPostId,
+  notificationCommentId,
+  type,
+  router,
 }) {
   const numComments = post?.comments?.length || 0;
   const [isCommentCreated, setIsCommentCreated] = useState(false);
-  const [hasBlurredCommentError, setHasBlurredCommentError] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const commentInputRef = useRef(null);
   const commentScrollEndRef = useRef(null);
   const formattedPostedAt = useMemo(
@@ -86,10 +97,10 @@ export default function BottomSection({
         align={"start"}
         direction={"column"}
         pt="0.25rem"
-        sx={{
+        sx={(theme) => ({
           transform: "translateY(-0.3rem)",
           borderTop: `1px solid ${theme.colors.lightWhite[7]}`,
-        }}
+        })}
       >
         {isPostModal ? (
           <Stack
@@ -170,10 +181,10 @@ export default function BottomSection({
                 <div ref={commentScrollEndRef} />
               </ScrollArea>
               <Box
-                sx={{
+                sx={(theme) => ({
                   borderTop: `1px solid ${theme.colors.lightWhite[7]}`,
                   width: "100%",
-                }}
+                })}
                 mb={"0.25rem"}
               >
                 <Popover
@@ -214,30 +225,22 @@ export default function BottomSection({
                       }}
                       error={comment.error}
                       value={comment.text}
-                      onFocus={() => {
+                      onFocus={() =>
+                        !comment.isFocused &&
                         setComment({
                           ...comment,
                           isFocused: true,
-                        });
-                      }}
-                      onBlur={() => {
-                        if (comment.error && !hasBlurredCommentError) {
-                          setHasBlurredCommentError(true);
-                          setComment({
-                            ...comment,
-                            isFocused: true,
-                          });
-                          setTimeout(() => {
-                            commentInputRef.current?.focus();
-                          }, 0);
-                          return;
-                        }
+                        })
+                      }
+                      onBlur={() =>
+                        !comment.addedEmoji &&
+                        !isMobileOpen &&
                         setComment({
                           ...comment,
-                          error: "",
+                          text: comment.text.trim(),
                           isFocused: false,
-                        });
-                      }}
+                        })
+                      }
                       maxLength={COMMENT_MAX_LENGTH}
                       onChange={(e) => {
                         const value = e.target.value;
@@ -250,45 +253,70 @@ export default function BottomSection({
                         });
                       }}
                       rightSection={
-                        comment.text.length > 0 && (
-                          <Tooltip
-                            offset={-2}
-                            withinPortal
-                            position="top"
-                            label={"Post"}
-                            color="dark.7"
-                            styles={{
-                              tooltip: {
-                                border: "none",
-                                outline: "1px solid rgba(192, 193, 196, 0.75)",
-                              },
+                        comment?.isFocused && (
+                          <Flex
+                            justify="center"
+                            align={"center"}
+                            style={{
+                              zIndex: 100,
+                              transform: "translateX(-.25rem)",
+                              borderRadius: "0.5rem",
                             }}
+                            bg="lightGray"
                           >
-                            <ActionIcon
-                              disabled={
-                                !!comment.error ||
-                                comment.isLoading ||
-                                comment.isDeleting
+                            <EmojiPicker
+                              isDisabled={
+                                comment.text.length >= COMMENT_MAX_LENGTH
                               }
-                              variant={"transparent"}
-                              onMouseDown={() => {
-                                postComment({
-                                  comment,
-                                  setComment,
-                                  post,
-                                  setPost,
-                                  session,
-                                  badWordsFilter,
-                                  commentInputRef,
-                                  setIsCommentCreated,
-                                  setHasBlurredCommentError,
-                                  allUsers,
-                                });
+                              isMobileOpen={isMobileOpen}
+                              setIsMobileOpen={setIsMobileOpen}
+                              setText={setComment}
+                              position={"top-start"}
+                              inputRef={commentInputRef}
+                              isSmall={isSmall}
+                            />
+                            <Tooltip
+                              disabled={comment.text.length === 0}
+                              offset={-2}
+                              withinPortal
+                              position="top"
+                              label={"Post"}
+                              color="dark.7"
+                              styles={{
+                                tooltip: {
+                                  border: "none",
+                                  outline:
+                                    "1px solid rgba(192, 193, 196, 0.75)",
+                                },
                               }}
                             >
-                              <AiOutlineSend />
-                            </ActionIcon>
-                          </Tooltip>
+                              <ActionIcon
+                                mr={"-0.3rem"}
+                                disabled={
+                                  !!comment.error ||
+                                  comment.isLoading ||
+                                  comment.isDeleting ||
+                                  comment.text.length === 0
+                                }
+                                variant={"transparent"}
+                                onMouseDown={() => {
+                                  postComment({
+                                    comment,
+                                    setComment,
+                                    post,
+                                    setPost,
+                                    session,
+                                    badWordsFilter,
+                                    commentInputRef,
+                                    setIsCommentCreated,
+                                    allUsers,
+                                  });
+                                }}
+                              >
+                                <AiOutlineSend />
+                              </ActionIcon>
+                            </Tooltip>
+                          </Flex>
                         )
                       }
                     />
@@ -339,7 +367,6 @@ export default function BottomSection({
                               borderRadius: "0.5rem !important",
                               transition: "all 0.1s ease-in-out",
                               "&:hover": {
-                                // backgroundColor: theme.colors.dark[5],
                                 backgroundColor: "#141517",
                               },
                             }}

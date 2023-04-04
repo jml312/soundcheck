@@ -64,7 +64,7 @@ export default function NotificationModal({
           }}
         >
           <Stack spacing={"md"} align={"center"} justify="center" w="100%">
-            {notifications.map((notification) => (
+            {notifications?.map((notification) => (
               <NotificationCard
                 key={notification._id}
                 notification={notification}
@@ -89,7 +89,7 @@ export default function NotificationModal({
           variant={"light"}
           onClick={() =>
             clearNotification({
-              notificationIDs: notifications.map((n) => n._key),
+              notificationIDs: notifications?.map((n) => n._key),
               notifications,
               setNotifications,
               userId: session?.user?.id,

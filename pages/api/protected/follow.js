@@ -22,26 +22,30 @@ export default async function handler(req, res) {
         ])
         .commit();
       await client
-        .patch(toFollowId)
-        .append("followers", [
-          {
-            _type: "reference",
-            _ref: userId,
-            _key: createdAt,
-          },
-        ])
-        .append("notifications", [
-          {
-            _type: "notification",
-            _key: `follow.${userId}`,
-            type: "follow",
-            user: {
+        .transaction()
+        .patch(toFollowId, (p) =>
+          p.append("followers", [
+            {
               _type: "reference",
               _ref: userId,
+              _key: createdAt,
             },
-            createdAt,
-          },
-        ])
+          ])
+        )
+        .patch(toFollowId, (p) =>
+          p.append("notifications", [
+            {
+              _type: "notification",
+              _key: `follow.${userId}`,
+              type: "follow",
+              user: {
+                _type: "reference",
+                _ref: userId,
+              },
+              createdAt,
+            },
+          ])
+        )
         .commit();
     } else if (type === "unfollow") {
       await client
@@ -49,12 +53,13 @@ export default async function handler(req, res) {
         .unset([`following[_ref == \"${toFollowId}\"]`])
         .commit();
       await client
-        .patch(toFollowId)
-        .unset([`followers[_ref == \"${userId}\"]`])
-        .unset([`notifications[_key == \"${`follow.${userId}`}\"]`])
+        .transaction()
+        .patch(toFollowId, (p) => p.unset([`followers[_ref == \"${userId}\"]`]))
+        .patch(toFollowId, (p) =>
+          p.unset([`notifications[_key == \"${`follow.${userId}`}\"]`])
+        )
         .commit();
     }
-
     return res.status(200).json({ message: "Success" });
   } catch {
     return res.status(500).json({ message: "Internal server error" });

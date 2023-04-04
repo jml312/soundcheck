@@ -1,6 +1,6 @@
 import { Flex, useMantineTheme, LoadingOverlay } from "@mantine/core";
-import { useRef, useEffect, useState } from "react";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useEffect, useState } from "react";
+import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/router";
 import PostModal from "../modals/PostModal";
 import TopSection from "./TopSection";
@@ -23,11 +23,13 @@ function Post({
   setComment,
   caption,
   setCaption,
+  captionRef,
   badWordsFilter,
   isPosting,
   allUsers,
   activePost,
   setActivePost,
+  isSmall,
 }) {
   const router = useRouter();
   const {
@@ -35,7 +37,6 @@ function Post({
     commentId: notificationCommentId,
     type,
   } = router.query;
-  const isSmall = useMediaQuery("(max-width: 470px)");
   const theme = useMantineTheme();
   const [postModalOpen, { open: openPostModal, close: closePostModal }] =
     useDisclosure(
@@ -47,7 +48,6 @@ function Post({
     );
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
-  const captionRef = useRef(null);
 
   useEffect(() => {
     setActivePost(null);
@@ -91,6 +91,7 @@ function Post({
         notificationPostId={notificationPostId}
         notificationCommentId={notificationCommentId}
         allUsers={allUsers}
+        isSmall={isSmall}
       />
 
       <Flex
@@ -134,6 +135,7 @@ function Post({
           setIsLikeLoading={setIsLikeLoading}
           isFollowLoading={isFollowLoading}
           setIsFollowLoading={setIsFollowLoading}
+          isSmall={isSmall}
         />
         {/* song image and details */}
         <MiddleSection
@@ -156,15 +158,25 @@ function Post({
         />
         {/* comment, view comments button, and posted at */}
         <BottomSection
+          isPostModal={isPostModal}
           isSelect={isSelect}
           isDiscover={isDiscover}
           post={post}
+          setPost={setPost}
           comment={comment}
           setComment={setComment}
           session={session}
           allUsers={allUsers}
           isLikeLoading={isLikeLoading}
           isFollowLoading={isFollowLoading}
+          setCurrentlyPlaying={setCurrentlyPlaying}
+          openPostModal={openPostModal}
+          badWordsFilter={badWordsFilter}
+          notificationPostId={notificationPostId}
+          notificationCommentId={notificationCommentId}
+          type={type}
+          router={router}
+          isSmall={isSmall}
         />
       </Flex>
     </>

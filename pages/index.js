@@ -4,7 +4,6 @@ import { BsSpotify } from "react-icons/bs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { notifications } from "@mantine/notifications";
-import dayjs from "dayjs";
 
 function Index() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +14,7 @@ function Index() {
   useEffect(() => {
     if (error === "AccessDenied") {
       setHasShownError(true);
-      window.history.replaceState(null, "", `${process.env.NEXT_PUBLIC_URL}/`);
+      window.history.replaceState(null, "", `${process.env.NEXT_PUBLIC_URL}`);
     }
   }, [error]);
 

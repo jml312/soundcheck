@@ -10,13 +10,12 @@ import {
   TextInput,
 } from "@mantine/core";
 import { FaHeart, FaUserPlus, FaUserCheck } from "react-icons/fa";
-import { VscAdd, VscRemove } from "react-icons/vsc";
 import Link from "next/link";
 import { truncateText } from "@/utils";
-import { likePost, followUser, captionPost } from "@/actions";
+import { likePost, followUser } from "@/actions";
 import { CAPTION_MAX_LENGTH } from "@/constants";
-import dayjs from "dayjs";
 import { useState } from "react";
+import dayjs from "dayjs";
 import EmojiPicker from "../EmojiPicker";
 
 export default function TopSection({
@@ -35,8 +34,9 @@ export default function TopSection({
   setIsLikeLoading,
   isFollowLoading,
   setIsFollowLoading,
+  isSmall,
 }) {
-  const [hasBlurredCaptionError, setHasBlurredCaptionError] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
     <>
@@ -191,26 +191,7 @@ export default function TopSection({
 
           {!isUser && (
             <Flex justify={"center"} align="center">
-              <Tooltip
-                events={{
-                  hover: true,
-                  focus: false,
-                  touch: false,
-                }}
-                withinPortal
-                label={post?.isFollowing ? "Unfollow" : "Follow"}
-                position="top"
-                zIndex={2}
-                offset={3}
-                disabled={isFollowLoading}
-                color="dark.7"
-                styles={{
-                  tooltip: {
-                    border: "none",
-                    outline: "1px solid rgba(192, 193, 196, 0.75)",
-                  },
-                }}
-              >
+              {isFollowLoading ? (
                 <ActionIcon
                   mr={"-.2rem"}
                   variant={"transparent"}
@@ -238,27 +219,52 @@ export default function TopSection({
                 >
                   {post?.isFollowing ? <FaUserCheck /> : <FaUserPlus />}
                 </ActionIcon>
-              </Tooltip>
-              <Tooltip
-                events={{
-                  hover: true,
-                  focus: false,
-                  touch: false,
-                }}
-                withinPortal
-                label={post?.isLiked ? "Unlike" : "Like"}
-                position="top"
-                zIndex={2}
-                offset={3}
-                disabled={isLikeLoading}
-                color="dark.7"
-                styles={{
-                  tooltip: {
-                    border: "none",
-                    outline: "1px solid rgba(192, 193, 196, 0.75)",
-                  },
-                }}
-              >
+              ) : (
+                <Tooltip
+                  withinPortal
+                  label={post?.isFollowing ? "Unfollow" : "Follow"}
+                  position="top"
+                  zIndex={2}
+                  offset={3}
+                  disabled={isFollowLoading}
+                  color="dark.7"
+                  styles={{
+                    tooltip: {
+                      border: "none",
+                      outline: "1px solid rgba(192, 193, 196, 0.75)",
+                    },
+                  }}
+                >
+                  <ActionIcon
+                    mr={"-.2rem"}
+                    variant={"transparent"}
+                    radius="xl"
+                    onClick={() => {
+                      followUser({
+                        isFollowing: post?.isFollowing,
+                        setIsFollowLoading,
+                        post,
+                        setPost,
+                        session,
+                      });
+                    }}
+                    disabled={isFollowLoading}
+                    sx={(theme) => ({
+                      color: post?.isFollowing
+                        ? theme.colors.green[6]
+                        : "#c1c2c5",
+                      "&[data-disabled]": {
+                        color: post?.isFollowing
+                          ? theme.colors.green[6]
+                          : "#c1c2c5",
+                      },
+                    })}
+                  >
+                    {post?.isFollowing ? <FaUserCheck /> : <FaUserPlus />}
+                  </ActionIcon>
+                </Tooltip>
+              )}
+              {isLikeLoading ? (
                 <ActionIcon
                   variant={"transparent"}
                   radius="xl"
@@ -281,7 +287,46 @@ export default function TopSection({
                 >
                   <FaHeart />
                 </ActionIcon>
-              </Tooltip>
+              ) : (
+                <Tooltip
+                  withinPortal
+                  label={post?.isLiked ? "Unlike" : "Like"}
+                  position="top"
+                  zIndex={2}
+                  offset={3}
+                  disabled={isLikeLoading}
+                  color="dark.7"
+                  styles={{
+                    tooltip: {
+                      border: "none",
+                      outline: "1px solid rgba(192, 193, 196, 0.75)",
+                    },
+                  }}
+                >
+                  <ActionIcon
+                    variant={"transparent"}
+                    radius="xl"
+                    onClick={() =>
+                      likePost({
+                        isLiked: post?.isLiked,
+                        setIsLikeLoading,
+                        post,
+                        setPost,
+                        session,
+                      })
+                    }
+                    disabled={isLikeLoading}
+                    sx={(theme) => ({
+                      color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+                      "&[data-disabled]": {
+                        color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+                      },
+                    })}
+                  >
+                    <FaHeart />
+                  </ActionIcon>
+                </Tooltip>
+              )}
             </Flex>
           )}
         </Flex>
@@ -294,7 +339,7 @@ export default function TopSection({
           maw={375}
           w={"100%"}
         >
-          {!isSelect || isPosting || !caption.isEditing ? (
+          {!isSelect || isPosting ? (
             <Flex
               w={"100%"}
               justify={"space-between"}
@@ -302,112 +347,46 @@ export default function TopSection({
               mt="-.5rem"
               mb={"0.2rem"}
             >
-              <Tooltip.Floating
-                offset={17.5}
-                position="bottom"
-                disabled={!isSelect}
-                label={"Edit"}
-                color="dark.7"
-                styles={{
-                  tooltip: {
-                    border: "none",
-                    outline: "1px solid rgba(192, 193, 196, 0.75)",
-                  },
+              <Flex
+                w={"100%"}
+                justify={"space-between"}
+                align={"start"}
+                style={{
+                  cursor: "default",
                 }}
               >
-                <Flex
-                  w={"100%"}
-                  justify={"space-between"}
-                  align={"start"}
+                <Text
+                  color="white"
+                  fw={"bold"}
+                  zIndex={999}
                   style={{
-                    cursor: isSelect ? "pointer" : "default",
-                  }}
-                  onClick={() => {
-                    if (!isSelect) return;
-                    setCaption({
-                      ...caption,
-                      isEditing: isSelect ? true : !isPostModal,
-                      isFocused: isSelect ? true : !isPostModal,
-                    });
-                    setTimeout(() => {
-                      captionRef?.current?.focus();
-                    }, 0);
+                    marginTop: !isSelect ? "-.1rem" : "0",
+                    userSelect: "none",
                   }}
                 >
-                  <Text
-                    color="white"
-                    fw={"bold"}
-                    zIndex={999}
-                    style={{
-                      marginTop: !isSelect ? "-.1rem" : "0",
-                      userSelect: "none",
-                    }}
-                  >
-                    {isUser ? caption?.text : post?.caption}
-                  </Text>
-                </Flex>
-              </Tooltip.Floating>
-              {isSelect && !isPosting && (
-                <Tooltip
-                  offset={-2}
-                  withinPortal
-                  position="bottom"
-                  label={"Remove"}
-                  color="dark.7"
-                  styles={{
-                    tooltip: {
-                      border: "none",
-                      outline: "1px solid rgba(192, 193, 196, 0.75)",
-                    },
-                  }}
-                >
-                  <ActionIcon
-                    variant={"transparent"}
-                    onClick={() => {
-                      setCaption({
-                        ...caption,
-                        text: "",
-                        originalText: "",
-                        isEditing: true,
-                        isFocused: false,
-                      });
-                    }}
-                  >
-                    <VscRemove fontSize="0.75rem" />
-                  </ActionIcon>
-                </Tooltip>
-              )}
+                  {isUser ? caption?.text : post?.caption}
+                </Text>
+              </Flex>
             </Flex>
           ) : (
             <TextInput
-              data-autoFocus
-              onFocus={() => {
+              onFocus={() =>
+                !caption.isFocused &&
                 setCaption({
                   ...caption,
                   isFocused: true,
-                });
-              }}
-              onBlur={() => {
-                if (caption.error && !hasBlurredCaptionError) {
-                  setHasBlurredCaptionError(true);
-                  setCaption({
-                    ...caption,
-                    isEditing: true,
-                    isFocused: true,
-                  });
-                  setTimeout(() => {
-                    captionRef?.current?.focus();
-                  }, 0);
-                  return;
-                }
+                })
+              }
+              onBlur={() =>
+                !caption.addedEmoji &&
+                !isMobileOpen &&
                 setCaption({
                   ...caption,
-                  text: caption?.originalText || "",
-                  error: "",
-                  isEditing: caption?.originalText?.length === 0,
+                  text: caption.text.trim(),
                   isFocused: false,
-                });
-              }}
+                })
+              }
+              data-autoFocus
               ref={captionRef}
               w="100%"
               value={caption.text}
@@ -422,51 +401,6 @@ export default function TopSection({
                 });
               }}
               placeholder="Add a caption..."
-              rightSection={
-                caption.text.length > 0 && (
-                  <Tooltip
-                    offset={-2}
-                    withinPortal
-                    position="bottom"
-                    label={"Add"}
-                    color="dark.7"
-                    styles={{
-                      tooltip: {
-                        border: "none",
-                        outline: "1px solid rgba(192, 193, 196, 0.75)",
-                      },
-                    }}
-                  >
-                    <ActionIcon
-                      onMouseDown={() =>
-                        captionPost({
-                          post,
-                          setPost,
-                          caption,
-                          setCaption,
-                          badWordsFilter,
-                          setHasBlurredCaptionError,
-                        })
-                      }
-                      disabled={
-                        (caption.text.length === 0 &&
-                          caption?.originalText?.length === 0) ||
-                        caption.text === caption?.originalText ||
-                        caption.error
-                      }
-                      variant={"transparent"}
-                      sx={{
-                        "&[data-disabled]": {
-                          backgroundColor: "transparent",
-                          border: "none",
-                        },
-                      }}
-                    >
-                      <VscAdd fontSize="0.75rem" />
-                    </ActionIcon>
-                  </Tooltip>
-                )
-              }
               variant={"unstyled"}
               mt="-.8rem"
               error={caption.error}
@@ -475,6 +409,8 @@ export default function TopSection({
                 input: {
                   color: "white",
                   fontSize: "1rem",
+                  fontWeight:
+                    !caption.isFocused && !caption.error ? "bold" : "normal",
                 },
                 description: {
                   transform: "translateY(.5rem)",
@@ -483,6 +419,19 @@ export default function TopSection({
                   transform: "translateY(-.5rem)",
                 },
               }}
+              rightSection={
+                caption.isFocused && (
+                  <EmojiPicker
+                    isDisabled={caption.text.length >= CAPTION_MAX_LENGTH}
+                    isMobileOpen={isMobileOpen}
+                    setIsMobileOpen={setIsMobileOpen}
+                    setText={setCaption}
+                    position="bottom-end"
+                    inputRef={captionRef}
+                    isSmall={isSmall}
+                  />
+                )
+              }
             />
           )}
         </Flex>

@@ -7,7 +7,7 @@ import SelectSongModal from "@/components/modals/SelectSongModal";
 import Filter from "bad-words";
 import { useRouter } from "next/router";
 import { Flex, Text, ScrollArea, Stack, SegmentedControl } from "@mantine/core";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import client from "@/lib/sanity";
 import { allUsersQuery } from "@/lib/queries";
 import { dehydrate, QueryClient, useQuery } from "react-query";
@@ -36,18 +36,17 @@ function Feed({ spotifyData, allUsers }) {
       });
     },
     refetchOnMount: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
-
-  const isToday = dayjs(date).isSame(dayjs(), "day");
   const [caption, setCaption] = useState({
     text: currentPosts?.userPost?.caption || "",
-    originalText: currentPosts?.userPost?.caption || "",
-    isEditing: isToday && !currentPosts?.userPost?.caption,
     error: "",
     isFocused: false,
+    addedEmoji: false,
   });
+  const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);
-  // const formattedDate = dayjs(date).format("MMMM D, YYYY");
   const [selectSongOpened, { close: closeSelectSong, open: openSelectSong }] =
     useDisclosure(
       typeof currentPosts?.hasPostedToday === "boolean" &&
@@ -55,6 +54,7 @@ function Feed({ spotifyData, allUsers }) {
     );
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const badWordsFilter = new Filter();
+  const isSmall = useMediaQuery("(max-width: 470px)");
   const isMobile = useMediaQuery("(max-width: 769px)");
   const twoCards = useMediaQuery("(min-width: 1115px) and (max-width: 1460px)");
   const threeCards = useMediaQuery(
@@ -95,10 +95,9 @@ function Feed({ spotifyData, allUsers }) {
     });
     setCaption({
       text: currentPosts?.userPost?.caption || "",
-      originalText: currentPosts?.userPost?.caption || "",
-      addedEmoji: false,
-      isEditing: isToday && !currentPosts?.userPost?.caption,
       error: "",
+      isFocused: false,
+      addedEmoji: false,
     });
   }, [currentPosts]);
 
@@ -131,6 +130,8 @@ function Feed({ spotifyData, allUsers }) {
         badWordsFilter={badWordsFilter}
         activePost={activePost}
         setActivePost={setActivePost}
+        captionRef={captionRef}
+        isSmall={isSmall}
       />
 
       <Flex
@@ -238,6 +239,7 @@ function Feed({ spotifyData, allUsers }) {
                             allUsers={allUsers}
                             activePost={activePost}
                             setActivePost={setActivePost}
+                            isSmall={isSmall}
                           />
                         ))}
                       </Flex>
@@ -312,6 +314,7 @@ function Feed({ spotifyData, allUsers }) {
                   allUsers={allUsers}
                   activePost={activePost}
                   setActivePost={setActivePost}
+                  isSmall={isSmall}
                 />
               </Stack>
             )}

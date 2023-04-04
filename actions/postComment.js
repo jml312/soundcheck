@@ -8,15 +8,13 @@ export default async function postComment({
   setPost,
   session,
   badWordsFilter,
-  setHasBlurredCommentError,
   allUsers,
   setIsCommentCreated,
 }) {
   if (badWordsFilter.isProfane(comment.text)) {
-    setHasBlurredCommentError(false);
     setComment({
       ...comment,
-      error: "Please do not use profanity.",
+      error: "Please don't use profanity.",
     });
     return;
   }

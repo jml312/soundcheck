@@ -62,7 +62,7 @@ export default function MiddleSection({
           audioRef.current.pause();
         }
         setIsAudioPlaying(false);
-        setActivePost(post?._id);
+        setActivePost(null);
         setCurrentlyPlaying(null);
       }
     });
@@ -85,10 +85,8 @@ export default function MiddleSection({
         isChanged: false,
       });
       setCaption({
-        ...caption,
         text: "",
-        originalText: "",
-        isEditing: true,
+        error: "",
         isFocused: true,
       });
       setTimeout(() => {
@@ -123,8 +121,10 @@ export default function MiddleSection({
           src={post?.albumImage}
           alt={post?.albumName}
           radius={"0.25rem"}
-          width={!isPostModal ? 275 : isSmall ? "75vw" : 375}
-          height={!isPostModal ? 275 : isSmall ? "75vw" : 375}
+          // width={!isPostModal ? 275 : isSmall ? "75vw" : 375}
+          // height={!isPostModal ? 275 : isSmall ? "75vw" : 375}
+          width={!isPostModal ? 275 : isSmall ? "70vw" : 375}
+          height={!isPostModal ? 275 : isSmall ? "70vw" : 375}
           withPlaceholder
           placeholder={
             <Stack align="center">
@@ -280,7 +280,8 @@ export default function MiddleSection({
         direction={"column"}
         mt={8}
         mb={(isDiscover || isSelect) && "0.5rem"}
-        w={!isPostModal ? 275 : isSmall ? "75vw" : 375}
+        w={!isPostModal ? 275 : isSmall ? "70vw" : 375}
+        // w={!isPostModal ? 275 : isSmall ? "75vw" : 375}
         style={{
           textAlign: "center",
         }}

@@ -12,14 +12,6 @@ import dayjs from "dayjs";
 import { clearNotification, viewNotification } from "@/actions";
 
 export default function NotificationCard({
-  // type,
-  // postId,
-  // commentId,
-  // userId,
-  // username,
-  // userImage,
-  // createdAt,
-  // isSmall,
   notification,
   notifications,
   setNotifications,

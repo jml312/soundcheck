@@ -44,7 +44,7 @@ export default async function getSpotify({ session, client }) {
         albumUrl: currentlyPlaying.item.album.external_urls.spotify,
         albumImage: currentlyPlaying.item.album.images[0].url,
         songID: currentlyPlaying.item.id,
-        isCurrentlyPlaying: true,
+        group: "Currently Playing",
       });
     }
 
@@ -72,6 +72,7 @@ export default async function getSpotify({ session, client }) {
         albumUrl: item.track.album.external_urls.spotify,
         albumImage: item.track.album.images[0].url,
         songID: item.track.id,
+        group: "Recently Played",
       }))
       .filter(
         (v, i, a) =>

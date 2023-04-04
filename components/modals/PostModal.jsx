@@ -17,10 +17,12 @@ export default function PostModal({
   notificationPostId,
   notificationCommentId,
   allUsers,
+  isSmall,
 }) {
   const [comment, setComment] = useState({
     text: "",
     error: "",
+    addedEmoji: false,
     isLoading: false,
     isDeleting: false,
     isMentioning: false,
@@ -41,6 +43,8 @@ export default function PostModal({
         if (!comment.isLoading && !comment.isDeleting && !caption?.isLoading) {
           setComment({
             text: "",
+            error: "",
+            addedEmoji: false,
             isLoading: false,
             isDeleting: false,
             isMentioning: false,
@@ -78,6 +82,7 @@ export default function PostModal({
         allUsers={allUsers}
         activePost={activePost}
         setActivePost={setActivePost}
+        isSmall={isSmall}
       />
     </Modal>
   );

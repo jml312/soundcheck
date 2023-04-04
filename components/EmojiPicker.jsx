@@ -1,74 +1,101 @@
-import { HoverCard, ActionIcon, Flex } from "@mantine/core";
+import { HoverCard, Popover, ActionIcon, Flex } from "@mantine/core";
 import { VscReactions } from "react-icons/vsc";
-import { useDisclosure } from "@mantine/hooks";
 import { useEffect } from "react";
 
 export default function EmojiPicker({
-  text,
+  isDisabled,
+  isMobileOpen,
+  setIsMobileOpen,
   setText,
   inputRef,
-  styles,
-  isDisabled,
-  maxLen,
+  isSmall,
+  position,
 }) {
   const emojis = ["🔥", "❤️", "👍", "😂", "😍", "🤩", "😭", "🤔"];
-  const [
-    emojiPickerOpened,
-    { open: openEmojiPicker, close: closeEmojiPicker },
-  ] = useDisclosure(false);
 
   useEffect(() => {
-    if (text.addedEmoji && (text.text.length >= maxLen || isDisabled)) {
+    if (isDisabled) {
+      setText((prev) => ({
+        ...prev,
+        isFocused: true,
+        addedEmoji: false,
+        error: "",
+      }));
+      setIsMobileOpen(false);
       setTimeout(() => {
         inputRef.current.focus();
-        setText({
-          ...text,
-          addedEmoji: false,
-        });
       }, 0);
     }
-  }, [text.addedEmoji, text.text, maxLen, isDisabled]);
+  }, [isDisabled]);
 
-  return (
+  return isSmall ? (
+    <Popover
+      zIndex={1000}
+      width={150}
+      shadow="md"
+      position={position}
+      disabled={isDisabled}
+      opened={isMobileOpen}
+      onChange={setIsMobileOpen}
+    >
+      <Popover.Target>
+        <ActionIcon
+          disabled={isDisabled}
+          size={"xs"}
+          variant={"transparent"}
+          onMouseDown={() => setIsMobileOpen((o) => !o)}
+        >
+          <VscReactions />
+        </ActionIcon>
+      </Popover.Target>
+      <Popover.Dropdown>
+        <Flex wrap={"wrap"} justify={"space-between"} align={"center"}>
+          {emojis.map((emoji, idx) => (
+            <ActionIcon
+              key={idx}
+              onMouseDown={() => {
+                setText((prev) => ({
+                  ...prev,
+                  text: prev.text + emoji,
+                  addedEmoji: true,
+                  error: "",
+                }));
+              }}
+              onClick={() => {
+                setText((prev) => ({
+                  ...prev,
+                  addedEmoji: false,
+                  error: "",
+                }));
+                inputRef.current.focus();
+              }}
+              sx={(theme) => ({
+                "&:hover": {
+                  backgroundColor: theme.colors.dark[7],
+                },
+                "&:active": {
+                  backgroundColor: theme.colors.dark[7],
+                  transform: "none",
+                },
+              })}
+            >
+              {emoji}
+            </ActionIcon>
+          ))}
+        </Flex>
+      </Popover.Dropdown>
+    </Popover>
+  ) : (
     <HoverCard
       zIndex={1000}
       width={150}
       shadow="md"
-      position="bottom-end"
-      onOpen={openEmojiPicker}
-      onClose={closeEmojiPicker}
-      disabled={text.text.length >= maxLen || isDisabled}
+      position={position}
+      disabled={isDisabled}
+      returnFocus
     >
       <HoverCard.Target>
-        <ActionIcon
-          disabled={text.text.length >= maxLen || isDisabled}
-          size={"xs"}
-          variant={"subtle"}
-          sx={(theme) => ({
-            ...styles,
-            backgroundColor: emojiPickerOpened ? theme.colors.dark[7] : "none",
-            "&:hover": {
-              backgroundColor: theme.colors.dark[7],
-            },
-            "&:active": {
-              backgroundColor: theme.colors.dark[7],
-              transform: "none",
-            },
-          })}
-          onMouseDown={() => {
-            setText({
-              ...text,
-              addedEmoji: true,
-            });
-          }}
-          onClick={() => {
-            setText({
-              ...text,
-              addedEmoji: false,
-            });
-            inputRef.current.focus();
-          }}
-        >
+        <ActionIcon disabled={isDisabled} size={"xs"} variant={"transparent"}>
           <VscReactions />
         </ActionIcon>
       </HoverCard.Target>
@@ -78,17 +105,19 @@ export default function EmojiPicker({
             <ActionIcon
               key={idx}
               onMouseDown={() => {
-                setText({
-                  ...text,
-                  text: text.text + emoji,
+                setText((prev) => ({
+                  ...prev,
+                  text: prev.text + emoji,
                   addedEmoji: true,
-                });
+                  error: "",
+                }));
               }}
               onClick={() => {
-                setText({
-                  ...text,
+                setText((prev) => ({
+                  ...prev,
                   addedEmoji: false,
-                });
+                  error: "",
+                }));
                 inputRef.current.focus();
               }}
               sx={(theme) => ({

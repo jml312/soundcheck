@@ -90,7 +90,9 @@ export default NextAuth({
 
         return true;
       } catch {
-        await client.delete(newUserId).commit();
+        try {
+          await client.delete(newUserId).commit();
+        } catch {}
         return false;
       }
     },

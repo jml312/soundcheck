@@ -91,10 +91,15 @@ export default {
       hidden: ({document}) => !document?.genres,
     },
     {
-      name: 'isCurrentlyPlaying',
-      title: 'Is Currently Playing',
-      type: 'boolean',
-      initialValue: false,
+      name: 'group',
+      title: 'Group',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Currently Playing', value: 'Currently Playing'},
+          {title: 'Recently Played', value: 'Recently Played'},
+        ],
+      },
     },
   ],
 }

@@ -7,7 +7,6 @@ export default async function postSong({
   session,
   setPost,
   caption,
-  setCaption,
   setCurrentlyPlaying,
   close,
 }) {
@@ -30,12 +29,7 @@ export default async function postSong({
       userId: session.user.id,
       username: session.user.name,
       userImage: session.user.image,
-      caption: selectedSong.data?.caption,
-    });
-    setCaption({
-      ...caption,
-      originalText: selectedSong.data?.caption || "",
-      isEditing: caption.originalText.length === 0,
+      caption: caption.text,
     });
     setSelectedSong({
       ...selectedSong,
