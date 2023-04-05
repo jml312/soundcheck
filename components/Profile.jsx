@@ -11,7 +11,8 @@ import {
   Anchor,
   Modal,
   Button,
-  Divider,
+  Box,
+  Title,
 } from "@mantine/core";
 import { followUser } from "@/actions";
 import dayjs from "dayjs";
@@ -492,8 +493,8 @@ export default function Profile({ isUser, profile }) {
               <ScrollArea
                 offsetScrollbars
                 mt="1.25rem"
-                type="always"
                 w="100%"
+                type="always"
                 styles={{
                   scrollbar: {
                     "&, &:hover": {
@@ -544,7 +545,103 @@ export default function Profile({ isUser, profile }) {
         </Tabs.Panel>
 
         <Tabs.Panel value="stats">
-          <Flex
+          <ScrollArea
+            h="45vh"
+            offsetScrollbars
+            mt="1.25rem"
+            w="100%"
+            type="always"
+            styles={{
+              scrollbar: {
+                "&, &:hover": {
+                  backgroundColor: "transparent",
+                  borderRadius: "0.5rem",
+                },
+                '&[data-orientation="horizontal"]': {
+                  backgroundColor: "transparent !important",
+                },
+                '&[data-orientation="horizontal"]:hover': {
+                  backgroundColor: "transparent !important",
+                },
+                '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
+                  backgroundColor: "#474952",
+                },
+              },
+              corner: {
+                display: "none",
+              },
+              viewport: {
+                // backgroundColor: "red",
+              },
+            }}
+          >
+            <Flex justify="space-evenly" align="center" w="100%" h="50%">
+              <Title
+                order={3}
+                // fz="lg"
+                color="white"
+                style={{
+                  textAlign: "center",
+                }}
+              >
+                Artists
+              </Title>
+              <Box w="50%" h="50%">
+                <VictoryPie
+                  // width={300}
+                  // height={300}
+                  labelRadius={160}
+                  // innerRadius={68}
+                  data={artists}
+                  x="name"
+                  y="value"
+                  // colorScale="grayscale"
+                  // colorScale="cool"
+                  colorScale="qualitative"
+                  style={{
+                    labels: {
+                      fill: "white",
+                      fontSize: 12,
+                    },
+                  }}
+                />
+              </Box>
+            </Flex>
+
+            <Flex justify="space-evenly" align="center" w="100%" h="50%">
+              <Title
+                order={3}
+                // fz="lg"
+                color="white"
+                style={{
+                  textAlign: "center",
+                }}
+              >
+                Genres
+              </Title>
+              <Box w="50%" h="50%">
+                <VictoryPie
+                  // width={300}
+                  // height={300}
+                  labelRadius={160}
+                  // innerRadius={68}
+                  data={genres}
+                  x="name"
+                  y="value"
+                  // colorScale="grayscale"
+                  // colorScale="cool"
+                  colorScale="qualitative"
+                  style={{
+                    labels: {
+                      fontSize: 12,
+                      fill: "white",
+                    },
+                  }}
+                />
+              </Box>
+            </Flex>
+          </ScrollArea>
+          {/* <Flex
             h="45vh"
             w="100%"
             justify="space-between"
@@ -613,7 +710,7 @@ export default function Profile({ isUser, profile }) {
                 }}
               />
             </Stack>
-          </Flex>
+          </Flex> */}
         </Tabs.Panel>
       </Tabs>
     </Flex>

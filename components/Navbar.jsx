@@ -21,6 +21,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useMediaQuery, useDisclosure } from "@mantine/hooks";
 import { MdOutlineNotifications } from "react-icons/md";
+import { AiOutlineHome } from "react-icons/ai";
 import NotificationModal from "./modals/NotificationModal";
 import { useQuery } from "react-query";
 import { getNotifications } from "@/actions";
@@ -188,6 +189,14 @@ function Navbar({ children }) {
                 </UnstyledButton>
               </Menu.Target>
               <Menu.Dropdown>
+                <Link href="/feed" passHref>
+                  <Menu.Item
+                    icon={<AiOutlineHome size={"0.9rem"} stroke={1.5} />}
+                  >
+                    Feed
+                  </Menu.Item>
+                </Link>
+
                 <Link href="/my-profile" passHref>
                   <Menu.Item icon={<CgProfile size={"0.9rem"} stroke={1.5} />}>
                     Profile
