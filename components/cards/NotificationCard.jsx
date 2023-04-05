@@ -10,6 +10,7 @@ import { useMemo } from "react";
 import { truncateText } from "@/utils";
 import dayjs from "dayjs";
 import { clearNotification, viewNotification } from "@/actions";
+import { getAvatarText } from "@/utils";
 
 export default function NotificationCard({
   notification,
@@ -68,11 +69,7 @@ export default function NotificationCard({
           transform: "translateY(.225rem)",
         }}
       >
-        {notificationUsername
-          .split(" ")
-          .map((word) => word[0])
-          .join("")
-          .slice(0, 2)}
+        {getAvatarText(notificationUsername)}
       </Avatar>
       <Stack
         spacing={1}

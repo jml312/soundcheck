@@ -7,7 +7,7 @@ import {
   UnstyledButton,
   useMantineTheme,
 } from "@mantine/core";
-import { truncateText } from "@/utils";
+import { truncateText, getAvatarText } from "@/utils";
 import { deleteComment } from "@/actions";
 import { useMemo, useEffect, useRef } from "react";
 import dayjs from "dayjs";
@@ -84,11 +84,7 @@ export default function CommentCard({
           outline: "1px solid #c0c1c4",
         }}
       >
-        {username
-          .split(" ")
-          .map((word) => word[0])
-          .join("")
-          .slice(0, 2)}
+        {getAvatarText(username)}
       </Avatar>
       <Stack
         spacing={1}

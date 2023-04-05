@@ -24,6 +24,7 @@ import { MdOutlineNotifications } from "react-icons/md";
 import NotificationModal from "./modals/NotificationModal";
 import { useQuery } from "react-query";
 import { getNotifications } from "@/actions";
+import { getAvatarText } from "@/utils";
 
 const useStyles = createStyles((theme) => ({
   logoText: {
@@ -107,7 +108,7 @@ function Navbar({ children }) {
                 disabled={!notifications || notifications.length === 0}
                 withinPortal
                 position="bottom-end"
-                label={"View Notifications"}
+                label={"view notifications"}
                 color="dark.7"
                 styles={{
                   tooltip: {
@@ -170,11 +171,7 @@ function Navbar({ children }) {
                         outline: `1px solid ${theme.colors.lightWhite[8]}`,
                       })}
                     >
-                      {session?.user?.name
-                        .split(" ")
-                        .map((word) => word[0])
-                        .join("")
-                        .slice(0, 2)}
+                      {getAvatarText(session?.user?.name)}
                     </Avatar>
                     {!isMobile && (
                       <Text

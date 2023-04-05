@@ -19,6 +19,7 @@ import { COMMENT_MAX_LENGTH } from "@/constants";
 import { useState, useEffect, useRef, useMemo } from "react";
 import dayjs from "dayjs";
 import EmojiPicker from "../EmojiPicker";
+import { getAvatarText } from "@/utils";
 
 export default function BottomSection({
   isPostModal,
@@ -386,11 +387,7 @@ export default function BottomSection({
                                 }}
                                 size={24}
                               >
-                                {user.username
-                                  .split(" ")
-                                  .map((word) => word[0])
-                                  .join("")
-                                  .slice(0, 2)}
+                                {getAvatarText(user.username)}
                               </Avatar>
                               <Text color="white" fz={"0.95rem"}>
                                 {user.username}

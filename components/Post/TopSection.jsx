@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { FaHeart, FaUserPlus, FaUserCheck } from "react-icons/fa";
 import Link from "next/link";
-import { truncateText } from "@/utils";
+import { truncateText, getAvatarText } from "@/utils";
 import { likePost, followUser } from "@/actions";
 import { CAPTION_MAX_LENGTH } from "@/constants";
 import { useState } from "react";
@@ -78,11 +78,7 @@ export default function TopSection({
                     }}
                     size={30}
                   >
-                    {post?.username
-                      .split(" ")
-                      .map((word) => word[0])
-                      .join("")
-                      .slice(0, 2)}
+                    {getAvatarText(post?.username)}
                   </Avatar>
                   <Stack
                     spacing={5}
@@ -158,11 +154,7 @@ export default function TopSection({
                       outline: "1px solid #c0c1c4",
                     }}
                   >
-                    {post?.username
-                      .split(" ")
-                      .map((word) => word[0])
-                      .join("")
-                      .slice(0, 2)}
+                    {getAvatarText(post?.username)}
                   </Avatar>
                 }
               >
@@ -193,11 +185,7 @@ export default function TopSection({
                         outline: "1px solid #c0c1c4",
                       }}
                     >
-                      {post?.username
-                        .split(" ")
-                        .map((word) => word[0])
-                        .join("")
-                        .slice(0, 2)}
+                      {getAvatarText(post?.username)}
                     </Avatar>
                   }
                 >

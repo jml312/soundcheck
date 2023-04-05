@@ -23,6 +23,7 @@ import Post from "./Post/Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import Link from "next/link";
 import { VictoryPie } from "victory";
+import { getAvatarText } from "@/utils";
 
 export default function Profile({ isUser, profile }) {
   const {
@@ -129,11 +130,7 @@ export default function Profile({ isUser, profile }) {
               transform: "translateY(.225rem)",
             }}
           >
-            {name
-              .split(" ")
-              .map((word) => word[0])
-              .join("")
-              .slice(0, 2)}
+            {getAvatarText(name)}
           </Avatar>
           <Stack spacing={0}>
             <Group
@@ -288,11 +285,7 @@ export default function Profile({ isUser, profile }) {
                   }}
                   size={24}
                 >
-                  {user.username
-                    .split(" ")
-                    .map((word) => word[0])
-                    .join("")
-                    .slice(0, 2)}
+                  {getAvatarText(user.username)}
                 </Avatar>
                 <Text color="white" fz={"0.95rem"}>
                   {user.username}
@@ -366,11 +359,7 @@ export default function Profile({ isUser, profile }) {
                   }}
                   size={24}
                 >
-                  {user.username
-                    .split(" ")
-                    .map((word) => word[0])
-                    .join("")
-                    .slice(0, 2)}
+                  {getAvatarText(user.username)}
                 </Avatar>
                 <Text color="white" fz={"0.95rem"}>
                   {user.username}
@@ -572,6 +561,8 @@ export default function Profile({ isUser, profile }) {
                 Artists
               </Text>
               <VictoryPie
+                labelRadius={160}
+                // innerRadius={68}
                 data={artists}
                 x="name"
                 y="value"
@@ -606,6 +597,8 @@ export default function Profile({ isUser, profile }) {
                 Genres
               </Text>
               <VictoryPie
+                labelRadius={160}
+                // innerRadius={68}
                 data={genres}
                 x="name"
                 y="value"
