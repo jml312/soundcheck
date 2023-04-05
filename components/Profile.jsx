@@ -11,6 +11,7 @@ import {
   Anchor,
   Modal,
   Button,
+  Divider,
 } from "@mantine/core";
 import { followUser } from "@/actions";
 import dayjs from "dayjs";
@@ -19,10 +20,9 @@ import { useSession } from "next-auth/react";
 import { useState, useMemo } from "react";
 import { BsSpotify } from "react-icons/bs";
 import Post from "./Post/Post";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import Link from "next/link";
-import { Pie } from "react-chartjs-2";
-import Chart from "chart.js/auto";
+import { VictoryPie } from "victory";
 
 export default function Profile({ isUser, profile }) {
   const {
@@ -50,9 +50,9 @@ export default function Profile({ isUser, profile }) {
               (item) => item.name === artist
             );
             if (artistIndex === -1) {
-              acc.artists.push({ name: artist, count: 1 });
+              acc.artists.push({ name: artist, value: 1 });
             } else {
-              acc.artists[artistIndex].count++;
+              acc.artists[artistIndex].value++;
             }
           });
           genres.forEach((genre) => {
@@ -60,9 +60,9 @@ export default function Profile({ isUser, profile }) {
               (item) => item.name === genre
             );
             if (genreIndex === -1) {
-              acc.genres.push({ name: genre, count: 1 });
+              acc.genres.push({ name: genre, value: 1 });
             } else {
-              acc.genres[genreIndex].count++;
+              acc.genres[genreIndex].value++;
             }
           });
           return acc;
@@ -75,6 +75,7 @@ export default function Profile({ isUser, profile }) {
     []
   );
 
+  const isMobile = useMediaQuery("(max-width: 769px)");
   const { data: session } = useSession();
   const [activePost, setActivePost] = useState(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
@@ -554,32 +555,71 @@ export default function Profile({ isUser, profile }) {
         </Tabs.Panel>
 
         <Tabs.Panel value="stats">
-          <Flex h="25rem" w="100%">
-            <Pie
-              data={{
-                labels: artists.map((artist) => artist.name),
-                datasets: [
-                  {
-                    label: "Artists",
-                    data: artists.map((artist) => artist.count),
-                    borderWidth: 1,
+          <Flex
+            h="45vh"
+            w="100%"
+            justify="space-between"
+            direction={isMobile ? "column" : "row"}
+          >
+            <Stack spacing={0} mt="1.5rem" justify="space-between">
+              <Text
+                color="white"
+                fz="lg"
+                style={{
+                  textAlign: "center",
+                }}
+              >
+                Artists
+              </Text>
+              <VictoryPie
+                data={artists}
+                x="name"
+                y="value"
+                // colorScale="grayscale"
+                // colorScale="cool"
+                colorScale="qualitative"
+                style={{
+                  labels: {
+                    fill: "white",
+                    fontSize: 12,
                   },
-                ],
+                }}
+              />
+            </Stack>
+
+            <Divider
+              orientation={isMobile ? "horizontal" : "vertical"}
+              h="85%"
+              style={{
+                placeSelf: !isMobile && "end",
               }}
-              width={100}
-              height={100}
             />
-            <Pie
-              data={{
-                labels: genres.map((genre) => genre.name),
-                datasets: [
-                  {
-                    label: "Genres",
-                    data: genres.map((genre) => genre.count),
+
+            <Stack spacing={0} mt="1.5rem" justify="space-between">
+              <Text
+                color="white"
+                fz="lg"
+                style={{
+                  textAlign: "center",
+                }}
+              >
+                Genres
+              </Text>
+              <VictoryPie
+                data={genres}
+                x="name"
+                y="value"
+                // colorScale="grayscale"
+                // colorScale="cool"
+                colorScale="qualitative"
+                style={{
+                  labels: {
+                    fontSize: 12,
+                    fill: "white",
                   },
-                ],
-              }}
-            />
+                }}
+              />
+            </Stack>
           </Flex>
         </Tabs.Panel>
       </Tabs>
