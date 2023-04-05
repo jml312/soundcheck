@@ -21,8 +21,7 @@ import { BsSpotify } from "react-icons/bs";
 import Post from "./Post/Post";
 import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
-
-import { Pie, Bar } from "react-chartjs-2";
+import { Pie } from "react-chartjs-2";
 import Chart from "chart.js/auto";
 
 export default function Profile({ isUser, profile }) {
@@ -35,7 +34,7 @@ export default function Profile({ isUser, profile }) {
     likes,
     posts,
     followers: followersProp,
-    isFollowing: isFollowingProp,
+    // isFollowing: isFollowingProp,
     following,
     stats,
     playlistID,
@@ -103,7 +102,7 @@ export default function Profile({ isUser, profile }) {
       style={{
         transform: "translateY(5rem)",
         userSelect: "none",
-        overflow: "hidden",
+        // overflow: "hidden",
       }}
     >
       <Flex
@@ -128,7 +127,13 @@ export default function Profile({ isUser, profile }) {
               outline: "1px solid #c0c1c4",
               transform: "translateY(.225rem)",
             }}
-          />
+          >
+            {name
+              .split(" ")
+              .map((word) => word[0])
+              .join("")
+              .slice(0, 2)}
+          </Avatar>
           <Stack spacing={0}>
             <Group
               spacing={8}
@@ -281,7 +286,13 @@ export default function Profile({ isUser, profile }) {
                     zIndex: -1,
                   }}
                   size={24}
-                />
+                >
+                  {user.username
+                    .split(" ")
+                    .map((word) => word[0])
+                    .join("")
+                    .slice(0, 2)}
+                </Avatar>
                 <Text color="white" fz={"0.95rem"}>
                   {user.username}
                 </Text>
@@ -353,7 +364,13 @@ export default function Profile({ isUser, profile }) {
                     zIndex: -1,
                   }}
                   size={24}
-                />
+                >
+                  {user.username
+                    .split(" ")
+                    .map((word) => word[0])
+                    .join("")
+                    .slice(0, 2)}
+                </Avatar>
                 <Text color="white" fz={"0.95rem"}>
                   {user.username}
                 </Text>
@@ -395,6 +412,10 @@ export default function Profile({ isUser, profile }) {
           transform: "translateY(-.5rem)",
         }}
         defaultValue="posts"
+        onTabChange={() => {
+          setCurrentlyPlaying(null);
+          setActivePost(null);
+        }}
       >
         <Tabs.List grow>
           <Tabs.Tab label="Posts" value="posts">
@@ -408,7 +429,7 @@ export default function Profile({ isUser, profile }) {
           </Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="posts" mb="4rem">
+        <Tabs.Panel value="posts">
           <Stack>
             <ScrollArea
               offsetScrollbars
@@ -463,8 +484,8 @@ export default function Profile({ isUser, profile }) {
           </Stack>
         </Tabs.Panel>
 
-        <Tabs.Panel value="likes" mb="4rem">
-          {likes.length !== 0 ? (
+        <Tabs.Panel value="likes">
+          {likes.length === 0 ? (
             <Flex
               justify="center"
               align="center"
@@ -532,21 +553,34 @@ export default function Profile({ isUser, profile }) {
           )}
         </Tabs.Panel>
 
-        <Tabs.Panel value="stats" mb="4rem">
-          {/* stats:
-          {artists.map((artist) => (
-            <Text key={artist.name}>
-              {artist.name} - {artist.count}
-            </Text>
-          ))}
-          <hr />
-          genres:
-          {genres.map((genre) => (
-            <Text key={genre.name}>
-              {genre.name} - {genre.count}
-            </Text>
-          ))} */}
-          {/* stats graphs go here */}
+        <Tabs.Panel value="stats">
+          <Flex h="25rem" w="100%">
+            <Pie
+              data={{
+                labels: artists.map((artist) => artist.name),
+                datasets: [
+                  {
+                    label: "Artists",
+                    data: artists.map((artist) => artist.count),
+                    borderWidth: 1,
+                  },
+                ],
+              }}
+              width={100}
+              height={100}
+            />
+            <Pie
+              data={{
+                labels: genres.map((genre) => genre.name),
+                datasets: [
+                  {
+                    label: "Genres",
+                    data: genres.map((genre) => genre.count),
+                  },
+                ],
+              }}
+            />
+          </Flex>
         </Tabs.Panel>
       </Tabs>
     </Flex>

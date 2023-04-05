@@ -83,7 +83,13 @@ export default function CommentCard({
         style={{
           outline: "1px solid #c0c1c4",
         }}
-      />
+      >
+        {username
+          .split(" ")
+          .map((word) => word[0])
+          .join("")
+          .slice(0, 2)}
+      </Avatar>
       <Stack
         spacing={1}
         align={"flex-start"}

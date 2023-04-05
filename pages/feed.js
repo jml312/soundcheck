@@ -5,7 +5,6 @@ import { useDisclosure, useMediaQuery, useDidUpdate } from "@mantine/hooks";
 import dayjs from "dayjs";
 import SelectSongModal from "@/components/modals/SelectSongModal";
 import Filter from "bad-words";
-import { useRouter } from "next/router";
 import { Flex, Text, ScrollArea, Stack, SegmentedControl } from "@mantine/core";
 import { useState, useEffect, useRef } from "react";
 import client from "@/lib/sanity";
@@ -14,8 +13,6 @@ import { dehydrate, QueryClient, useQuery } from "react-query";
 import { getPosts, getSpotify } from "@/actions";
 
 function Feed({ spotifyData, allUsers }) {
-  const router = useRouter();
-  const { date } = router.query;
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
   const [posts, setPosts] = useState();
@@ -38,6 +35,7 @@ function Feed({ spotifyData, allUsers }) {
     refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    refetchInterval: 1000 * 60 * 5, // 5 minutes
   });
   const [caption, setCaption] = useState({
     text: currentPosts?.userPost?.caption || "",
@@ -102,18 +100,34 @@ function Feed({ spotifyData, allUsers }) {
   }, [currentPosts]);
 
   useDidUpdate(() => {
-    if (postType === "everyone") {
+    const updatedOriginalPosts = currentPosts?.feedPosts?.map((post) => {
+      const foundPost = posts?.feedPosts?.find((p) => p._id === post._id);
+      if (foundPost) {
+        return {
+          ...post,
+          isFollowing: foundPost.isFollowing,
+          numFollowers: foundPost.numFollowers,
+        };
+      }
+      return post;
+    });
+    setPosts({
+      ...posts,
+      feedPosts:
+        postType === "everyone"
+          ? updatedOriginalPosts
+          : posts?.feedPosts?.filter((post) => post.isFollowing),
+    });
+  }, [postType]);
+
+  useDidUpdate(() => {
+    if (postType === "following") {
       setPosts({
         ...posts,
-        feedPosts: currentPosts?.feedPosts,
-      });
-    } else if (postType === "following") {
-      setPosts({
-        ...posts,
-        feedPosts: currentPosts?.feedPosts?.filter((post) => post.isFollowing),
+        feedPosts: posts?.feedPosts?.filter((post) => post.isFollowing),
       });
     }
-  }, [postType]);
+  }, [posts]);
 
   return (
     <>
@@ -133,7 +147,6 @@ function Feed({ spotifyData, allUsers }) {
         captionRef={captionRef}
         isSmall={isSmall}
       />
-
       <Flex
         style={{
           height: "calc(100vh - 5rem)",
@@ -257,11 +270,6 @@ function Feed({ spotifyData, allUsers }) {
                     {postType === "everyone"
                       ? "No posts yet"
                       : "No following posts yet"}
-
-                    {/* //   `No posts
-                  // for ${
-                  //   postType === "everyone" ? "everyone" : "following"
-                  // } on ${formattedDate}`} */}
                   </Text>
                 )}
               </>

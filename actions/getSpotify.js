@@ -105,7 +105,7 @@ export default async function getSpotify({ session, client }) {
               ...artist,
               _key: artist.id,
             })),
-            genres: [...new Set(genres.flat())],
+            genres: [...new Set(genres.flat())], // filter into main
           };
         })
     );

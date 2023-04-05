@@ -67,7 +67,13 @@ export default function NotificationCard({
           outline: "1px solid #c0c1c4",
           transform: "translateY(.225rem)",
         }}
-      />
+      >
+        {notificationUsername
+          .split(" ")
+          .map((word) => word[0])
+          .join("")
+          .slice(0, 2)}
+      </Avatar>
       <Stack
         spacing={1}
         align={"flex-start"}

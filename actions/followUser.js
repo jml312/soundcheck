@@ -16,7 +16,7 @@ export default async function followUser({
   setIsFollowLoading(true);
   try {
     const type = isFollowing ? "unfollow" : "follow";
-    if (setIsFollowing) {
+    if (!!setIsFollowing) {
       setIsFollowing((prev) => !prev);
       if (type === "follow") {
         setFollowers((prev) => [
@@ -39,7 +39,6 @@ export default async function followUser({
         numFollowers: post?.numFollowers + (isFollowing ? -1 : 1),
       });
     }
-
     await axios.post("/api/protected/follow", {
       userId: session.user.id,
       toFollowId,

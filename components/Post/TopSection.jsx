@@ -77,7 +77,13 @@ export default function TopSection({
                       transform: "translateY(-2px)",
                     }}
                     size={30}
-                  />
+                  >
+                    {post?.username
+                      .split(" ")
+                      .map((word) => word[0])
+                      .join("")
+                      .slice(0, 2)}
+                  </Avatar>
                   <Stack
                     spacing={5}
                     sx={{
@@ -151,7 +157,13 @@ export default function TopSection({
                     style={{
                       outline: "1px solid #c0c1c4",
                     }}
-                  />
+                  >
+                    {post?.username
+                      .split(" ")
+                      .map((word) => word[0])
+                      .join("")
+                      .slice(0, 2)}
+                  </Avatar>
                 }
               >
                 {truncateText(post?.username, 19)}
@@ -180,7 +192,13 @@ export default function TopSection({
                       style={{
                         outline: "1px solid #c0c1c4",
                       }}
-                    />
+                    >
+                      {post?.username
+                        .split(" ")
+                        .map((word) => word[0])
+                        .join("")
+                        .slice(0, 2)}
+                    </Avatar>
                   }
                 >
                   {truncateText(post?.username, 19)}

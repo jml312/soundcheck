@@ -169,7 +169,13 @@ function Navbar({ children }) {
                       sx={(theme) => ({
                         outline: `1px solid ${theme.colors.lightWhite[8]}`,
                       })}
-                    />
+                    >
+                      {session?.user?.name
+                        .split(" ")
+                        .map((word) => word[0])
+                        .join("")
+                        .slice(0, 2)}
+                    </Avatar>
                     {!isMobile && (
                       <Text
                         weight={500}

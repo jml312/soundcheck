@@ -385,7 +385,13 @@ export default function BottomSection({
                                   outline: "1px solid #c0c1c4",
                                 }}
                                 size={24}
-                              />
+                              >
+                                {user.username
+                                  .split(" ")
+                                  .map((word) => word[0])
+                                  .join("")
+                                  .slice(0, 2)}
+                              </Avatar>
                               <Text color="white" fz={"0.95rem"}>
                                 {user.username}
                               </Text>
