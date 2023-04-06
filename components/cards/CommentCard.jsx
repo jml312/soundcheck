@@ -30,6 +30,7 @@ export default function CommentCard({
   allUsers,
   router,
   isSmall,
+  isProfile,
 }) {
   const theme = useMantineTheme();
   const commentRef = useRef();
@@ -146,60 +147,63 @@ export default function CommentCard({
           })}
         </Text>
 
-        <Flex
-          mt={isUser ? "-.45rem" : "-.1rem"}
-          justify="flex-start"
-          align="center"
-          w={"100%"}
-        >
-          <UnstyledButton
-            fs={"italic"}
-            fz={".75rem"}
-            color="#BDBDBD"
-            sx={{
-              zIndex: 100,
-            }}
-            onClick={() => {
-              commentInputRef.current.focus();
-              setComment({
-                text: comment.text + `${!comment.text ? "" : " "}@${username} `,
-                isLoading: false,
-                isDeleting: false,
-                isMentioning: false,
-                isFocused: true,
-              });
-            }}
+        {!isProfile && (
+          <Flex
+            mt={isUser ? "-.45rem" : "-.1rem"}
+            justify="flex-start"
+            align="center"
+            w={"100%"}
           >
-            Reply
-          </UnstyledButton>
-          {isUser && (
-            <>
-              &nbsp;&bull;&nbsp;
-              <UnstyledButton
-                fs={"italic"}
-                fz={".75rem"}
-                color="#BDBDBD"
-                sx={{
-                  zIndex: 100,
-                }}
-                onClick={() =>
-                  deleteComment({
-                    userId,
-                    createdAt,
-                    post,
-                    setPost,
-                    text,
-                    setComment,
-                    allUsers,
-                    session,
-                  })
-                }
-              >
-                Delete
-              </UnstyledButton>
-            </>
-          )}
-        </Flex>
+            <UnstyledButton
+              fs={"italic"}
+              fz={".75rem"}
+              color="#BDBDBD"
+              sx={{
+                zIndex: 100,
+              }}
+              onClick={() => {
+                commentInputRef.current.focus();
+                setComment({
+                  text:
+                    comment.text + `${!comment.text ? "" : " "}@${username} `,
+                  isLoading: false,
+                  isDeleting: false,
+                  isMentioning: false,
+                  isFocused: true,
+                });
+              }}
+            >
+              Reply
+            </UnstyledButton>
+            {isUser && (
+              <>
+                &nbsp;&bull;&nbsp;
+                <UnstyledButton
+                  fs={"italic"}
+                  fz={".75rem"}
+                  color="#BDBDBD"
+                  sx={{
+                    zIndex: 100,
+                  }}
+                  onClick={() =>
+                    deleteComment({
+                      userId,
+                      createdAt,
+                      post,
+                      setPost,
+                      text,
+                      setComment,
+                      allUsers,
+                      session,
+                    })
+                  }
+                >
+                  Delete
+                </UnstyledButton>
+              </>
+            )}
+          </Flex>
+        )}
       </Stack>
     </Flex>
   );

@@ -14,6 +14,7 @@ function Post({
   isPostModal = false,
   isSelect = false,
   isDiscover = false,
+  isProfile = false,
   currentlyPlaying,
   setCurrentlyPlaying,
   selectedSong,
@@ -92,6 +93,7 @@ function Post({
         notificationCommentId={notificationCommentId}
         allUsers={allUsers}
         isSmall={isSmall}
+        isProfile={isProfile}
       />
 
       <Flex
@@ -124,6 +126,7 @@ function Post({
           isUser={isUser}
           isSelect={isSelect}
           isDiscover={isDiscover}
+          isProfile={isProfile}
           post={post}
           setPost={setPost}
           session={session}
@@ -161,6 +164,7 @@ function Post({
           isPostModal={isPostModal}
           isSelect={isSelect}
           isDiscover={isDiscover}
+          isProfile={isProfile}
           post={post}
           setPost={setPost}
           comment={comment}

@@ -23,7 +23,7 @@ import { BsSpotify } from "react-icons/bs";
 import Post from "./Post/Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import Link from "next/link";
-import { VictoryPie } from "victory";
+import { VictoryPie, VictoryLabel } from "victory";
 import { getAvatarText } from "@/utils";
 
 export default function Profile({ isUser, profile }) {
@@ -36,7 +36,6 @@ export default function Profile({ isUser, profile }) {
     likes,
     posts,
     followers: followersProp,
-    // isFollowing: isFollowingProp,
     following,
     stats,
     playlistID,
@@ -188,7 +187,7 @@ export default function Profile({ isUser, profile }) {
                   withinPortal
                   position="right"
                   disabled={isFollowLoading}
-                  label={isFollowing ? "Unfollow" : "Follow"}
+                  label={isFollowing ? "unfollow" : "follow"}
                   color="dark.7"
                   styles={{
                     tooltip: {
@@ -238,11 +237,10 @@ export default function Profile({ isUser, profile }) {
       <Flex
         w={BODY_WIDTH}
         maw={"450px"}
-        my={40}
+        my={10}
         justify="space-evenly"
         style={{
           flexGrow: 0,
-          transform: "translateY(-.1rem)",
         }}
       >
         <Modal
@@ -467,7 +465,7 @@ export default function Profile({ isUser, profile }) {
                     setActivePost={setActivePost}
                     currentlyPlaying={currentlyPlaying}
                     setCurrentlyPlaying={setCurrentlyPlaying}
-                    isDiscover
+                    isProfile
                   />
                 ))}
               </Flex>
@@ -482,7 +480,7 @@ export default function Profile({ isUser, profile }) {
               align="center"
               w="100%"
               mt="1.25rem"
-              h="45vh"
+              h="435px"
             >
               <Text fz="lg" color="#c0c1c4">
                 No likes yet...
@@ -535,7 +533,7 @@ export default function Profile({ isUser, profile }) {
                       setActivePost={setActivePost}
                       currentlyPlaying={currentlyPlaying}
                       setCurrentlyPlaying={setCurrentlyPlaying}
-                      isDiscover
+                      isProfile
                     />
                   ))}
                 </Flex>
@@ -545,11 +543,72 @@ export default function Profile({ isUser, profile }) {
         </Tabs.Panel>
 
         <Tabs.Panel value="stats">
-          <ScrollArea
-            h="45vh"
-            offsetScrollbars
+          <Flex
+            direction={isMobile ? "column" : "row"}
+            justify="space-between"
+            align="center"
+            // bg="red"
+            h="435px"
             mt="1.25rem"
             w="100%"
+          >
+            <svg viewBox="0 0 650 650">
+              <VictoryPie
+                standalone={false}
+                width={650}
+                height={650}
+                data={artists}
+                x="name"
+                y="value"
+                innerRadius={105}
+                labelRadius={175}
+                // colorScale="grayscale"
+                // colorScale="cool"
+                colorScale="qualitative"
+                style={{
+                  labels: { fontSize: 15, fill: "white", fontWeight: "bold" },
+                }}
+              />
+              <VictoryLabel
+                textAnchor="middle"
+                style={{ fontSize: 20, fill: "white", fontWeight: "bold" }}
+                x={325}
+                y={325}
+                text="Artists"
+              />
+            </svg>
+
+            <svg viewBox="0 0 650 650">
+              <VictoryPie
+                standalone={false}
+                width={650}
+                height={650}
+                data={genres}
+                x="name"
+                y="value"
+                innerRadius={105}
+                labelRadius={175}
+                // colorScale="grayscale"
+                // colorScale="cool"
+                colorScale="qualitative"
+                style={{
+                  labels: { fontSize: 15, fill: "white", fontWeight: "bold" },
+                }}
+              />
+              <VictoryLabel
+                textAnchor="middle"
+                style={{ fontSize: 20, fill: "white", fontWeight: "bold" }}
+                x={325}
+                y={325}
+                text="Genres"
+              />
+            </svg>
+          </Flex>
+          {/* <ScrollArea
+            h="435px"
+            mt="1.25rem"
+            w="100%"
+            offsetScrollbars
             type="always"
             styles={{
               scrollbar: {
@@ -571,146 +630,61 @@ export default function Profile({ isUser, profile }) {
                 display: "none",
               },
               viewport: {
-                // backgroundColor: "red",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
               },
             }}
           >
-            <Flex justify="space-evenly" align="center" w="100%" h="50%">
-              <Title
-                order={3}
-                // fz="lg"
-                color="white"
-                style={{
-                  textAlign: "center",
-                }}
-              >
-                Artists
-              </Title>
-              <Box w="50%" h="50%">
-                <VictoryPie
-                  // width={300}
-                  // height={300}
-                  labelRadius={160}
-                  // innerRadius={68}
-                  data={artists}
-                  x="name"
-                  y="value"
-                  // colorScale="grayscale"
-                  // colorScale="cool"
-                  colorScale="qualitative"
-                  style={{
-                    labels: {
-                      fill: "white",
-                      fontSize: 12,
-                    },
-                  }}
-                />
-              </Box>
-            </Flex>
-
-            <Flex justify="space-evenly" align="center" w="100%" h="50%">
-              <Title
-                order={3}
-                // fz="lg"
-                color="white"
-                style={{
-                  textAlign: "center",
-                }}
-              >
-                Genres
-              </Title>
-              <Box w="50%" h="50%">
-                <VictoryPie
-                  // width={300}
-                  // height={300}
-                  labelRadius={160}
-                  // innerRadius={68}
-                  data={genres}
-                  x="name"
-                  y="value"
-                  // colorScale="grayscale"
-                  // colorScale="cool"
-                  colorScale="qualitative"
-                  style={{
-                    labels: {
-                      fontSize: 12,
-                      fill: "white",
-                    },
-                  }}
-                />
-              </Box>
-            </Flex>
-          </ScrollArea>
-          {/* <Flex
-            h="45vh"
-            w="100%"
-            justify="space-between"
-            direction={isMobile ? "column" : "row"}
-          >
-            <Stack spacing={0} mt="1.5rem" justify="space-between">
-              <Text
-                color="white"
-                fz="lg"
-                style={{
-                  textAlign: "center",
-                }}
-              >
-                Artists
-              </Text>
+            <svg viewBox="0 0 650 650">
               <VictoryPie
-                labelRadius={160}
-                // innerRadius={68}
+                standalone={false}
+                width={400}
+                height={400}
                 data={artists}
                 x="name"
                 y="value"
+                innerRadius={68}
+                labelRadius={100}
                 // colorScale="grayscale"
                 // colorScale="cool"
                 colorScale="qualitative"
-                style={{
-                  labels: {
-                    fill: "white",
-                    fontSize: 12,
-                  },
-                }}
+                style={{ labels: { fontSize: 12, fill: "white" } }}
               />
-            </Stack>
+              <VictoryLabel
+                textAnchor="middle"
+                style={{ fontSize: 20, fill: "white" }}
+                x={200}
+                y={200}
+                text="Artists"
+              />
+            </svg>
 
-            <Divider
-              orientation={isMobile ? "horizontal" : "vertical"}
-              h="85%"
-              style={{
-                placeSelf: !isMobile && "end",
-              }}
-            />
-
-            <Stack spacing={0} mt="1.5rem" justify="space-between">
-              <Text
-                color="white"
-                fz="lg"
-                style={{
-                  textAlign: "center",
-                }}
-              >
-                Genres
-              </Text>
+            <svg viewBox="0 0 650 650">
               <VictoryPie
-                labelRadius={160}
-                // innerRadius={68}
+                standalone={false}
+                width={400}
+                height={400}
                 data={genres}
                 x="name"
                 y="value"
+                innerRadius={68}
+                labelRadius={100}
                 // colorScale="grayscale"
                 // colorScale="cool"
                 colorScale="qualitative"
-                style={{
-                  labels: {
-                    fontSize: 12,
-                    fill: "white",
-                  },
-                }}
+                style={{ labels: { fontSize: 12, fill: "white" } }}
               />
-            </Stack>
-          </Flex> */}
+              <VictoryLabel
+                textAnchor="middle"
+                style={{ fontSize: 20, fill: "white" }}
+                x={200}
+                y={200}
+                text="Genres"
+              />
+            </svg>
+          </ScrollArea> */}
         </Tabs.Panel>
       </Tabs>
     </Flex>

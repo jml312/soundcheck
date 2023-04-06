@@ -23,6 +23,7 @@ export default function TopSection({
   isUser,
   isSelect,
   isDiscover,
+  isProfile,
   post,
   setPost,
   session,
@@ -40,7 +41,7 @@ export default function TopSection({
 
   return (
     <>
-      {!isDiscover && (
+      {!isDiscover && !isProfile && (
         <Flex
           w={isPostModal ? "100%" : "275px"}
           justify={"space-between"}
@@ -229,7 +230,7 @@ export default function TopSection({
               ) : (
                 <Tooltip
                   withinPortal
-                  label={post?.isFollowing ? "Unfollow" : "Follow"}
+                  label={post?.isFollowing ? "unfollow" : "follow"}
                   position="top"
                   zIndex={2}
                   offset={3}
@@ -298,7 +299,7 @@ export default function TopSection({
               ) : (
                 <Tooltip
                   withinPortal
-                  label={post?.isLiked ? "Unlike" : "Like"}
+                  label={post?.isLiked ? "unlike" : "like"}
                   position="top"
                   zIndex={2}
                   offset={3}

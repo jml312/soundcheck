@@ -18,6 +18,7 @@ export default function PostModal({
   notificationCommentId,
   allUsers,
   isSmall,
+  isProfile,
 }) {
   const [comment, setComment] = useState({
     text: "",
@@ -83,6 +84,7 @@ export default function PostModal({
         activePost={activePost}
         setActivePost={setActivePost}
         isSmall={isSmall}
+        isProfile={isProfile}
       />
     </Modal>
   );

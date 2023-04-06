@@ -103,7 +103,7 @@ function Navbar({ children }) {
               Soundcheck!
             </Title>
           </Link>
-          <Group spacing={5}>
+          <Group spacing={6}>
             <Group position="center">
               <Tooltip
                 disabled={!notifications || notifications.length === 0}
@@ -120,7 +120,7 @@ function Navbar({ children }) {
               >
                 <Indicator
                   disabled={!notifications || notifications.length === 0}
-                  size={".525rem"}
+                  size={".5rem"}
                   color={theme.colors.spotify[8]}
                   offset={3.5}
                 >
@@ -134,7 +134,7 @@ function Navbar({ children }) {
                       },
                     }}
                   >
-                    <MdOutlineNotifications size={"1.5rem"} />
+                    <MdOutlineNotifications size={"1.4rem"} />
                   </ActionIcon>
                 </Indicator>
               </Tooltip>
