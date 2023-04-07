@@ -109,6 +109,9 @@ function Post({
           borderRadius: "0.5rem !important",
           position: "relative",
         }}
+        style={{
+          scrollSnapAlign: "start",
+        }}
       >
         <LoadingOverlay
           visible={

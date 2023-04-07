@@ -12,6 +12,8 @@ import { allUsersQuery } from "@/lib/queries";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import { getPosts, getSpotify } from "@/actions";
 
+
+
 function Feed({ spotifyData, allUsers }) {
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
@@ -227,6 +229,9 @@ function Feed({ spotifyData, allUsers }) {
                         },
                         corner: {
                           display: "none",
+                        },
+                        viewport: {
+                          scrollSnapType: "y mandatory",
                         },
                       }}
                     >

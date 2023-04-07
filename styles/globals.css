@@ -17,3 +17,11 @@ div[data-orientation="horizontal"], div[data-orientation="horizontal"]:hover, di
 .profile-modal div.mantine-ScrollArea-thumb, .profile-modal div.mantine-ScrollArea-thumb:hover {
   background-color: #474952 !important;
 }
+
+.swiper-pagination-bullet {
+  background-color: #c0c1c4 !important;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: white  !important;
+}

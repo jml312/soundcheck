@@ -129,6 +129,12 @@ export default function BottomSection({
                         backgroundColor: "#474952",
                       },
                   },
+                  corner: {
+                    display: "none",
+                  },
+                  viewport: {
+                    scrollSnapType: "y mandatory",
+                  },
                 }}
               >
                 {numComments === 0 ? (

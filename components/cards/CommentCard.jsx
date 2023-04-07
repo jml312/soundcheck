@@ -74,6 +74,7 @@ export default function CommentCard({
         cursor: "default",
         placeSelf: "flex-start",
         overflowWrap: "anywhere",
+        scrollSnapAlign: "start",
       }}
     >
       <Avatar

@@ -9,22 +9,23 @@ import {
   Tooltip,
   ScrollArea,
   Anchor,
-  Modal,
   Button,
-  Box,
-  Title,
 } from "@mantine/core";
 import { followUser } from "@/actions";
+import { getAvatarText } from "@/utils";
 import dayjs from "dayjs";
 import { FaUserPlus, FaUserCheck } from "react-icons/fa";
 import { useSession } from "next-auth/react";
 import { useState, useMemo } from "react";
 import { BsSpotify } from "react-icons/bs";
-import Post from "./Post/Post";
+import Post from "../Post/Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import Link from "next/link";
-import { VictoryPie, VictoryLabel } from "victory";
-import { getAvatarText } from "@/utils";
+import StatGraph from "./StatGraph";
+import ProfileModal from "../modals/ProfileModal";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
+import { Pagination } from "swiper";
 
 export default function Profile({ isUser, profile }) {
   const {
@@ -41,11 +42,11 @@ export default function Profile({ isUser, profile }) {
     playlistID,
   } = profile;
 
-  const { artists, genres } = useMemo(
+  const { artists, albums, genres } = useMemo(
     () =>
       stats.reduce(
         (acc, stat) => {
-          const { artists, genres } = stat;
+          const { artists, album, genres } = stat;
           artists.forEach((artist) => {
             const artistIndex = acc.artists.findIndex(
               (item) => item.name === artist
@@ -56,6 +57,14 @@ export default function Profile({ isUser, profile }) {
               acc.artists[artistIndex].value++;
             }
           });
+          const albumIndex = acc.albums.findIndex(
+            (item) => item.name === album
+          );
+          if (albumIndex === -1) {
+            acc.albums.push({ name: album, value: 1 });
+          } else {
+            acc.albums[albumIndex].value++;
+          }
           genres.forEach((genre) => {
             const genreIndex = acc.genres.findIndex(
               (item) => item.name === genre
@@ -70,13 +79,19 @@ export default function Profile({ isUser, profile }) {
         },
         {
           artists: [],
+          albums: [],
           genres: [],
         }
       ),
     []
   );
 
-  const isMobile = useMediaQuery("(max-width: 769px)");
+  const isSmall = useMediaQuery("(max-width: 470px)");
+  const isMobile = useMediaQuery("(max-width: 850px)");
+  const BODY_WIDTH = "87.5%";
+  const BODY_MAX_WIDTH = "1050px";
+
+  const [activeStat, setActiveStat] = useState("artists");
   const { data: session } = useSession();
   const [activePost, setActivePost] = useState(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
@@ -91,8 +106,8 @@ export default function Profile({ isUser, profile }) {
     useDisclosure(false);
   const numFollowers = followers?.length;
   const numFollowing = following?.length;
-  const BODY_WIDTH = "87.5%";
-  const BODY_MAX_WIDTH = "925px";
+  // const BODY_WIDTH = "87.5%";
+  // const BODY_MAX_WIDTH = "925px";
 
   return (
     <Flex
@@ -104,7 +119,6 @@ export default function Profile({ isUser, profile }) {
       style={{
         transform: "translateY(5rem)",
         userSelect: "none",
-        // overflow: "hidden",
       }}
     >
       <Flex
@@ -243,56 +257,13 @@ export default function Profile({ isUser, profile }) {
           flexGrow: 0,
         }}
       >
-        <Modal
+        {/* followers */}
+        <ProfileModal
           opened={followersOpened}
-          onClose={closeFollowers}
+          close={closeFollowers}
           title={"Followers"}
-          centered
-          className="profile-modal"
-          overlayProps={{
-            blur: 3,
-            opacity: 0.55,
-          }}
-        >
-          {followers.map((user) => (
-            <Link
-              href={`/profile/${user?.userId}`}
-              passHref
-              key={user.userId}
-              w="100%"
-              sx={{
-                borderRadius: "0.5rem !important",
-                transition: "all 0.1s ease-in-out",
-                "&:hover": {
-                  backgroundColor: "#141517",
-                },
-              }}
-            >
-              <Flex
-                justify="start"
-                align="center"
-                p="0.5rem 0.5rem 0.5rem .7rem"
-                gap="0.65rem"
-              >
-                <Avatar
-                  src={user.userImage}
-                  alt={user.username}
-                  radius="xl"
-                  style={{
-                    outline: "1px solid #c0c1c4",
-                    zIndex: -1,
-                  }}
-                  size={24}
-                >
-                  {getAvatarText(user.username)}
-                </Avatar>
-                <Text color="white" fz={"0.95rem"}>
-                  {user.username}
-                </Text>
-              </Flex>
-            </Link>
-          ))}
-        </Modal>
+          data={followers}
+        />
         <Group>
           <Button
             size="md"
@@ -317,56 +288,14 @@ export default function Profile({ isUser, profile }) {
             {numFollowers} Follower{numFollowers === 1 ? "" : "s"}
           </Button>
         </Group>
-        <Modal
+
+        {/* following */}
+        <ProfileModal
           opened={followingOpened}
-          onClose={closeFollowing}
+          close={closeFollowing}
           title={"Following"}
-          centered
-          className="profile-modal"
-          overlayProps={{
-            blur: 3,
-            opacity: 0.55,
-          }}
-        >
-          {following.map((user) => (
-            <Link
-              href={`/profile/${user?.userId}`}
-              passHref
-              key={user.userId}
-              w="100%"
-              sx={{
-                borderRadius: "0.5rem !important",
-                transition: "all 0.1s ease-in-out",
-                "&:hover": {
-                  backgroundColor: "#141517",
-                },
-              }}
-            >
-              <Flex
-                justify="start"
-                align="center"
-                p="0.5rem 0.5rem 0.5rem .7rem"
-                gap="0.65rem"
-              >
-                <Avatar
-                  src={user.userImage}
-                  alt={user.username}
-                  radius="xl"
-                  style={{
-                    outline: "1px solid #c0c1c4",
-                    zIndex: -1,
-                  }}
-                  size={24}
-                >
-                  {getAvatarText(user.username)}
-                </Avatar>
-                <Text color="white" fz={"0.95rem"}>
-                  {user.username}
-                </Text>
-              </Flex>
-            </Link>
-          ))}
-        </Modal>
+          data={following}
+        />
         <Group>
           <Button
             size="md"
@@ -424,29 +353,31 @@ export default function Profile({ isUser, profile }) {
               offsetScrollbars
               mt="1.25rem"
               type="always"
-              w="100%"
+              w="104%"
+              maw={BODY_MAX_WIDTH}
+              h="435px"
               styles={{
                 scrollbar: {
                   "&, &:hover": {
                     backgroundColor: "transparent",
                     borderRadius: "0.5rem",
                   },
-                  '&[data-orientation="horizontal"]': {
+                  '&[data-orientation="vertical"]': {
                     backgroundColor: "transparent !important",
                   },
-                  '&[data-orientation="horizontal"]:hover': {
+                  '&[data-orientation="vertical"]:hover': {
                     backgroundColor: "transparent !important",
                   },
-                  '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb':
-                    {
-                      backgroundColor: "#474952",
-                    },
+                  '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
+                    backgroundColor: "#474952",
+                  },
                 },
                 corner: {
                   display: "none",
                 },
                 viewport: {
                   paddingBottom: "1.075rem",
+                  scrollSnapType: "y mandatory",
                 },
               }}
             >
@@ -455,6 +386,7 @@ export default function Profile({ isUser, profile }) {
                 align={"end"}
                 w={"100%"}
                 h={"100%"}
+                wrap={"wrap"}
                 gap="1.5rem"
               >
                 {posts?.map((post) => (
@@ -466,6 +398,7 @@ export default function Profile({ isUser, profile }) {
                     currentlyPlaying={currentlyPlaying}
                     setCurrentlyPlaying={setCurrentlyPlaying}
                     isProfile
+                    isSmall={isSmall}
                   />
                 ))}
               </Flex>
@@ -491,21 +424,23 @@ export default function Profile({ isUser, profile }) {
               <ScrollArea
                 offsetScrollbars
                 mt="1.25rem"
-                w="100%"
                 type="always"
+                w="104%"
+                maw={BODY_MAX_WIDTH}
+                h="435px"
                 styles={{
                   scrollbar: {
                     "&, &:hover": {
                       backgroundColor: "transparent",
                       borderRadius: "0.5rem",
                     },
-                    '&[data-orientation="horizontal"]': {
+                    '&[data-orientation="vertical"]': {
                       backgroundColor: "transparent !important",
                     },
-                    '&[data-orientation="horizontal"]:hover': {
+                    '&[data-orientation="vertical"]:hover': {
                       backgroundColor: "transparent !important",
                     },
-                    '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb':
+                    '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
                       {
                         backgroundColor: "#474952",
                       },
@@ -515,6 +450,7 @@ export default function Profile({ isUser, profile }) {
                   },
                   viewport: {
                     paddingBottom: "1.075rem",
+                    scrollSnapType: "y mandatory",
                   },
                 }}
               >
@@ -534,6 +470,7 @@ export default function Profile({ isUser, profile }) {
                       currentlyPlaying={currentlyPlaying}
                       setCurrentlyPlaying={setCurrentlyPlaying}
                       isProfile
+                      isSmall={isSmall}
                     />
                   ))}
                 </Flex>
@@ -543,148 +480,27 @@ export default function Profile({ isUser, profile }) {
         </Tabs.Panel>
 
         <Tabs.Panel value="stats">
-          <Flex
-            direction={isMobile ? "column" : "row"}
-            justify="space-between"
-            align="center"
-            // bg="red"
-            h="435px"
-            mt="1.25rem"
-            w="100%"
-          >
-            <svg viewBox="0 0 650 650">
-              <VictoryPie
-                standalone={false}
-                width={650}
-                height={650}
-                data={artists}
-                x="name"
-                y="value"
-                innerRadius={105}
-                labelRadius={175}
-                // colorScale="grayscale"
-                // colorScale="cool"
-                colorScale="qualitative"
-                style={{
-                  labels: { fontSize: 15, fill: "white", fontWeight: "bold" },
-                }}
-              />
-              <VictoryLabel
-                textAnchor="middle"
-                style={{ fontSize: 20, fill: "white", fontWeight: "bold" }}
-                x={325}
-                y={325}
-                text="Artists"
-              />
-            </svg>
-
-            <svg viewBox="0 0 650 650">
-              <VictoryPie
-                standalone={false}
-                width={650}
-                height={650}
-                data={genres}
-                x="name"
-                y="value"
-                innerRadius={105}
-                labelRadius={175}
-                // colorScale="grayscale"
-                // colorScale="cool"
-                colorScale="qualitative"
-                style={{
-                  labels: { fontSize: 15, fill: "white", fontWeight: "bold" },
-                }}
-              />
-              <VictoryLabel
-                textAnchor="middle"
-                style={{ fontSize: 20, fill: "white", fontWeight: "bold" }}
-                x={325}
-                y={325}
-                text="Genres"
-              />
-            </svg>
-          </Flex>
-          {/* <ScrollArea
-            h="435px"
-            mt="1.25rem"
-            w="100%"
-            offsetScrollbars
-            type="always"
-            styles={{
-              scrollbar: {
-                "&, &:hover": {
-                  backgroundColor: "transparent",
-                  borderRadius: "0.5rem",
-                },
-                '&[data-orientation="horizontal"]': {
-                  backgroundColor: "transparent !important",
-                },
-                '&[data-orientation="horizontal"]:hover': {
-                  backgroundColor: "transparent !important",
-                },
-                '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
-                  backgroundColor: "#474952",
-                },
-              },
-              corner: {
-                display: "none",
-              },
-              viewport: {
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                width: "100%",
-              },
+          <Swiper
+            slidesPerView={1}
+            pagination={{
+              clickable: true,
+            }}
+            modules={[Pagination]}
+            style={{
+              height: "435px",
+              marginTop: "1.25rem",
             }}
           >
-            <svg viewBox="0 0 650 650">
-              <VictoryPie
-                standalone={false}
-                width={400}
-                height={400}
-                data={artists}
-                x="name"
-                y="value"
-                innerRadius={68}
-                labelRadius={100}
-                // colorScale="grayscale"
-                // colorScale="cool"
-                colorScale="qualitative"
-                style={{ labels: { fontSize: 12, fill: "white" } }}
-              />
-              <VictoryLabel
-                textAnchor="middle"
-                style={{ fontSize: 20, fill: "white" }}
-                x={200}
-                y={200}
-                text="Artists"
-              />
-            </svg>
-
-            <svg viewBox="0 0 650 650">
-              <VictoryPie
-                standalone={false}
-                width={400}
-                height={400}
-                data={genres}
-                x="name"
-                y="value"
-                innerRadius={68}
-                labelRadius={100}
-                // colorScale="grayscale"
-                // colorScale="cool"
-                colorScale="qualitative"
-                style={{ labels: { fontSize: 12, fill: "white" } }}
-              />
-              <VictoryLabel
-                textAnchor="middle"
-                style={{ fontSize: 20, fill: "white" }}
-                x={200}
-                y={200}
-                text="Genres"
-              />
-            </svg>
-          </ScrollArea> */}
+            <SwiperSlide>
+              <StatGraph isMobile={isMobile} title={"Artists"} data={artists} />
+            </SwiperSlide>
+            <SwiperSlide>
+              <StatGraph isMobile={isMobile} title={"Albums"} data={albums} />
+            </SwiperSlide>
+            <SwiperSlide>
+              <StatGraph isMobile={isMobile} title={"Genres"} data={genres} />
+            </SwiperSlide>
+          </Swiper>
         </Tabs.Panel>
       </Tabs>
     </Flex>

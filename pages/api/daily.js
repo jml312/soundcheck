@@ -26,37 +26,47 @@ export default async function handle(req, res) {
   }
 
   try {
+    // generate random time between 9am and 5pm
     const sendAt = getRandom9To5().unix();
     const userIDs = await client.fetch(`*[_type == "user"] {_id, email}`);
     userIDs.forEach(async ({ _id, email }) => {
-      // const { startDate: yesterdayStart, endDate: yesterdayEnd } =
-      //   getDayInterval(dayjs().subtract(1, "day"));
-      // const hasPostedYesterday = await client.fetch(hasPostedYesterdayQuery, {
-      //   userId: _id,
-      //   yesterdayStart: yesterdayStart.toISOString(),
-      //   yesterdayEnd: yesterdayEnd.toISOString(),
-      // });
-      // const recommendations = await getDiscoverSongs({
-      //   userId: _id,
-      //   accessToken: session.user.accessToken,
-      //   client,
-      // });
-      // await client
-      //   .patch(_id)
-      //   .set(hasPostedYesterday ? {} : { postStreak: 0 })
-      //   .set({ discoverSongs: recommendations })
-      //   // .unset(["notifications"])
-      //   // .unset(["notifications[type != 'follow']"])
-      //   .commit();
-
-      await sgMail.send({
-        to: email,
-        from: "scheckad123@gmail.com",
-        subject: "Your daily reminder",
-        text: "Your daily reminder",
-        html: `<strong>Your daily reminder</strong>`,
-        sendAt: testMode === "true" ? undefined : sendAt,
+      // check if user posted yesterday
+      const { startDate: yesterdayStart, endDate: yesterdayEnd } =
+        getDayInterval(dayjs().subtract(1, "day"));
+      const hasPostedYesterday = await client.fetch(hasPostedYesterdayQuery, {
+        userId: _id,
+        yesterdayStart: yesterdayStart.toISOString(),
+        yesterdayEnd: yesterdayEnd.toISOString(),
       });
+
+      // get new recommendations for discover page
+      const recommendations = await getDiscoverSongs({
+        userId: _id,
+        accessToken: session.user.accessToken,
+        client,
+      });
+
+      // set user streak to 0 if they didn't post yesterday
+      // update discover songs
+      // remove notifications
+      await client
+        .patch(_id)
+        .set(hasPostedYesterday ? {} : { postStreak: 0 })
+        .set({ discoverSongs: recommendations })
+        // .unset(["notifications"])
+        // .unset(["notifications[type != 'follow']"])
+        .commit();
+
+      try {
+        await sgMail.send({
+          to: email,
+          from: "scheckad123@gmail.com",
+          subject: "Your daily reminder",
+          text: "Your daily reminder",
+          html: `<strong>Your daily reminder</strong>`,
+          sendAt: testMode === "true" ? undefined : sendAt,
+        });
+      } catch {}
     });
 
     return res.status(200).json({ message: "Success" });

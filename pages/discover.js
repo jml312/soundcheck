@@ -13,19 +13,6 @@ function Discover({ recommendations }) {
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [activePost, setActivePost] = useState(null);
 
-  const twoCards = useMediaQuery("(min-width: 745px) and (max-width: 1092px)");
-  const threeCards = useMediaQuery(
-    "(min-width: 1092px) and (max-width: 1425px)"
-  );
-  const fourCards = useMediaQuery("(min-width: 1425px)");
-
-  const getScrollAreaWidth = () => {
-    if (twoCards) return "705px";
-    else if (threeCards) return "1050px";
-    else if (fourCards) return "1395px";
-    else return "360px";
-  };
-
   return (
     <Flex
       justify={"center"}
@@ -64,9 +51,10 @@ function Discover({ recommendations }) {
       ) : (
         <ScrollArea
           mb={"4.5rem"}
-          w={getScrollAreaWidth()}
-          type={"always"}
+          w="92%"
+          maw="1050x"
           offsetScrollbars
+          type={"always"}
           style={{
             transform: "translateY(2.8rem)",
           }}
@@ -82,9 +70,12 @@ function Discover({ recommendations }) {
               '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
                 display: "none",
               },
-              corner: {
-                display: "none !important",
-              },
+            },
+            corner: {
+              display: "none !important",
+            },
+            viewport: {
+              scrollSnapType: "y mandatory",
             },
           }}
         >
