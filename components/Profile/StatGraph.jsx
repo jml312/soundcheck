@@ -14,7 +14,7 @@ export default function StatGraph({ title, data, height }) {
     >
       <Text
         color="white"
-        fz="1.25rem"
+        fz="1.2rem"
         fw="bold"
         style={{
           position: "absolute",
@@ -33,8 +33,8 @@ export default function StatGraph({ title, data, height }) {
         data={data}
         x="name"
         y="value"
-        innerRadius={74}
-        labelRadius={75}
+        innerRadius={45}
+        labelRadius={47}
         // colorScale="cool"
         // colorScale="grayscale"
         colorScale="qualitative"
