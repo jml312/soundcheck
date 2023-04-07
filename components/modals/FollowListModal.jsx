@@ -2,7 +2,7 @@ import { Modal, Flex, Avatar, Text } from "@mantine/core";
 import { getAvatarText } from "@/utils";
 import Link from "next/link";
 
-export default function ProfileModal({ opened, close, title, data }) {
+export default function FollowListModal({ opened, close, title, data }) {
   return (
     <Modal
       opened={opened}

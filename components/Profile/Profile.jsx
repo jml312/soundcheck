@@ -21,11 +21,7 @@ import { BsSpotify } from "react-icons/bs";
 import Post from "../Post/Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import StatGraph from "./StatGraph";
-import ProfileModal from "../modals/ProfileModal";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
-import { Pagination } from "swiper";
+import FollowListModal from "../modals/FollowListModal";
 
 export default function Profile({ isUser, profile }) {
   const {
@@ -87,11 +83,10 @@ export default function Profile({ isUser, profile }) {
   );
 
   const isSmall = useMediaQuery("(max-width: 470px)");
-  const isMobile = useMediaQuery("(max-width: 850px)");
   const BODY_WIDTH = "87.5%";
   const BODY_MAX_WIDTH = "1050px";
-
-  const [activeStat, setActiveStat] = useState("artists");
+  const TAB_VIEWPORT_HEIGHT = "438px";
+  const TAB_MARGIN_TOP = "1.4rem";
   const { data: session } = useSession();
   const [activePost, setActivePost] = useState(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
@@ -106,8 +101,6 @@ export default function Profile({ isUser, profile }) {
     useDisclosure(false);
   const numFollowers = followers?.length;
   const numFollowing = following?.length;
-  // const BODY_WIDTH = "87.5%";
-  // const BODY_MAX_WIDTH = "925px";
 
   return (
     <Flex
@@ -258,7 +251,7 @@ export default function Profile({ isUser, profile }) {
         }}
       >
         {/* followers */}
-        <ProfileModal
+        <FollowListModal
           opened={followersOpened}
           close={closeFollowers}
           title={"Followers"}
@@ -290,7 +283,7 @@ export default function Profile({ isUser, profile }) {
         </Group>
 
         {/* following */}
-        <ProfileModal
+        <FollowListModal
           opened={followingOpened}
           close={closeFollowing}
           title={"Following"}
@@ -351,11 +344,11 @@ export default function Profile({ isUser, profile }) {
           <Stack>
             <ScrollArea
               offsetScrollbars
-              mt="1.25rem"
+              mt={TAB_MARGIN_TOP}
               type="always"
               w="104%"
               maw={BODY_MAX_WIDTH}
-              h="435px"
+              h={TAB_VIEWPORT_HEIGHT}
               styles={{
                 scrollbar: {
                   "&, &:hover": {
@@ -412,8 +405,8 @@ export default function Profile({ isUser, profile }) {
               justify="center"
               align="center"
               w="100%"
-              mt="1.25rem"
-              h="435px"
+              mt={TAB_MARGIN_TOP}
+              h={TAB_VIEWPORT_HEIGHT}
             >
               <Text fz="lg" color="#c0c1c4">
                 No likes yet...
@@ -423,11 +416,11 @@ export default function Profile({ isUser, profile }) {
             <Stack>
               <ScrollArea
                 offsetScrollbars
-                mt="1.25rem"
+                mt={TAB_MARGIN_TOP}
                 type="always"
                 w="104%"
                 maw={BODY_MAX_WIDTH}
-                h="435px"
+                h={TAB_VIEWPORT_HEIGHT}
                 styles={{
                   scrollbar: {
                     "&, &:hover": {
@@ -480,27 +473,55 @@ export default function Profile({ isUser, profile }) {
         </Tabs.Panel>
 
         <Tabs.Panel value="stats">
-          <Swiper
-            slidesPerView={1}
-            pagination={{
-              clickable: true,
-            }}
-            modules={[Pagination]}
-            style={{
-              height: "435px",
-              marginTop: "1.25rem",
+          <ScrollArea
+            offsetScrollbars
+            mt={TAB_MARGIN_TOP}
+            type="always"
+            w="100%"
+            maw={BODY_MAX_WIDTH}
+            h={TAB_VIEWPORT_HEIGHT}
+            styles={{
+              scrollbar: {
+                "&, &:hover": {
+                  backgroundColor: "transparent",
+                  borderRadius: "0.5rem",
+                },
+                '&[data-orientation="vertical"]': {
+                  backgroundColor: "transparent !important",
+                },
+                '&[data-orientation="vertical"]:hover': {
+                  backgroundColor: "transparent !important",
+                },
+                '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
+                  backgroundColor: "#474952",
+                },
+              },
+              corner: {
+                display: "none",
+              },
+              viewport: {
+                scrollSnapType: "y mandatory",
+              },
             }}
           >
-            <SwiperSlide>
-              <StatGraph isMobile={isMobile} title={"Artists"} data={artists} />
-            </SwiperSlide>
-            <SwiperSlide>
-              <StatGraph isMobile={isMobile} title={"Albums"} data={albums} />
-            </SwiperSlide>
-            <SwiperSlide>
-              <StatGraph isMobile={isMobile} title={"Genres"} data={genres} />
-            </SwiperSlide>
-          </Swiper>
+            <Stack spacing={0}>
+              <StatGraph
+                title={"Artists"}
+                data={artists}
+                height={TAB_VIEWPORT_HEIGHT}
+              />
+              <StatGraph
+                title={"Albums"}
+                data={albums}
+                height={TAB_VIEWPORT_HEIGHT}
+              />
+              <StatGraph
+                title={"Genres"}
+                data={genres}
+                height={TAB_VIEWPORT_HEIGHT}
+              />
+            </Stack>
+          </ScrollArea>
         </Tabs.Panel>
       </Tabs>
     </Flex>

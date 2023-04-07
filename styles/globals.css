@@ -13,15 +13,17 @@ div[data-orientation="horizontal"], div[data-orientation="horizontal"]:hover, di
 .profile-modal div[data-orientation="vertical"] {
   background-color: #1a1b1e !important;
 }
-
 .profile-modal div.mantine-ScrollArea-thumb, .profile-modal div.mantine-ScrollArea-thumb:hover {
   background-color: #474952 !important;
 }
 
-.swiper-pagination-bullet {
-  background-color: #c0c1c4 !important;
+.swiper-pagination-progressbar {
+  background-color: transparent !important;
+  border-radius: 0.5rem !important;
+  width: 6px !important;
 }
-
-.swiper-pagination-bullet-active {
-  background-color: white  !important;
+.swiper-pagination-progressbar-fill {
+  background-color: #474952 !important;
+  border-radius: 0.5rem !important;
+  width: 6px !important;
 }

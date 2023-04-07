@@ -101,5 +101,11 @@ export default {
         ],
       },
     },
+    {
+      name: 'isLiked',
+      title: 'Is Liked',
+      type: 'boolean',
+      initialValue: false,
+    },
   ],
 }

@@ -19,6 +19,10 @@ export default function PostModal({
   allUsers,
   isSmall,
   isProfile,
+  isLikeLoading,
+  setIsLikeLoading,
+  isFollowLoading,
+  setIsFollowLoading,
 }) {
   const [comment, setComment] = useState({
     text: "",
@@ -85,6 +89,10 @@ export default function PostModal({
         setActivePost={setActivePost}
         isSmall={isSmall}
         isProfile={isProfile}
+        isLikeLoading={isLikeLoading}
+        setIsLikeLoading={setIsLikeLoading}
+        isFollowLoading={isFollowLoading}
+        setIsFollowLoading={setIsFollowLoading}
       />
     </Modal>
   );

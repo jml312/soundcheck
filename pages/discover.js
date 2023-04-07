@@ -3,7 +3,6 @@ import { Flex, ScrollArea, Title, Text, Stack } from "@mantine/core";
 import { getDayInterval, clearAuthCookies } from "@/utils";
 import Post from "@/components/Post/Post";
 import { useState } from "react";
-import { useMediaQuery } from "@mantine/hooks";
 import client from "@/lib/sanity";
 import { userDiscoverQuery, hasPostedTodayQuery } from "@/lib/queries";
 import dayjs from "dayjs";
@@ -12,6 +11,9 @@ function Discover({ recommendations }) {
   const { data: session } = useSession();
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [activePost, setActivePost] = useState(null);
+  const [recs, setRecs] = useState(
+    recommendations.map((r) => ({ ...r, _id: r.songID }))
+  );
 
   return (
     <Flex
@@ -80,16 +82,24 @@ function Discover({ recommendations }) {
           }}
         >
           <Flex justify={"center"} wrap={"wrap"} gap="1.5rem">
-            {recommendations?.map((item) => (
+            {recs?.map((rec, idx) => (
               <Post
-                key={item.songID}
-                post={{ ...item, _id: item.songID }}
+                key={rec._id}
+                post={rec}
+                setPost={(newPost) => {
+                  setRecs((prev) => {
+                    const newRecs = [...prev];
+                    newRecs[idx] = newPost;
+                    return newRecs;
+                  });
+                }}
                 isDiscover
                 currentlyPlaying={currentlyPlaying}
                 setCurrentlyPlaying={setCurrentlyPlaying}
                 session={session}
                 activePost={activePost}
                 setActivePost={setActivePost}
+                idx={idx}
               />
             ))}
           </Flex>

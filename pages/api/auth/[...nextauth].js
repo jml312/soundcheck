@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 export default NextAuth({
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60,
+    maxAge: 60 * 60, // 1 hour
   },
   callbacks: {
     async signIn({ account, user }) {
@@ -53,7 +53,7 @@ export default NextAuth({
           user.playlistID = playlistID;
         } else {
           const {
-            data: { id: _playlistID },
+            data: { id: newPlaylistID },
           } = await axios.post(
             `https://api.spotify.com/v1/users/${id}/playlists`,
             {
@@ -82,8 +82,8 @@ export default NextAuth({
           //   }
           // );
 
-          await client.patch(id).set({ playlistID: _playlistID }).commit();
-          user.playlistID = _playlistID;
+          await client.patch(id).set({ playlistID: newPlaylistID }).commit();
+          user.playlistID = newPlaylistID;
         }
 
         user.accessToken = access_token;
@@ -92,8 +92,10 @@ export default NextAuth({
       } catch {
         try {
           await client.delete(newUserId).commit();
-        } catch {}
-        return false;
+        } catch {
+        } finally {
+          return false;
+        }
       }
     },
     async jwt({ token, user }) {

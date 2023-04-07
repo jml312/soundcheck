@@ -31,6 +31,7 @@ function Post({
   activePost,
   setActivePost,
   isSmall,
+  idx,
 }) {
   const router = useRouter();
   const {
@@ -94,6 +95,10 @@ function Post({
         allUsers={allUsers}
         isSmall={isSmall}
         isProfile={isProfile}
+        isLikeLoading={isLikeLoading}
+        setIsLikeLoading={setIsLikeLoading}
+        isFollowLoading={isFollowLoading}
+        setIsFollowLoading={setIsFollowLoading}
       />
 
       <Flex
@@ -142,6 +147,7 @@ function Post({
           isFollowLoading={isFollowLoading}
           setIsFollowLoading={setIsFollowLoading}
           isSmall={isSmall}
+          idx={idx}
         />
         {/* song image and details */}
         <MiddleSection

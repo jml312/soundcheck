@@ -66,7 +66,7 @@ export default function NotificationModal({
           <Stack spacing={"md"} align={"center"} justify="center" w="100%">
             {notifications?.map((notification) => (
               <NotificationCard
-                key={notification._id}
+                key={notification._key}
                 notification={notification}
                 notifications={notifications}
                 setNotifications={setNotifications}
