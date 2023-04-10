@@ -23,7 +23,25 @@ function Index() {
       notifications.show({
         title: "Sign in failed",
         message: "Please try again",
-        color: "red",
+        styles: (theme) => ({
+          root: {
+            borderColor: theme.colors.contrast[theme.colorScheme],
+            backgroundColor: theme.colors.contrast[theme.colorScheme],
+            "&::before": {
+              backgroundColor: theme.colors.red[6],
+            },
+          },
+          title: { color: theme.colors.pure[theme.colorScheme] },
+          description: {
+            color: theme.colorScheme === "dark" ? "#8a8c90" : "#75736f",
+          },
+          closeButton: {
+            color: theme.colors.pure[theme.colorScheme],
+            "&:hover": {
+              backgroundColor: theme.colors.itemHover[theme.colorScheme],
+            },
+          },
+        }),
       });
     }
   }, [hasShownError]);
@@ -35,15 +53,14 @@ function Index() {
       direction={"column"}
       mih={"100vh"}
       gap={20}
-      bg={"lightGray"}
     >
-      <Title size="2.5rem" order={1} color={"white"}>
+      <Title size="2.5rem" order={1}>
         Soundcheck!
       </Title>
       <Button
         onClick={(e) => {
-          setIsLoading(true);
           e.preventDefault();
+          setIsLoading(true);
           signIn("spotify", {
             callbackUrl: "/feed",
           });

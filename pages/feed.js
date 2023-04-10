@@ -12,8 +12,6 @@ import { allUsersQuery } from "@/lib/queries";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import { getPosts, getSpotify } from "@/actions";
 
-
-
 function Feed({ spotifyData, allUsers }) {
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
@@ -37,7 +35,7 @@ function Feed({ spotifyData, allUsers }) {
     refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    refetchInterval: 1000 * 60 * 5, // 5 minutes
+    // refetchInterval: 1000 * 60 * 5, // 5 minutes
   });
   const [caption, setCaption] = useState({
     text: currentPosts?.userPost?.caption || "",
@@ -202,37 +200,41 @@ function Feed({ spotifyData, allUsers }) {
                       { label: "Everyone", value: "everyone" },
                       { label: "Following", value: "following" },
                     ]}
+                    radius={8}
+                    styles={(theme) => ({
+                      controlActive: {
+                        backgroundColor: theme.colors.spotify.main,
+                      },
+                      label: {
+                        color:
+                          theme.colorScheme === "dark"
+                            ? "rgba(255,255,255,0.5)"
+                            : "rgba(0,0,0,0.5)",
+                        '&[data-active="true"]': {
+                          color: theme.colors.pure[theme.colorScheme],
+                        },
+                        "&:hover": {
+                          color: theme.colors.pure[theme.colorScheme],
+                        },
+                      },
+                      root: {
+                        backgroundColor:
+                          theme.colors.contrast[theme.colorScheme],
+                      },
+                    })}
                   />
                 </Flex>
                 {/* feed posts */}
                 {posts?.feedPosts?.length > 0 ? (
                   <Stack spacing={0}>
                     <ScrollArea
-                      type="always"
+                      offsetScrollbars={false}
                       w={getScrollAreaWidth()}
                       h={"565px"}
                       mt={isMobile && "1.5rem"}
                       mb={isMobile && "1rem"}
                       style={{
                         transform: !isMobile && "translateY(2.8rem)",
-                      }}
-                      styles={{
-                        scrollbar: {
-                          "&, &:hover": {
-                            backgroundColor: "transparent",
-                            borderRadius: "0.5rem",
-                          },
-                          '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
-                            {
-                              backgroundColor: "#474952",
-                            },
-                        },
-                        corner: {
-                          display: "none",
-                        },
-                        viewport: {
-                          scrollSnapType: "y mandatory",
-                        },
                       }}
                     >
                       <Flex
@@ -272,9 +274,7 @@ function Feed({ spotifyData, allUsers }) {
                       transform: isMobile && "translateY(1rem)",
                     }}
                   >
-                    {postType === "everyone"
-                      ? "No posts yet"
-                      : "No following posts yet"}
+                    Nothing yet...
                   </Text>
                 )}
               </>
@@ -283,11 +283,15 @@ function Feed({ spotifyData, allUsers }) {
 
           {/* user post */}
           <Flex
-            sx={{
-              borderBottom: isMobile && "1px solid rgba(230, 236, 240, 0.5)",
-              borderLeft: !isMobile && "1px solid rgba(230, 236, 240, 0.5)",
+            sx={(theme) => ({
+              borderBottom:
+                isMobile &&
+                `1px solid ${theme.colors.border[theme.colorScheme]}`,
+              borderLeft:
+                !isMobile &&
+                `1px solid ${theme.colors.border[theme.colorScheme]}`,
               height: "100%",
-            }}
+            })}
             align="center"
             justify="center"
             w={!isMobile ? "375px" : "100%"}
@@ -304,7 +308,11 @@ function Feed({ spotifyData, allUsers }) {
                 }}
               >{`-`}</Text>
             ) : (
-              <Stack>
+              <Stack
+                style={{
+                  transform: "translateY(.75rem)",
+                }}
+              >
                 <Text
                   fz={"lg"}
                   fw={"bold"}

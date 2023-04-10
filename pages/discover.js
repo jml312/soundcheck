@@ -33,52 +33,28 @@ function Discover({ recommendations }) {
           spacing={8}
           style={{
             transform: "translateY(1.5rem)",
-            userSelect: "none",
           }}
         >
           <Title order={2}>Discover</Title>
-          <Text c="dimmed">Like posts or come back tomorrow for more!</Text>
+          <Text
+            sx={(theme) => ({
+              color: theme.colors.dimmed[theme.colorScheme],
+            })}
+          >
+            Like posts or come back tomorrow for more!
+          </Text>
         </Stack>
       ) : null}
 
       {!recommendations?.length ? (
-        <Title
-          order={3}
-          style={{
-            userSelect: "none",
-          }}
-        >
-          Nothing to discover yet. Go like some posts!
-        </Title>
+        <Title order={3}>Nothing to discover yet. Go like some posts!</Title>
       ) : (
         <ScrollArea
           mb={"4.5rem"}
           w="92%"
           maw="1050x"
-          offsetScrollbars
-          type={"always"}
           style={{
             transform: "translateY(2.8rem)",
-          }}
-          styles={{
-            scrollbar: {
-              "&, &:hover": {
-                background: "transparent",
-                borderRadius: "0.5rem",
-              },
-              '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
-                backgroundColor: "#474952",
-              },
-              '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
-                display: "none",
-              },
-            },
-            corner: {
-              display: "none !important",
-            },
-            viewport: {
-              scrollSnapType: "y mandatory",
-            },
           }}
         >
           <Flex justify={"center"} wrap={"wrap"} gap="1.5rem">

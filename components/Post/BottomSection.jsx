@@ -9,7 +9,8 @@ import {
   Tooltip,
   ActionIcon,
   UnstyledButton,
-  Avatar,
+  useMantineTheme,
+  useMantineColorScheme,
 } from "@mantine/core";
 import CommentCard from "../cards/CommentCard";
 import { AiOutlineSend } from "react-icons/ai";
@@ -18,7 +19,7 @@ import { COMMENT_MAX_LENGTH } from "@/constants";
 import { useState, useEffect, useRef, useMemo } from "react";
 import dayjs from "dayjs";
 import EmojiPicker from "../EmojiPicker";
-import { getAvatarText } from "@/utils";
+import MentionCard from "../cards/MentionCard";
 
 export default function BottomSection({
   isPostModal,
@@ -42,6 +43,8 @@ export default function BottomSection({
   type,
   router,
 }) {
+  const theme = useMantineTheme();
+  const { colorScheme } = useMantineColorScheme();
   const numComments = post?.comments?.length || 0;
   const [isCommentCreated, setIsCommentCreated] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -98,10 +101,10 @@ export default function BottomSection({
         align={"start"}
         direction={"column"}
         pt="0.25rem"
-        sx={(theme) => ({
+        sx={{
           transform: "translateY(-0.3rem)",
-          borderTop: `1px solid ${theme.colors.lightWhite[7]}`,
-        })}
+          borderTop: `1px solid ${theme.colors.cardDivider[colorScheme]}`,
+        }}
       >
         {isPostModal ? (
           <Stack
@@ -113,27 +116,12 @@ export default function BottomSection({
           >
             <Stack w="100%" align={"center"} spacing={0}>
               <ScrollArea
-                offsetScrollbars
                 h={!comment.error ? "148px" : "168px"}
                 w="100%"
-                type={"always"}
                 pb={"0.5rem"}
                 styles={{
-                  scrollbar: {
-                    "&, &:hover": {
-                      background: "transparent",
-                      borderRadius: "0.5rem",
-                    },
-                    '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
-                      {
-                        backgroundColor: "#474952",
-                      },
-                  },
-                  corner: {
-                    display: "none",
-                  },
                   viewport: {
-                    scrollSnapType: "y mandatory",
+                    scrollSnapType: "none",
                   },
                 }}
               >
@@ -190,15 +178,17 @@ export default function BottomSection({
               </ScrollArea>
               {!isProfile && (
                 <Box
-                  sx={(theme) => ({
-                    borderTop: `1px solid ${theme.colors.lightWhite[7]}`,
+                  sx={{
+                    borderTop: `1px solid ${
+                      theme.colors.cardDivider[theme.colorScheme]
+                    }`,
                     width: "100%",
-                  })}
+                  }}
                   mb={"0.25rem"}
                 >
                   <Popover
-                    position="top"
                     opened={comment.isMentioning && comment.isFocused}
+                    position="top"
                     width="target"
                     offset={1}
                     withinPortal
@@ -207,7 +197,9 @@ export default function BottomSection({
                       dropdown: {
                         zIndex: 100,
                         border: "none",
-                        outline: "1px solid rgba(192, 193, 196, 0.75)",
+                        outline: `1px solid ${
+                          theme.colors.border[theme.colorScheme]
+                        }`,
                       },
                     }}
                   >
@@ -224,9 +216,21 @@ export default function BottomSection({
                         styles={{
                           zIndex: 100,
                           input: {
-                            color: "white",
+                            color: theme.colors.pure[theme.colorScheme],
+                            borderTopColor: `${
+                              theme.colors.cardDivider[theme.colorScheme]
+                            }`,
                             fontSize: "1rem",
                             marginBottom: "-.35rem",
+                            "&:focus": {
+                              borderTopColor: `${
+                                theme.colors.cardDivider[theme.colorScheme]
+                              }`,
+                            },
+                            "&::placeholder": {
+                              color:
+                                theme.colors.placeholder[theme.colorScheme],
+                            },
                           },
                           error: {
                             transform: "translateY(.7rem)",
@@ -271,7 +275,6 @@ export default function BottomSection({
                                 transform: "translateX(-.25rem)",
                                 borderRadius: "0.5rem",
                               }}
-                              bg="lightGray"
                             >
                               <EmojiPicker
                                 isDisabled={
@@ -287,17 +290,9 @@ export default function BottomSection({
                               <Tooltip
                                 disabled={comment.text.length === 0}
                                 offset={-2}
-                                withinPortal
                                 position="top"
                                 label={"post"}
-                                color="dark.7"
-                                styles={{
-                                  tooltip: {
-                                    border: "none",
-                                    outline:
-                                      "1px solid rgba(192, 193, 196, 0.75)",
-                                  },
-                                }}
+                                withinPortal
                               >
                                 <ActionIcon
                                   mr={"-0.3rem"}
@@ -321,6 +316,16 @@ export default function BottomSection({
                                       allUsers,
                                     });
                                   }}
+                                  sx={{
+                                    cursor: "pointer",
+                                    color: theme.colors.pure[theme.colorScheme],
+                                    "&[data-disabled]": {
+                                      color:
+                                        theme.colorScheme === "dark"
+                                          ? "#868e96 !important"
+                                          : "#797169 !important",
+                                    },
+                                  }}
                                 >
                                   <AiOutlineSend />
                                 </ActionIcon>
@@ -339,69 +344,22 @@ export default function BottomSection({
                             ? "90px"
                             : "140px"
                         }
-                        type={"always"}
+                        offsetScrollbars={false}
                         styles={{
-                          scrollbar: {
-                            "&, &:hover": {
-                              background: "transparent",
-                              borderRadius: "0.5rem",
-                            },
-                            '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
-                              {
-                                backgroundColor: "#474952",
-                              },
+                          viewport: {
+                            scrollSnapType: "none",
                           },
                         }}
                       >
                         <Stack w="100%" spacing={"xs"}>
                           {allUsers?.map((user) => (
-                            <UnstyledButton
+                            <MentionCard
                               key={user.userId}
-                              onClick={() => {
-                                const newText = `${comment.text.slice(
-                                  0,
-                                  comment.text.length - 1
-                                )}@${user.username} `;
-                                setComment({
-                                  ...comment,
-                                  text: newText,
-                                  isMentioning: false,
-                                });
-                                setTimeout(() => {
-                                  commentInputRef.current.focus();
-                                }, 0);
-                              }}
-                              w="100%"
-                              sx={{
-                                borderRadius: "0.5rem !important",
-                                transition: "all 0.1s ease-in-out",
-                                "&:hover": {
-                                  backgroundColor: "#141517",
-                                },
-                              }}
-                            >
-                              <Flex
-                                justify="start"
-                                align="center"
-                                p="0.5rem 0.5rem 0.5rem .7rem"
-                                gap="0.65rem"
-                              >
-                                <Avatar
-                                  src={user.userImage}
-                                  name={user.username}
-                                  radius="xl"
-                                  style={{
-                                    outline: "1px solid #c0c1c4",
-                                  }}
-                                  size={24}
-                                >
-                                  {getAvatarText(user.username)}
-                                </Avatar>
-                                <Text color="white" fz={"0.95rem"}>
-                                  {user.username}
-                                </Text>
-                              </Flex>
-                            </UnstyledButton>
+                              user={user}
+                              comment={comment}
+                              setComment={setComment}
+                              commentInputRef={commentInputRef}
+                            />
                           ))}
                         </Stack>
                       </ScrollArea>
@@ -424,18 +382,18 @@ export default function BottomSection({
                 setCurrentlyPlaying(null);
                 openPostModal();
               }}
-              c="dimmed"
               sx={{
+                color: theme.colors.dimmed[theme.colorScheme],
                 transform: "translateX(.25rem) translateY(-.25rem)",
               }}
             >
               {getViewCommentText()}
             </UnstyledButton>
             <Text
-              c="dimmed"
               sx={{
                 transform: "translateX(-.15rem) translateY(-.25rem)",
                 cursor: "default",
+                color: theme.colors.dimmed[theme.colorScheme],
               }}
             >
               {formattedPostedAt}

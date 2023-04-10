@@ -1,4 +1,10 @@
-import { HoverCard, Popover, ActionIcon, Flex } from "@mantine/core";
+import {
+  HoverCard,
+  Popover,
+  ActionIcon,
+  Flex,
+  useMantineTheme,
+} from "@mantine/core";
 import { VscReactions } from "react-icons/vsc";
 import { useEffect } from "react";
 
@@ -11,6 +17,7 @@ export default function EmojiPicker({
   isSmall,
   position,
 }) {
+  const theme = useMantineTheme();
   const emojis = ["🔥", "❤️", "👍", "😂", "😍", "🤩", "😭", "🤔"];
 
   useEffect(() => {
@@ -37,6 +44,11 @@ export default function EmojiPicker({
       disabled={isDisabled}
       opened={isMobileOpen}
       onChange={setIsMobileOpen}
+      styles={{
+        dropdown: {
+          border: `1px solid ${theme.colors.border[theme.colorScheme]}`,
+        },
+      }}
     >
       <Popover.Target>
         <ActionIcon
@@ -44,6 +56,15 @@ export default function EmojiPicker({
           size={"xs"}
           variant={"transparent"}
           onMouseDown={() => setIsMobileOpen((o) => !o)}
+          sx={{
+            color: theme.colors.pure[theme.colorScheme],
+            "&[data-disabled]": {
+              color:
+                theme.colorScheme === "dark"
+                  ? "#868e96 !important"
+                  : "#797169 !important",
+            },
+          }}
         >
           <VscReactions />
         </ActionIcon>
@@ -69,15 +90,15 @@ export default function EmojiPicker({
                 }));
                 inputRef.current.focus();
               }}
-              sx={(theme) => ({
+              sx={{
                 "&:hover": {
-                  backgroundColor: theme.colors.dark[7],
+                  backgroundColor: theme.colors.contrast[theme.colorScheme],
                 },
                 "&:active": {
-                  backgroundColor: theme.colors.dark[7],
+                  backgroundColor: theme.colors.contrast[theme.colorScheme],
                   transform: "none",
                 },
-              })}
+              }}
             >
               {emoji}
             </ActionIcon>
@@ -93,9 +114,27 @@ export default function EmojiPicker({
       position={position}
       disabled={isDisabled}
       returnFocus
+      styles={{
+        dropdown: {
+          border: `1px solid ${theme.colors.border[theme.colorScheme]}`,
+        },
+      }}
     >
       <HoverCard.Target>
-        <ActionIcon disabled={isDisabled} size={"xs"} variant={"transparent"}>
+        <ActionIcon
+          disabled={isDisabled}
+          size={"xs"}
+          variant={"transparent"}
+          sx={{
+            color: theme.colors.pure[theme.colorScheme],
+            "&[data-disabled]": {
+              color:
+                theme.colorScheme === "dark"
+                  ? "#868e96 !important"
+                  : "#797169 !important",
+            },
+          }}
+        >
           <VscReactions />
         </ActionIcon>
       </HoverCard.Target>
@@ -120,15 +159,15 @@ export default function EmojiPicker({
                 }));
                 inputRef.current.focus();
               }}
-              sx={(theme) => ({
+              sx={{
                 "&:hover": {
-                  backgroundColor: theme.colors.dark[7],
+                  backgroundColor: theme.colors.itemHover[theme.colorScheme],
                 },
                 "&:active": {
-                  backgroundColor: theme.colors.dark[7],
+                  backgroundColor: theme.colors.itemHover[theme.colorScheme],
                   transform: "none",
                 },
-              })}
+              }}
             >
               {emoji}
             </ActionIcon>

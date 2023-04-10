@@ -12,11 +12,12 @@ import {
   Indicator,
   useMantineTheme,
   Tooltip,
+  useMantineColorScheme,
 } from "@mantine/core";
 import { useSession, signOut } from "next-auth/react";
-import { BsChevronDown, BsHeadphones } from "react-icons/bs";
-import { FaSignOutAlt } from "react-icons/fa";
-import { CgProfile } from "react-icons/cg";
+import { BsChevronDown, BsHeadphones, BsMoonStars } from "react-icons/bs";
+import { FaSignOutAlt, FaUserFriends } from "react-icons/fa";
+import { CgProfile, CgSun } from "react-icons/cg";
 import { useState } from "react";
 import Link from "next/link";
 import { useMediaQuery, useDisclosure } from "@mantine/hooks";
@@ -37,13 +38,11 @@ const useStyles = createStyles((theme) => ({
 
 function Navbar({ children }) {
   const { data: session } = useSession();
-  const [menuHover, setMenuHover] = useState(false);
   const { classes } = useStyles();
   const isMobile = useMediaQuery("(max-width: 480px)");
   const theme = useMantineTheme();
-
   const [notifications, setNotifications] = useState([]);
-
+  const { toggleColorScheme } = useMantineColorScheme();
   useQuery({
     queryKey: "notifications",
     queryFn: () =>
@@ -55,9 +54,7 @@ function Navbar({ children }) {
       setNotifications(data);
     },
   });
-
   const [isLoading, setIsLoading] = useState(false);
-
   const [
     notificationOpen,
     { open: openNotification, close: closeNotification },
@@ -77,7 +74,7 @@ function Navbar({ children }) {
       <MantineNavbar
         width="100%"
         height={"5rem"}
-        bg={"lightGray"}
+        bg={theme.colors.contrast[theme.colorScheme]}
         style={{
           position: "fixed",
           top: "0%",
@@ -93,42 +90,51 @@ function Navbar({ children }) {
         >
           <Link href={"/feed"} passHref>
             <Title
-              color="white"
+              color={theme.colors.pure[theme.colorScheme]}
               style={{
                 cursor: "pointer",
-                userSelect: "none",
               }}
               className={classes.logoText}
             >
               Soundcheck!
             </Title>
           </Link>
-          <Group spacing={6}>
+          <Group spacing={3}>
+            <Tooltip position="bottom-end" label="theme">
+              <ActionIcon
+                color={theme.colors.pure[theme.colorScheme]}
+                variant="transparent"
+                onClick={toggleColorScheme}
+              >
+                {theme.colorScheme === "dark" ? (
+                  <CgSun size="1.125rem" />
+                ) : (
+                  <BsMoonStars size="1.125rem" />
+                )}
+              </ActionIcon>
+            </Tooltip>
+
             <Group position="center">
               <Tooltip
                 disabled={!notifications || notifications.length === 0}
-                withinPortal
                 position="bottom-end"
-                label={"view notifications"}
-                color="dark.7"
-                styles={{
-                  tooltip: {
-                    border: "none",
-                    outline: "1px solid rgba(192, 193, 196, 0.75)",
-                  },
-                }}
+                label={"notifications"}
               >
                 <Indicator
                   disabled={!notifications || notifications.length === 0}
-                  size={".5rem"}
-                  color={theme.colors.spotify[8]}
+                  size={".475rem"}
+                  color={theme.colors.spotify.main}
                   offset={3.5}
                 >
                   <ActionIcon
                     onClick={openNotification}
                     disabled={!notifications || notifications.length === 0}
+                    color={theme.colors.pure[theme.colorScheme]}
+                    variant="transparent"
                     sx={{
                       "&[data-disabled]": {
+                        color:
+                          theme.colors.notificationsDisabled[theme.colorScheme],
                         backgroundColor: "transparent",
                         border: "none",
                       },
@@ -148,29 +154,35 @@ function Navbar({ children }) {
               position="bottom-end"
               transitionProps={{ transition: "pop-top-right" }}
               withinPortal
-              onOpen={() => setMenuHover(true)}
-              onClose={() => setMenuHover(false)}
+              styles={{
+                dropdown: {
+                  backgroundColor: theme.colors.contrast[theme.colorScheme],
+                  border: `1px solid ${theme.colors.border[theme.colorScheme]}`,
+                },
+                item: {
+                  "&[data-hovered]": {
+                    backgroundColor: theme.colors.itemHover[theme.colorScheme],
+                  },
+                },
+                divider: {
+                  borderTop: `0.0625rem solid ${
+                    theme.colors.border[theme.colorScheme]
+                  }`,
+                },
+              }}
             >
               <Menu.Target>
                 <UnstyledButton
-                  sx={() => ({
+                  sx={{
                     borderRadius: "0.5rem",
                     padding: "0.5rem",
-                    backgroundColor: menuHover ? "#141517" : "transparent",
-                    "&:hover": {
-                      backgroundColor: "#141517",
-                    },
-                  })}
+                  }}
                 >
                   <Group spacing={8}>
                     <Avatar
                       src={session?.user?.image}
                       alt={session?.user?.name}
-                      radius="xl"
                       size={20}
-                      sx={(theme) => ({
-                        outline: `1px solid ${theme.colors.lightWhite[8]}`,
-                      })}
                     >
                       {getAvatarText(session?.user?.name)}
                     </Avatar>
@@ -211,9 +223,18 @@ function Navbar({ children }) {
                   </Menu.Item>
                 </Link>
 
+                <Link href="/search" passHref>
+                  <Menu.Item
+                    icon={<FaUserFriends size={"0.9rem"} stroke={1.5} />}
+                  >
+                    Search
+                  </Menu.Item>
+                </Link>
+
                 <Menu.Divider />
+
                 <Menu.Item
-                  onClick={() => signOut()}
+                  onClick={signOut}
                   icon={<FaSignOutAlt size={"0.9rem"} stroke={1.5} />}
                 >
                   Sign out

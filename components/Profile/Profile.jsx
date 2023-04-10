@@ -10,14 +10,16 @@ import {
   ScrollArea,
   Anchor,
   Button,
+  useMantineTheme,
 } from "@mantine/core";
 import { followUser } from "@/actions";
 import { getAvatarText } from "@/utils";
 import dayjs from "dayjs";
 import { FaUserPlus, FaUserCheck } from "react-icons/fa";
+import { AiFillPieChart, AiFillHeart } from "react-icons/ai";
 import { useSession } from "next-auth/react";
 import { useState, useMemo } from "react";
-import { BsSpotify } from "react-icons/bs";
+import { BsSpotify, BsHeadphones } from "react-icons/bs";
 import Post from "../Post/Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import StatGraph from "./StatGraph";
@@ -82,6 +84,7 @@ export default function Profile({ isUser, profile }) {
     []
   );
 
+  const theme = useMantineTheme();
   const isSmall = useMediaQuery("(max-width: 470px)");
   const BODY_WIDTH = "87.5%";
   const BODY_MAX_WIDTH = "1050px";
@@ -111,7 +114,6 @@ export default function Profile({ isUser, profile }) {
       gap={40}
       style={{
         transform: "translateY(5rem)",
-        userSelect: "none",
       }}
     >
       <Flex
@@ -123,7 +125,7 @@ export default function Profile({ isUser, profile }) {
         mt={30}
         pb={11}
         style={{
-          borderBottom: "1px solid rgba(192, 193, 196, 0.65)",
+          borderBottom: `1px solid ${theme.colors.border[theme.colorScheme]}`,
           flexGrow: 0,
         }}
       >
@@ -131,9 +133,7 @@ export default function Profile({ isUser, profile }) {
           <Avatar
             size={32}
             src={image}
-            radius={"50%"}
             style={{
-              outline: "1px solid #c0c1c4",
               transform: "translateY(.225rem)",
             }}
           >
@@ -154,24 +154,17 @@ export default function Profile({ isUser, profile }) {
                   withinPortal
                   position="right"
                   disabled={isFollowLoading}
-                  label={"your soundcheck playlist"}
-                  color="dark.7"
-                  styles={{
-                    tooltip: {
-                      border: "none",
-                      outline: "1px solid rgba(192, 193, 196, 0.75)",
-                    },
-                  }}
+                  label={"soundcheck playlist"}
                 >
                   <Anchor
                     href={`https://open.spotify.com/playlist/${playlistID}`}
                     target="_blank"
                     fontSize={"1.6rem"}
-                    sx={(theme) => ({
+                    sx={{
                       cursor: "pointer !important",
-                      color: theme.colors.spotify[8],
+                      color: theme.colors.spotify.main,
                       transform: "translateX(-.15rem) translateY(.12rem)",
-                    })}
+                    }}
                   >
                     <BsSpotify />
                   </Anchor>
@@ -180,7 +173,7 @@ export default function Profile({ isUser, profile }) {
                 <ActionIcon
                   sx={{
                     transform: "translateX(-.375rem) translateY(.12rem)",
-                    color: "#b3b6b9",
+                    color: theme.colors.iconDisabled[theme.colorScheme],
                   }}
                   disabled
                   variant={"transparent"}
@@ -195,25 +188,26 @@ export default function Profile({ isUser, profile }) {
                   position="right"
                   disabled={isFollowLoading}
                   label={isFollowing ? "unfollow" : "follow"}
-                  color="dark.7"
-                  styles={{
-                    tooltip: {
-                      border: "none",
-                      outline: "1px solid rgba(192, 193, 196, 0.75)",
-                    },
-                  }}
                 >
                   <ActionIcon
-                    sx={(theme) => ({
+                    sx={{
                       transform: "translateX(-.375rem) translateY(.12rem)",
                       "&:active": {
                         transform: "translateX(-.375rem) translateY(.2rem)",
                       },
-                      color: isFollowing ? theme.colors.green[6] : "#c1c2c5",
+                      color: isFollowing
+                        ? theme.colors.green[
+                            theme.colorScheme === "dark" ? 5 : 7
+                          ]
+                        : theme.colors.iconDisabled[theme.colorScheme],
                       "&[data-disabled]": {
-                        color: isFollowing ? theme.colors.green[6] : "#c1c2c5",
+                        color: isFollowing
+                          ? theme.colors.green[
+                              theme.colorScheme === "dark" ? 5 : 7
+                            ]
+                          : theme.colors.iconDisabled[theme.colorScheme],
                       },
-                    })}
+                    }}
                     disabled={isFollowLoading}
                     variant={"transparent"}
                     radius="xl"
@@ -233,9 +227,7 @@ export default function Profile({ isUser, profile }) {
                 </Tooltip>
               )}
             </Group>
-            <Text fz="xs" color="#C0C0C0">
-              {dayjs(createdAt).format("MMM D, YYYY")}
-            </Text>
+            <Text fz="xs">{dayjs(createdAt).format("MMM D, YYYY")}</Text>
           </Stack>
         </Group>
         <Text fz="lg">🔥 {postStreak} day streak</Text>
@@ -267,14 +259,22 @@ export default function Profile({ isUser, profile }) {
             onClick={openFollowers}
             p={10}
             sx={{
+              backgroundColor:
+                theme.colors.lightBtn.bg.abled[theme.colorScheme],
               color:
-                numFollowers === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)",
+                numFollowers === 0
+                  ? theme.colors.lightBtn.color.base[theme.colorScheme]
+                  : theme.colors.lightBtn.color.multiple[theme.colorScheme],
               cursor: numFollowers === 0 ? "default" : "pointer",
               fontSize: "1rem",
               fontWeight: "400",
+              "&:hover": {
+                backgroundColor:
+                  theme.colors.lightBtn.bg.hover[theme.colorScheme],
+              },
               "&[data-disabled]": {
                 backgroundColor: "transparent",
-                color: "#919397",
+                color: theme.colors.lightBtn.color.base[theme.colorScheme],
               },
             }}
           >
@@ -299,14 +299,22 @@ export default function Profile({ isUser, profile }) {
             onClick={openFollowing}
             p={10}
             sx={{
+              backgroundColor:
+                theme.colors.lightBtn.bg.abled[theme.colorScheme],
               color:
-                numFollowing === 0 ? "#919397" : "rgba(255, 255, 255, 0.95)",
+                numFollowing === 0
+                  ? theme.colors.lightBtn.color.base[theme.colorScheme]
+                  : theme.colors.lightBtn.color.multiple[theme.colorScheme],
               cursor: numFollowing === 0 ? "default" : "pointer",
               fontSize: "1rem",
               fontWeight: "400",
+              "&:hover": {
+                backgroundColor:
+                  theme.colors.lightBtn.bg.hover[theme.colorScheme],
+              },
               "&[data-disabled]": {
                 backgroundColor: "transparent",
-                color: "#919397",
+                color: theme.colors.lightBtn.color.base[theme.colorScheme],
               },
             }}
           >
@@ -327,15 +335,35 @@ export default function Profile({ isUser, profile }) {
           setCurrentlyPlaying(null);
           setActivePost(null);
         }}
+        styles={{
+          tab: {
+            borderBottom: `2px solid ${
+              theme.colorScheme === "dark" ? "#373A40" : "#c8c5bf"
+            }`,
+            "&[data-active]": {
+              borderBottom: `2px solid ${theme.colors.spotify.main}`,
+              "&:hover": {
+                borderBottom: `2px solid ${theme.colors.spotify.main}`,
+              },
+            },
+            "&:hover": {
+              backgroundColor:
+                theme.colorScheme === "dark" ? "#25262b" : "#dad9d4",
+              borderBottom: `2px solid ${
+                theme.colorScheme === "dark" ? "#373A40" : "#c8c5bf"
+              }`,
+            },
+          },
+        }}
       >
         <Tabs.List grow>
-          <Tabs.Tab label="Posts" value="posts">
+          <Tabs.Tab label="Posts" value="posts" icon={<BsHeadphones />}>
             <Text>Posts</Text>
           </Tabs.Tab>
-          <Tabs.Tab label="Likes" value="likes">
+          <Tabs.Tab label="Likes" value="likes" icon={<AiFillHeart />}>
             <Text>Likes</Text>
           </Tabs.Tab>
-          <Tabs.Tab label="Stats" value="stats">
+          <Tabs.Tab label="Stats" value="stats" icon={<AiFillPieChart />}>
             <Text>Stats</Text>
           </Tabs.Tab>
         </Tabs.List>
@@ -343,34 +371,13 @@ export default function Profile({ isUser, profile }) {
         <Tabs.Panel value="posts">
           <Stack>
             <ScrollArea
-              offsetScrollbars
               mt={TAB_MARGIN_TOP}
-              type="always"
               w="104%"
               maw={BODY_MAX_WIDTH}
               h={TAB_VIEWPORT_HEIGHT}
               styles={{
-                scrollbar: {
-                  "&, &:hover": {
-                    backgroundColor: "transparent",
-                    borderRadius: "0.5rem",
-                  },
-                  '&[data-orientation="vertical"]': {
-                    backgroundColor: "transparent !important",
-                  },
-                  '&[data-orientation="vertical"]:hover': {
-                    backgroundColor: "transparent !important",
-                  },
-                  '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
-                    backgroundColor: "#474952",
-                  },
-                },
-                corner: {
-                  display: "none",
-                },
                 viewport: {
                   paddingBottom: "1.075rem",
-                  scrollSnapType: "y mandatory",
                 },
               }}
             >
@@ -408,42 +415,18 @@ export default function Profile({ isUser, profile }) {
               mt={TAB_MARGIN_TOP}
               h={TAB_VIEWPORT_HEIGHT}
             >
-              <Text fz="lg" color="#c0c1c4">
-                No likes yet...
-              </Text>
+              <Text fz="lg">No likes yet...</Text>
             </Flex>
           ) : (
             <Stack>
               <ScrollArea
-                offsetScrollbars
                 mt={TAB_MARGIN_TOP}
-                type="always"
                 w="104%"
                 maw={BODY_MAX_WIDTH}
                 h={TAB_VIEWPORT_HEIGHT}
                 styles={{
-                  scrollbar: {
-                    "&, &:hover": {
-                      backgroundColor: "transparent",
-                      borderRadius: "0.5rem",
-                    },
-                    '&[data-orientation="vertical"]': {
-                      backgroundColor: "transparent !important",
-                    },
-                    '&[data-orientation="vertical"]:hover': {
-                      backgroundColor: "transparent !important",
-                    },
-                    '&[data-orientation="vertical"] .mantine-ScrollArea-thumb':
-                      {
-                        backgroundColor: "#474952",
-                      },
-                  },
-                  corner: {
-                    display: "none",
-                  },
                   viewport: {
                     paddingBottom: "1.075rem",
-                    scrollSnapType: "y mandatory",
                   },
                 }}
               >
@@ -474,35 +457,10 @@ export default function Profile({ isUser, profile }) {
 
         <Tabs.Panel value="stats">
           <ScrollArea
-            offsetScrollbars
             mt={TAB_MARGIN_TOP}
-            type="always"
             w="100%"
             maw={BODY_MAX_WIDTH}
             h={TAB_VIEWPORT_HEIGHT}
-            styles={{
-              scrollbar: {
-                "&, &:hover": {
-                  backgroundColor: "transparent",
-                  borderRadius: "0.5rem",
-                },
-                '&[data-orientation="vertical"]': {
-                  backgroundColor: "transparent !important",
-                },
-                '&[data-orientation="vertical"]:hover': {
-                  backgroundColor: "transparent !important",
-                },
-                '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
-                  backgroundColor: "#474952",
-                },
-              },
-              corner: {
-                display: "none",
-              },
-              viewport: {
-                scrollSnapType: "y mandatory",
-              },
-            }}
           >
             <Stack spacing={0}>
               <StatGraph

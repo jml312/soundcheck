@@ -33,15 +33,13 @@ export default async function deleteComment({
           )
       ),
     ];
-    await axios.delete("/api/protected/comment", {
-      data: {
-        postID: post?._id,
-        userId,
-        postUserId: post?.userId,
-        mentions,
-        createdAt,
-        type: "delete",
-      },
+    await axios.post("/api/protected/comment", {
+      postID: post?._id,
+      userId,
+      postUserId: post?.userId,
+      mentions,
+      createdAt,
+      type: "delete",
     });
     setPost({
       ...post,

@@ -43,6 +43,25 @@ export default async function postSong({
         .map((artist) => artist.name)
         .join(", ")}`,
       autoClose: 7000,
+      styles: (theme) => ({
+        root: {
+          borderColor: theme.colors.contrast[theme.colorScheme],
+          backgroundColor: theme.colors.contrast[theme.colorScheme],
+          "&::before": {
+            backgroundColor: theme.colors.green[6],
+          },
+        },
+        title: { color: theme.colors.pure[theme.colorScheme] },
+        description: {
+          color: theme.colorScheme === "dark" ? "#8a8c90" : "#75736f",
+        },
+        closeButton: {
+          color: theme.colors.pure[theme.colorScheme],
+          "&:hover": {
+            backgroundColor: theme.colors.itemHover[theme.colorScheme],
+          },
+        },
+      }),
     });
   } catch {
     setSelectedSong({

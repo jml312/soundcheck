@@ -7,6 +7,7 @@ import {
   Stack,
   ActionIcon,
   Flex,
+  useMantineTheme,
 } from "@mantine/core";
 import { BsSpotify, BsPlayCircleFill, BsPauseCircleFill } from "react-icons/bs";
 import { useState, useEffect, useRef } from "react";
@@ -25,11 +26,10 @@ export default function MiddleSection({
   setCurrentlyPlaying,
   selectedSong,
   setSelectedSong,
-  caption,
   setCaption,
   captionRef,
-  theme,
 }) {
+  const theme = useMantineTheme();
   const artists = post?.artists?.map((artist) => artist.name)?.join(", ");
   const audioRef = useRef(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
@@ -102,6 +102,8 @@ export default function MiddleSection({
       <div
         style={{
           position: "relative",
+          backgroundColor: theme.colors.pure.light,
+          borderRadius: "0.25rem",
         }}
         ref={imageRef}
       >
@@ -121,8 +123,6 @@ export default function MiddleSection({
           src={post?.albumImage}
           alt={post?.albumName}
           radius={"0.25rem"}
-          // width={!isPostModal ? 275 : isSmall ? "75vw" : 375}
-          // height={!isPostModal ? 275 : isSmall ? "75vw" : 375}
           width={!isPostModal ? 275 : isSmall ? "70vw" : 375}
           height={!isPostModal ? 275 : isSmall ? "70vw" : 375}
           withPlaceholder
@@ -144,6 +144,7 @@ export default function MiddleSection({
           (!!post?.previewUrl ? (
             <>
               <RingProgress
+                rootColor={"transparent"}
                 sx={{
                   position: "absolute",
                   top: "50%",
@@ -154,7 +155,7 @@ export default function MiddleSection({
                 sections={[
                   {
                     value: audioProgress,
-                    color: theme.colors.spotify[8],
+                    color: theme.colors.spotify.main,
                   },
                 ]}
                 size={isPostModal ? 105 : 90}
@@ -182,6 +183,7 @@ export default function MiddleSection({
                       title={isAudioPlaying ? "Pause" : "Play"}
                       size={isPostModal ? "4.5rem" : "3.75rem"}
                       sx={{
+                        color: theme.colors.pure.dark,
                         "&:hover": {
                           backgroundColor: "transparent !important",
                         },
@@ -229,7 +231,7 @@ export default function MiddleSection({
                   fontSize={isPostModal ? "2rem" : "1.6rem"}
                   style={{
                     cursor: "pointer !important",
-                    color: theme.colors.spotify[8],
+                    color: theme.colors.spotify.main,
                   }}
                 />
               </ActionIcon>
@@ -265,7 +267,7 @@ export default function MiddleSection({
                   fontSize={"3.75rem"}
                   style={{
                     cursor: "pointer !important",
-                    color: theme.colors.spotify[8],
+                    color: theme.colors.spotify.main,
                   }}
                 />
               </ActionIcon>
@@ -281,7 +283,6 @@ export default function MiddleSection({
         mt={8}
         mb={(isDiscover || isSelect) && "0.5rem"}
         w={!isPostModal ? 275 : isSmall ? "70vw" : 375}
-        // w={!isPostModal ? 275 : isSmall ? "75vw" : 375}
         style={{
           textAlign: "center",
         }}
@@ -297,9 +298,9 @@ export default function MiddleSection({
           {post?.songName}
         </Title>
         <Text
-          color="rgba(255, 255, 255, 0.8)"
           sx={{
             cursor: "default",
+            opacity: 0.8,
           }}
           truncate
         >

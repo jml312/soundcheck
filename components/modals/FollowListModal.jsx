@@ -14,42 +14,37 @@ export default function FollowListModal({ opened, close, title, data }) {
         blur: 3,
         opacity: 0.55,
       }}
+      styles={{
+        root: {
+          "& .mantine-ScrollArea-thumb": {
+            zIndex: 2,
+          },
+        },
+        header: {
+          zIndex: 1,
+        },
+      }}
     >
       {data?.map(({ userId, userImage, username }) => (
-        <Link
-          href={`/profile/${userId}`}
-          passHref
-          key={userId}
-          w="100%"
-          sx={{
-            borderRadius: "0.5rem !important",
-            transition: "all 0.1s ease-in-out",
-            "&:hover": {
-              backgroundColor: "#141517",
-            },
-          }}
-        >
+        <Link href={`/profile/${userId}`} passHref key={userId}>
           <Flex
+            w={"100%"}
             justify="start"
             align="center"
             p="0.5rem 0.5rem 0.5rem .7rem"
             gap="0.65rem"
+            sx={(theme) => ({
+              borderRadius: "0.5rem !important",
+              transition: "all 0.1s ease-in-out",
+              "&:hover": {
+                backgroundColor: theme.colors.itemHover[theme.colorScheme],
+              },
+            })}
           >
-            <Avatar
-              src={userImage}
-              alt={username}
-              radius="xl"
-              style={{
-                outline: "1px solid #c0c1c4",
-                zIndex: -1,
-              }}
-              size={24}
-            >
+            <Avatar src={userImage} alt={username} size={24}>
               {getAvatarText(username)}
             </Avatar>
-            <Text color="white" fz={"0.95rem"}>
-              {username}
-            </Text>
+            <Text fz={"0.95rem"}>{username}</Text>
           </Flex>
         </Link>
       ))}

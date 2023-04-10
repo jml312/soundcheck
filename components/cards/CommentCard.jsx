@@ -74,18 +74,9 @@ export default function CommentCard({
         cursor: "default",
         placeSelf: "flex-start",
         overflowWrap: "anywhere",
-        scrollSnapAlign: "start",
       }}
     >
-      <Avatar
-        size={28}
-        src={userImage}
-        alt={`${username}'s profile`}
-        radius={"xl"}
-        style={{
-          outline: "1px solid #c0c1c4",
-        }}
-      >
+      <Avatar size={28} src={userImage} alt={`${username}'s profile`}>
         {getAvatarText(username)}
       </Avatar>
       <Stack
@@ -103,18 +94,23 @@ export default function CommentCard({
             transform: "translateY(-.15rem)",
           }}
         >
-          <Text fz={".86rem"} color="#F0F0F0">
+          <Text
+            fz={".86rem"}
+            color={theme.colorScheme === "dark" ? "#F0F0F0" : "#0f0f0f"}
+          >
             {truncateText(username, 12)}
           </Text>
           <Space w={6} />
-          <Text color="#C0C0C0" fz={".84rem"}>
+          <Text
+            color={theme.colorScheme === "dark" ? "#C0C0C0" : "#3f3f3f"}
+            fz={".84rem"}
+          >
             {formattedDate}
           </Text>
         </Flex>
 
         <Text
           mt=".075rem"
-          color="#FFFFFF"
           fz={"1rem"}
           fw="bold"
           style={{
@@ -135,7 +131,8 @@ export default function CommentCard({
                 <span
                   key={i}
                   style={{
-                    color: theme.colors.blue[6],
+                    color:
+                      theme.colors.blue[theme.colorScheme === "dark" ? 5 : 7],
                   }}
                 >
                   {word}
@@ -158,7 +155,7 @@ export default function CommentCard({
             <UnstyledButton
               fs={"italic"}
               fz={".75rem"}
-              color="#BDBDBD"
+              color={theme.colorScheme === "dark" ? "#BDBDBD" : "#424242"}
               sx={{
                 zIndex: 100,
               }}
@@ -182,7 +179,7 @@ export default function CommentCard({
                 <UnstyledButton
                   fs={"italic"}
                   fz={".75rem"}
-                  color="#BDBDBD"
+                  color={theme.colorScheme === "dark" ? "#BDBDBD" : "#424242"}
                   sx={{
                     zIndex: 100,
                   }}

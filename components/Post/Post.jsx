@@ -102,7 +102,7 @@ function Post({
       />
 
       <Flex
-        bg="lightGray"
+        bg={theme.colors.contrast[theme.colorScheme]}
         justify={"center"}
         align={"center"}
         direction={"column"}
@@ -115,7 +115,7 @@ function Post({
           position: "relative",
         }}
         style={{
-          scrollSnapAlign: "start",
+          scrollSnapAlign: !isSelect && "start",
         }}
       >
         <LoadingOverlay
@@ -163,10 +163,8 @@ function Post({
           setCurrentlyPlaying={setCurrentlyPlaying}
           selectedSong={selectedSong}
           setSelectedSong={setSelectedSong}
-          caption={caption}
           setCaption={setCaption}
           captionRef={captionRef}
-          theme={theme}
         />
         {/* comment, view comments button, and posted at */}
         <BottomSection

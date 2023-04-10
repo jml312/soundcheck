@@ -8,6 +8,7 @@ import {
   Button,
   ActionIcon,
   TextInput,
+  useMantineTheme,
 } from "@mantine/core";
 import { FaHeart, FaUserPlus, FaUserCheck } from "react-icons/fa";
 import Link from "next/link";
@@ -39,6 +40,7 @@ export default function TopSection({
   idx,
 }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const theme = useMantineTheme();
 
   return isDiscover ? (
     <Flex
@@ -48,9 +50,11 @@ export default function TopSection({
       mt={"-.65rem"}
       pb={".2rem"}
       mb={"0.75rem"}
-      sx={(theme) => ({
-        borderBottom: `1px solid ${theme.colors.lightWhite[7]}`,
-      })}
+      sx={{
+        borderBottom: `1px solid ${
+          theme.colors.cardDivider[theme.colorScheme]
+        }`,
+      }}
     >
       <Text>#{idx + 1}</Text>
       {isLikeLoading ? (
@@ -58,12 +62,16 @@ export default function TopSection({
           variant={"transparent"}
           radius="xl"
           disabled={true}
-          sx={(theme) => ({
-            color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+          sx={{
+            color: post?.isLiked
+              ? theme.colors.red[theme.colorScheme === "dark" ? 5 : 7]
+              : theme.colors.iconDisabled[theme.colorScheme],
             "&[data-disabled]": {
-              color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+              color: post?.isLiked
+                ? theme.colors.red[theme.colorScheme === "dark" ? 5 : 7]
+                : theme.colors.iconDisabled[theme.colorScheme],
             },
-          })}
+          }}
         >
           <FaHeart />
         </ActionIcon>
@@ -75,13 +83,6 @@ export default function TopSection({
           zIndex={2}
           offset={3}
           disabled={isLikeLoading}
-          color="dark.7"
-          styles={{
-            tooltip: {
-              border: "none",
-              outline: "1px solid rgba(192, 193, 196, 0.75)",
-            },
-          }}
         >
           <ActionIcon
             variant={"transparent"}
@@ -98,12 +99,16 @@ export default function TopSection({
               })
             }
             disabled={isLikeLoading}
-            sx={(theme) => ({
-              color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+            sx={{
+              color: post?.isLiked
+                ? theme.colors.red[theme.colorScheme === "dark" ? 5 : 7]
+                : theme.colors.iconDisabled[theme.colorScheme],
               "&[data-disabled]": {
-                color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+                color: post?.isLiked
+                  ? theme.colors.red[theme.colorScheme === "dark" ? 5 : 7]
+                  : theme.colors.iconDisabled[theme.colorScheme],
               },
-            })}
+            }}
           >
             <FaHeart />
           </ActionIcon>
@@ -120,21 +125,15 @@ export default function TopSection({
           mt={"-.65rem"}
           pb={".2rem"}
           mb={"0.75rem"}
-          sx={(theme) => ({
-            borderBottom: `1px solid ${theme.colors.lightWhite[7]}`,
-          })}
+          sx={{
+            borderBottom: `1px solid ${
+              theme.colors.cardDivider[theme.colorScheme]
+            }`,
+          }}
         >
           <Tooltip
             disabled={isSelect || isUser}
-            color="dark.7"
-            styles={{
-              tooltip: {
-                border: "none",
-                outline: "1px solid rgba(192, 193, 196, 0.75)",
-              },
-            }}
             withinPortal
-            shadow="md"
             offset={isSelect ? 5.25 : 3}
             position="top"
             label={
@@ -143,9 +142,7 @@ export default function TopSection({
                   <Avatar
                     src={post?.userImage}
                     alt={`${post?.username}'s profile`}
-                    radius="xl"
                     style={{
-                      outline: "1px solid #c0c1c4",
                       transform: "translateY(-2px)",
                     }}
                     size={30}
@@ -202,17 +199,21 @@ export default function TopSection({
           >
             {isSelect || isUser ? (
               <Button
-                ml={"-.3rem"}
+                ml={"-.5rem"}
                 size={"sm"}
                 compact
                 sx={{
+                  marginTop: "0.25rem",
                   cursor: "default",
                   zIndex: 1,
                   fontSize: "0.85rem",
-                  color: "rgba(255, 255, 255, 0.75)",
+                  color:
+                    theme.colorScheme === "dark"
+                      ? "rgba(255, 255, 255, 0.75)"
+                      : "rgba(0, 0, 0, 0.75)",
                   backgroundColor: "transparent !important",
                   "&:active": {
-                    transform: "none",
+                    transform: "none !important",
                   },
                 }}
                 component="div"
@@ -221,10 +222,6 @@ export default function TopSection({
                     size={20}
                     src={post?.userImage}
                     alt={`${post?.username}'s profile`}
-                    radius={"xl"}
-                    style={{
-                      outline: "1px solid #c0c1c4",
-                    }}
                   >
                     {getAvatarText(post?.username)}
                   </Avatar>
@@ -235,13 +232,16 @@ export default function TopSection({
             ) : (
               <Link href={`/profile/${post?.userId}`} passHref>
                 <Button
-                  ml={isPostModal ? "-.5rem" : "-.3rem"}
+                  ml={"-.5rem"}
                   compact
                   size={isPostModal ? "md" : "sm"}
                   sx={{
                     zIndex: 1,
                     fontSize: isPostModal ? "0.85rem" : "0.75rem",
-                    color: "rgba(255, 255, 255, 0.75)",
+                    color:
+                      theme.colorScheme === "dark"
+                        ? "rgba(255, 255, 255, 0.75)"
+                        : "rgba(0, 0, 0, 0.75)",
                     backgroundColor: "transparent !important",
                     cursor: "pointer",
                     transform: "translateY(.1rem)",
@@ -252,10 +252,6 @@ export default function TopSection({
                       size={20}
                       src={post?.userImage}
                       alt={`${post?.username}'s profile`}
-                      radius={"xl"}
-                      style={{
-                        outline: "1px solid #c0c1c4",
-                      }}
                     >
                       {getAvatarText(post?.username)}
                     </Avatar>
@@ -275,16 +271,18 @@ export default function TopSection({
                   variant={"transparent"}
                   radius="xl"
                   disabled
-                  sx={(theme) => ({
+                  sx={{
                     color: post?.isFollowing
-                      ? theme.colors.green[6]
-                      : "#c1c2c5",
+                      ? theme.colors.green[theme.colorScheme === "dark" ? 5 : 7]
+                      : theme.colors.iconDisabled[theme.colorScheme],
                     "&[data-disabled]": {
                       color: post?.isFollowing
-                        ? theme.colors.green[6]
-                        : "#c1c2c5",
+                        ? theme.colors.green[
+                            theme.colorScheme === "dark" ? 5 : 7
+                          ]
+                        : theme.colors.iconDisabled[theme.colorScheme],
                     },
-                  })}
+                  }}
                 >
                   {post?.isFollowing ? <FaUserCheck /> : <FaUserPlus />}
                 </ActionIcon>
@@ -296,13 +294,6 @@ export default function TopSection({
                   zIndex={2}
                   offset={3}
                   disabled={isFollowLoading}
-                  color="dark.7"
-                  styles={{
-                    tooltip: {
-                      border: "none",
-                      outline: "1px solid rgba(192, 193, 196, 0.75)",
-                    },
-                  }}
                 >
                   <ActionIcon
                     mr={"-.2rem"}
@@ -319,16 +310,20 @@ export default function TopSection({
                       });
                     }}
                     disabled={isFollowLoading}
-                    sx={(theme) => ({
+                    sx={{
                       color: post?.isFollowing
-                        ? theme.colors.green[6]
-                        : "#c1c2c5",
+                        ? theme.colors.green[
+                            theme.colorScheme === "dark" ? 5 : 7
+                          ]
+                        : theme.colors.iconDisabled[theme.colorScheme],
                       "&[data-disabled]": {
                         color: post?.isFollowing
-                          ? theme.colors.green[6]
-                          : "#c1c2c5",
+                          ? theme.colors.green[
+                              theme.colorScheme === "dark" ? 5 : 7
+                            ]
+                          : theme.colors.iconDisabled[theme.colorScheme],
                       },
-                    })}
+                    }}
                   >
                     {post?.isFollowing ? <FaUserCheck /> : <FaUserPlus />}
                   </ActionIcon>
@@ -339,12 +334,16 @@ export default function TopSection({
                   variant={"transparent"}
                   radius="xl"
                   disabled
-                  sx={(theme) => ({
-                    color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+                  sx={{
+                    color: post?.isLiked
+                      ? theme.colors.red[theme.colorScheme === "dark" ? 5 : 7]
+                      : theme.colors.iconDisabled[theme.colorScheme],
                     "&[data-disabled]": {
-                      color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+                      color: post?.isLiked
+                        ? theme.colors.red[theme.colorScheme === "dark" ? 5 : 7]
+                        : theme.colors.iconDisabled[theme.colorScheme],
                     },
-                  })}
+                  }}
                 >
                   <FaHeart />
                 </ActionIcon>
@@ -356,13 +355,6 @@ export default function TopSection({
                   zIndex={2}
                   offset={3}
                   disabled={isLikeLoading}
-                  color="dark.7"
-                  styles={{
-                    tooltip: {
-                      border: "none",
-                      outline: "1px solid rgba(192, 193, 196, 0.75)",
-                    },
-                  }}
                 >
                   <ActionIcon
                     variant={"transparent"}
@@ -377,12 +369,18 @@ export default function TopSection({
                       })
                     }
                     disabled={isLikeLoading}
-                    sx={(theme) => ({
-                      color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+                    sx={{
+                      color: post?.isLiked
+                        ? theme.colors.red[theme.colorScheme === "dark" ? 5 : 7]
+                        : theme.colors.iconDisabled[theme.colorScheme],
                       "&[data-disabled]": {
-                        color: post?.isLiked ? theme.colors.red[6] : "#c1c2c5",
+                        color: post?.isLiked
+                          ? theme.colors.red[
+                              theme.colorScheme === "dark" ? 5 : 7
+                            ]
+                          : theme.colors.iconDisabled[theme.colorScheme],
                       },
-                    })}
+                    }}
                   >
                     <FaHeart />
                   </ActionIcon>
@@ -417,12 +415,10 @@ export default function TopSection({
               }}
             >
               <Text
-                color="white"
                 fw={"bold"}
                 zIndex={999}
                 style={{
                   marginTop: !isSelect ? "-.1rem" : "0",
-                  userSelect: "none",
                 }}
               >
                 {isUser ? caption?.text : post?.caption}
@@ -468,15 +464,16 @@ export default function TopSection({
             styles={{
               zIndex: 100,
               input: {
-                color: "white",
+                color: `${theme.colors.pure[theme.colorScheme]} !important`,
                 fontSize: "1rem",
                 fontWeight:
                   !caption.isFocused && !caption.error ? "bold" : "normal",
-              },
-              description: {
-                transform: "translateY(.5rem)",
+                "&::placeholder": {
+                  color: `${theme.colors.placeholder[theme.colorScheme]}`,
+                },
               },
               error: {
+                color: theme.colors.red[7],
                 transform: "translateY(-.5rem)",
               },
             }}

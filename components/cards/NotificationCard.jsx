@@ -5,6 +5,7 @@ import {
   Text,
   Space,
   UnstyledButton,
+  useMantineTheme,
 } from "@mantine/core";
 import { useMemo } from "react";
 import { truncateText } from "@/utils";
@@ -30,6 +31,7 @@ export default function NotificationCard({
     username: notificationUsername,
   } = notification;
   const formattedDate = useMemo(() => dayjs(createdAt).fromNow(), [opened]);
+  const theme = useMantineTheme();
 
   const getNotificationAction = () => {
     switch (type) {
@@ -63,11 +65,6 @@ export default function NotificationCard({
         size={28}
         src={notificationUserImage}
         alt={`${notificationUsername}'s profile`}
-        radius={"xl"}
-        style={{
-          outline: "1px solid #c0c1c4",
-          transform: "translateY(.225rem)",
-        }}
       >
         {getAvatarText(notificationUsername)}
       </Avatar>
@@ -86,18 +83,23 @@ export default function NotificationCard({
             transform: "translateY(-.15rem)",
           }}
         >
-          <Text fz={".86rem"} color="#F0F0F0">
+          <Text
+            fz={".86rem"}
+            color={theme.colorScheme === "dark" ? "#F0F0F0" : "#0f0f0f"}
+          >
             {truncateText(notificationUsername, 12)}
           </Text>
           <Space w={6} />
-          <Text color="#C0C0C0" fz={".84rem"}>
+          <Text
+            color={theme.colorScheme === "dark" ? "#C0C0C0" : "#3f3f3f"}
+            fz={".84rem"}
+          >
             {formattedDate}
           </Text>
         </Flex>
 
         <Text
           mt=".075rem"
-          color="#FFFFFF"
           fz={"1rem"}
           fw="bold"
           style={{
@@ -112,13 +114,13 @@ export default function NotificationCard({
             disabled={isLoading}
             fs={"italic"}
             fz={".75rem"}
-            color="#BDBDBD"
+            color={theme.colorScheme === "dark" ? "#BDBDBD" : "#424242"}
             sx={{
               zIndex: 100,
             }}
             onClick={() =>
               clearNotification({
-                notificationIDs: [notification._key],
+                notificationID: notification._key,
                 notifications,
                 setNotifications,
                 userId: session?.user?.id,
@@ -134,7 +136,7 @@ export default function NotificationCard({
             disabled={isLoading}
             fs={"italic"}
             fz={".75rem"}
-            color="#BDBDBD"
+            color={theme.colorScheme === "dark" ? "#BDBDBD" : "#424242"}
             sx={{
               zIndex: 100,
             }}

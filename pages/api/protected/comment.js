@@ -2,7 +2,7 @@ import client from "@/lib/sanity";
 // import dayjs from "dayjs";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST" && req.method !== "DELETE") {
+  if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
 

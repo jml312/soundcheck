@@ -1,13 +1,21 @@
 import { SessionProvider, useSession } from "next-auth/react";
-import "@/styles/globals.css";
 import Head from "next/head";
-import { MantineProvider, Flex, Loader } from "@mantine/core";
+import {
+  MantineProvider,
+  Flex,
+  Loader,
+  ColorSchemeProvider,
+} from "@mantine/core";
 import Navbar from "@/components/Navbar";
 import { Notifications } from "@mantine/notifications";
+import { useHotkeys } from "@mantine/hooks";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import dayjs from "dayjs";
+import { getCookie, setCookie } from "cookies-next";
+import NextApp from "next/app";
+import { getMantineTheme } from "@/mantineTheme";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -32,7 +40,6 @@ dayjs.extend(relativeTime, {
     { l: "yy", d: "year" },
   ],
 });
-
 dayjs.extend(updateLocale);
 dayjs.updateLocale("en", {
   relativeTime: {
@@ -54,18 +61,28 @@ dayjs.updateLocale("en", {
     yy: "%d years",
   },
 });
-
 dayjs.extend(customParseFormat);
 dayjs.extend(isBetween);
 
 export default function App({
   Component,
   pageProps: { session, ...pageProps },
+  colorScheme: initialColorScheme,
 }) {
-  const emptyColors = (num) => Array(num).fill("");
-  const [queryClient] = useState(() => new QueryClient());
   const router = useRouter();
+  const [queryClient] = useState(() => new QueryClient());
   const [isRouteLoading, setIsRouteLoading] = useState(false);
+
+  const [colorScheme, setColorScheme] = useState(initialColorScheme);
+  const toggleColorScheme = () => {
+    const nextColorScheme = colorScheme === "dark" ? "light" : "dark";
+    setColorScheme(nextColorScheme);
+    setCookie("mantine-color-scheme", nextColorScheme, {
+      maxAge: 60 * 60 * 24 * 30,
+    });
+  };
+
+  useHotkeys([["mod + M", toggleColorScheme]]);
 
   useEffect(() => {
     router.events.on("routeChangeStart", (_, { shallow }) => {
@@ -97,47 +114,21 @@ export default function App({
       <SessionProvider session={session}>
         <QueryClientProvider client={queryClient}>
           <Hydrate state={pageProps.dehydratedState}>
-            <MantineProvider
-              withGlobalStyles
-              withNormalizeCSS
-              theme={{
-                loader: "bars",
-                colorScheme: "dark",
-                colors: {
-                  spotify: [
-                    ...emptyColors(7),
-                    "rgba(29, 185, 84, 0.9)",
-                    "rgba(29, 185, 84, 1)",
-                  ],
-                  lightWhite: [
-                    ...emptyColors(6),
-                    "#a8a9ad",
-                    "rgba(192, 193, 196, 0.75)",
-                    "#c0c1c4",
-                  ],
-                  lightGray: ["#3C3F42", ...emptyColors(7), "#25262b"],
-                },
-                primaryColor: "spotify",
-                components: {
-                  Button: {
-                    styles: (theme) => ({
-                      root: {
-                        color: "white",
-                        backgroundColor: theme.colors.spotify[6],
-                        "&:hover": {
-                          backgroundColor: theme.colors.spotify[7],
-                        },
-                      },
-                    }),
-                  },
-                },
-              }}
+            <ColorSchemeProvider
+              colorScheme={colorScheme}
+              toggleColorScheme={toggleColorScheme}
             >
-              <Notifications />
-              <Auth isRouteLoading={isRouteLoading}>
-                <Component {...pageProps} />
-              </Auth>
-            </MantineProvider>
+              <MantineProvider
+                withGlobalStyles
+                withNormalizeCSS
+                theme={getMantineTheme(colorScheme)}
+              >
+                <Notifications />
+                <Auth isRouteLoading={isRouteLoading}>
+                  <Component {...pageProps} />
+                </Auth>
+              </MantineProvider>
+            </ColorSchemeProvider>
           </Hydrate>
         </QueryClientProvider>
       </SessionProvider>
@@ -186,3 +177,11 @@ function Auth({ children, isRouteLoading }) {
     children
   );
 }
+
+App.getInitialProps = async (appContext) => {
+  const appProps = await NextApp.getInitialProps(appContext);
+  return {
+    ...appProps,
+    colorScheme: getCookie("mantine-color-scheme", appContext.ctx) || "dark",
+  };
+};

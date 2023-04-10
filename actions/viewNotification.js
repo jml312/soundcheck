@@ -21,11 +21,9 @@ export default async function viewNotification({
   setIsLoading(true);
   try {
     const newNotifications = notifications.filter((n) => n._key !== _key);
-    await axios.delete("/api/protected/notifications", {
-      data: {
-        userId,
-        newNotifications,
-      },
+    await axios.post("/api/protected/notification", {
+      userId,
+      newNotifications,
     });
     setNotifications(newNotifications);
     setIsLoading(false);
