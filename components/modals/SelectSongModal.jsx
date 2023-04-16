@@ -30,6 +30,23 @@ const SelectItem = forwardRef(
 );
 SelectItem.displayName = "SelectItem";
 
+/**
+ * @param {boolean} opened - The opened boolean
+ * @param {function} close - The close function
+ * @param {array} spotifyData - The spotifyData array
+ * @param {object} currentlyPlaying - The currentlyPlaying object
+ * @param {function} setCurrentlyPlaying - The setCurrentlyPlaying function
+ * @param {object} session - The session object
+ * @param {object} setPost - The setPost function
+ * @param {object} caption - The caption object
+ * @param {function} setCaption - The setCaption function
+ * @param {object} captionRef - The captionRef object
+ * @param {object} badWordsFilter - The badWordsFilter object
+ * @param {object} activePost - The activePost object
+ * @param {function} setActivePost - The setActivePost function
+ * @param {boolean} isSmall - The isSmall boolean
+ * @description A select song modal component
+ */
 export default function SelectSongModal({
   opened,
   close,
@@ -80,7 +97,6 @@ export default function SelectSongModal({
       <Modal
         opened={opened}
         closeOnEscape={false}
-        closeOnOutsideClick={false}
         onClose={() => {}}
         withCloseButton={false}
         centered
@@ -179,24 +195,18 @@ export default function SelectSongModal({
             separator: {
               "& .mantine-Divider-left::after": {
                 borderTop: `1px solid ${
-                  theme.colorScheme === "dark"
-                    ? "rgba(255, 255, 255, 0.75)"
-                    : "rgba(0, 0, 0, 0.75)"
+                  theme.colors.cardDivider[theme.colorScheme]
                 }`,
               },
             },
             separatorLabel: {
-              color: `${
-                theme.colorScheme === "dark"
-                  ? "rgba(255, 255, 255, 0.75)"
-                  : "rgba(0, 0, 0, 0.75)"
-              } !important`,
+              color: `${theme.colors.pure[theme.colorScheme]} !important`,
             },
             rightSection: {
               stroke:
                 theme.colorScheme === "dark"
-                  ? "rgba(255, 255, 255, 0.5)"
-                  : "rgba(0, 0, 0, 0.5)",
+                  ? "rgba(255, 255, 255, 0.25)"
+                  : "rgba(0, 0, 0, 0.25)",
             },
             root: { position: "relative" },
             label: {
@@ -231,6 +241,10 @@ export default function SelectSongModal({
               },
             },
             dropdown: {
+              backgroundColor: theme.colors.contrast[theme.colorScheme],
+              border: `1px solid ${
+                theme.colorScheme === "dark" ? "#373A40" : "#c8c5bf"
+              }`,
               "& .mantine-ScrollArea-thumb": {
                 backgroundColor: `${
                   theme.colorScheme === "dark" ? "#474952" : "#b8b6ad"

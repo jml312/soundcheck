@@ -1,6 +1,17 @@
 import dayjs from "dayjs";
 import axios from "axios";
 
+/**
+ * @param {Object} comment
+ * @param {Function} setComment
+ * @param {Object} post
+ * @param {Function} setPost
+ * @param {Object} session
+ * @param {Object} badWordsFilter
+ * @param {Array} allUsers
+ * @param {Function} setIsCommentCreated
+ * @description Posts a comment
+ */
 export default async function postComment({
   comment,
   setComment,

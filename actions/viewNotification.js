@@ -1,5 +1,16 @@
 import axios from "axios";
 
+/**
+ * @param {string} userId
+ * @param {Object} notification
+ * @param {Array} notifications
+ * @param {Function} setNotifications
+ * @param {Function} setIsLoading
+ * @param {Function} close
+ * @param {Object} router
+ * @description Removes a notification from the user's notifications array
+ * and redirects the user to the appropriate page
+ */
 export default async function viewNotification({
   userId,
   notification,

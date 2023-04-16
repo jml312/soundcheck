@@ -18,15 +18,16 @@ import { useSession, signOut } from "next-auth/react";
 import { BsChevronDown, BsHeadphones, BsMoonStars } from "react-icons/bs";
 import { FaSignOutAlt, FaUserFriends } from "react-icons/fa";
 import { CgProfile, CgSun } from "react-icons/cg";
+import { useMediaQuery, useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 import Link from "next/link";
-import { useMediaQuery, useDisclosure } from "@mantine/hooks";
 import { MdOutlineNotifications } from "react-icons/md";
 import { AiOutlineHome } from "react-icons/ai";
 import NotificationModal from "./modals/NotificationModal";
 import { useQuery } from "react-query";
 import { getNotifications } from "@/actions";
 import { getAvatarText } from "@/utils";
+import Logo from "./Logo";
 
 const useStyles = createStyles((theme) => ({
   logoText: {
@@ -36,9 +37,14 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-function Navbar({ children }) {
+/**
+ * @param {object} children - The children object
+ * @description A navbar component
+ */
+export default function Navbar({ children }) {
   const { data: session } = useSession();
   const { classes } = useStyles();
+  const [menuOpened, setMenuOpened] = useState(false);
   const isMobile = useMediaQuery("(max-width: 480px)");
   const theme = useMantineTheme();
   const [notifications, setNotifications] = useState([]);
@@ -89,15 +95,20 @@ function Navbar({ children }) {
           px={16}
         >
           <Link href={"/feed"} passHref>
-            <Title
-              color={theme.colors.pure[theme.colorScheme]}
-              style={{
-                cursor: "pointer",
-              }}
-              className={classes.logoText}
-            >
-              Soundcheck!
-            </Title>
+            <Flex align={"center"} justify={"center"} gap={".5rem"}>
+              <Logo />
+              {!isMobile && (
+                <Title
+                  color={theme.colors.pure[theme.colorScheme]}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                  className={classes.logoText}
+                >
+                  Soundcheck!
+                </Title>
+              )}
+            </Flex>
           </Link>
           <Group spacing={3}>
             <Tooltip position="bottom-end" label="theme">
@@ -147,7 +158,10 @@ function Navbar({ children }) {
             </Group>
 
             <Menu
-              trigger={isMobile ? "click" : "hover"}
+              opened={menuOpened}
+              onOpen={() => setMenuOpened(true)}
+              onClose={() => setMenuOpened(false)}
+              trigger={"hover"}
               openDelay={50}
               closeDelay={100}
               width={260}
@@ -171,7 +185,7 @@ function Navbar({ children }) {
                 },
               }}
             >
-              <Menu.Target>
+              <Menu.Target onClick={() => setMenuOpened(!menuOpened)}>
                 <UnstyledButton
                   sx={{
                     borderRadius: "0.5rem",
@@ -248,5 +262,3 @@ function Navbar({ children }) {
     </>
   );
 }
-
-export default Navbar;

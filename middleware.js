@@ -5,6 +5,7 @@ export const config = {
   matcher: "/api/protected/:function*",
 };
 
+/** Protect all "protected" API routes with middleware */
 export async function middleware(req) {
   const token = await getToken({ req });
 

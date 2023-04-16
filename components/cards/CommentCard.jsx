@@ -12,6 +12,27 @@ import { deleteComment } from "@/actions";
 import { useMemo, useEffect, useRef } from "react";
 import dayjs from "dayjs";
 
+/**
+ * @param {string} text - The comment text
+ * @param {string} createdAt - The comment's createdAt date
+ * @param {string} userId - The comment's userId
+ * @param {string} username - The comment's username
+ * @param {string} userImage - The comment's userImage
+ * @param {object} session - The session object
+ * @param {object} post - The post object
+ * @param {function} setPost - The setPost function
+ * @param {object} comment - The comment object
+ * @param {function} setComment - The setComment function
+ * @param {object} commentInputRef - The commentInputRef object
+ * @param {string} notificationPostId - The notificationPostId string
+ * @param {string} notificationCommentId - The notificationCommentId string
+ * @param {string} type - The type string
+ * @param {array} allUsers - The allUsers array
+ * @param {object} router - The router object
+ * @param {boolean} isSmall - The isSmall boolean
+ * @param {boolean} isProfile - The isProfile boolean
+ * @description A comment card component
+ */
 export default function CommentCard({
   text,
   createdAt,

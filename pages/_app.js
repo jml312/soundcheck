@@ -72,13 +72,12 @@ export default function App({
   const router = useRouter();
   const [queryClient] = useState(() => new QueryClient());
   const [isRouteLoading, setIsRouteLoading] = useState(false);
-
   const [colorScheme, setColorScheme] = useState(initialColorScheme);
   const toggleColorScheme = () => {
     const nextColorScheme = colorScheme === "dark" ? "light" : "dark";
     setColorScheme(nextColorScheme);
     setCookie("mantine-color-scheme", nextColorScheme, {
-      maxAge: 60 * 60 * 24 * 30,
+      maxAge: 60 * 60 * 24 * 30, // 30 days
     });
   };
 
@@ -98,41 +97,27 @@ export default function App({
   }, [router.events]);
 
   return (
-    <>
-      <Head>
-        <title>Soundcheck!</title>
-        <meta
-          name="description"
-          content="a social media platform that allows users to post daily updates of what they are listening to"
-        />
-        <meta
-          name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width"
-        />
-      </Head>
-
-      <SessionProvider session={session}>
-        <QueryClientProvider client={queryClient}>
-          <Hydrate state={pageProps.dehydratedState}>
-            <ColorSchemeProvider
-              colorScheme={colorScheme}
-              toggleColorScheme={toggleColorScheme}
+    <SessionProvider session={session}>
+      <QueryClientProvider client={queryClient}>
+        <Hydrate state={pageProps.dehydratedState}>
+          <ColorSchemeProvider
+            colorScheme={colorScheme}
+            toggleColorScheme={toggleColorScheme}
+          >
+            <MantineProvider
+              withGlobalStyles
+              withNormalizeCSS
+              theme={getMantineTheme(colorScheme)}
             >
-              <MantineProvider
-                withGlobalStyles
-                withNormalizeCSS
-                theme={getMantineTheme(colorScheme)}
-              >
-                <Notifications />
-                <Auth isRouteLoading={isRouteLoading}>
-                  <Component {...pageProps} />
-                </Auth>
-              </MantineProvider>
-            </ColorSchemeProvider>
-          </Hydrate>
-        </QueryClientProvider>
-      </SessionProvider>
-    </>
+              <Notifications />
+              <Auth isRouteLoading={isRouteLoading}>
+                <Component {...pageProps} />
+              </Auth>
+            </MantineProvider>
+          </ColorSchemeProvider>
+        </Hydrate>
+      </QueryClientProvider>
+    </SessionProvider>
   );
 }
 

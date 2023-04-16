@@ -1,9 +1,10 @@
+/** Global App Theme and Styles */
 export const getMantineTheme = (colorScheme) => {
   const themeValues = (lightValue, darkValue) =>
     colorScheme === "dark" ? darkValue : lightValue;
 
   return {
-    globalStyles: (theme) => ({
+    globalStyles: () => ({
       "*": {
         userSelect: "none",
       },
@@ -14,7 +15,6 @@ export const getMantineTheme = (colorScheme) => {
         fontWeight: "normal",
       },
     }),
-    // fontFamily: "",
     white: "#e5e4e1",
     black: "#1a1b1e",
     loader: "bars",
@@ -178,7 +178,38 @@ export const getMantineTheme = (colorScheme) => {
           close: {
             color: theme.colors.pure[colorScheme],
             "&:hover": {
-              backgroundColor: themeValues("#e0deda", "#1f2125"),
+              backgroundColor: theme.colors.contrast[colorScheme],
+            },
+          },
+        }),
+      },
+      SegmentedControl: {
+        defaultProps: {
+          radius: 8,
+        },
+        styles: (theme) => ({
+          root: {
+            backgroundColor: "transparent !important",
+          },
+          indicator: {
+            backgroundColor: theme.colors.contrast[theme.colorScheme],
+          },
+          label: {
+            color:
+              theme.colorScheme === "dark"
+                ? "rgba(255,255,255,0.8)"
+                : "rgba(0,0,0,0.8)",
+            transition: "color 0.1s ease",
+            "&:hover": {
+              color: theme.colors.pure[theme.colorScheme],
+            },
+            "&[data-active]": {
+              color: theme.colors.pure[theme.colorScheme],
+            },
+          },
+          control: {
+            "&:not(:first-of-type)": {
+              borderColor: theme.colors.cardDivider[theme.colorScheme],
             },
           },
         }),

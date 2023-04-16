@@ -21,6 +21,29 @@ import dayjs from "dayjs";
 import EmojiPicker from "../EmojiPicker";
 import MentionCard from "../cards/MentionCard";
 
+/**
+ * @param {boolean} isPostModal - The isPostModal boolean
+ * @param {boolean} isSelect - The isSelect boolean
+ * @param {boolean} isDiscover - The isDiscover boolean
+ * @param {boolean} isProfile - The isProfile boolean
+ * @param {boolean} isSmall - The isSmall boolean
+ * @param {object} post - The post object
+ * @param {function} setPost - The setPost function
+ * @param {object} comment - The comment object
+ * @param {function} setComment - The setComment function
+ * @param {object} session - The session object
+ * @param {array} allUsers - The allUsers array
+ * @param {boolean} isLikeLoading - The isLikeLoading boolean
+ * @param {boolean} isFollowLoading - The isFollowLoading boolean
+ * @param {function} setCurrentlyPlaying - The setCurrentlyPlaying function
+ * @param {function} openPostModal - The openPostModal function
+ * @param {object} badWordsFilter - The badWordsFilter object
+ * @param {string} notificationPostId - The notificationPostId string
+ * @param {string} notificationCommentId - The notificationCommentId string
+ * @param {string} type - The type string
+ * @param {object} router - The router object
+ * @description The bottom section of a post
+ */
 export default function BottomSection({
   isPostModal,
   isSelect,
@@ -54,17 +77,6 @@ export default function BottomSection({
     () => dayjs(post?.createdAt).fromNow(),
     [post]
   );
-
-  const getViewCommentText = () => {
-    if (numComments === 0) {
-      return isProfile ? "No comments" : "Add a comment...";
-    } else if (numComments === 1) {
-      return "View comment";
-    } else if (numComments < 10) {
-      return `View all ${numComments} comments`;
-    }
-    return "View all comments";
-  };
 
   useEffect(() => {
     if (
@@ -387,7 +399,11 @@ export default function BottomSection({
                 transform: "translateX(.25rem) translateY(-.25rem)",
               }}
             >
-              {getViewCommentText()}
+              {numComments === 0
+                ? isProfile
+                  ? "No comments"
+                  : "Add a comment..."
+                : `View comment${numComments === 1 ? "" : "s"}`}
             </UnstyledButton>
             <Text
               sx={{

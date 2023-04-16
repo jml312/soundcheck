@@ -2,10 +2,12 @@ import { getSession, useSession } from "next-auth/react";
 import { Flex, ScrollArea, Title, Text, Stack } from "@mantine/core";
 import { getDayInterval, clearAuthCookies } from "@/utils";
 import Post from "@/components/Post/Post";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import client from "@/lib/sanity";
 import { userDiscoverQuery, hasPostedTodayQuery } from "@/lib/queries";
 import dayjs from "dayjs";
+import { NextSeo } from "next-seo";
+import { DefaultSEO } from "seo";
 
 function Discover({ recommendations }) {
   const { data: session } = useSession();
@@ -15,73 +17,91 @@ function Discover({ recommendations }) {
     recommendations.map((r) => ({ ...r, _id: r.songID }))
   );
 
-  return (
-    <Flex
-      justify={"center"}
-      align={"center"}
-      direction={"column"}
-      h={"calc(100vh - 5rem)"}
-      w={"100%"}
-      style={{
-        transform: "translateY(5rem)",
-        overflow: "hidden",
-      }}
-    >
-      {recommendations?.length > 0 ? (
-        <Stack
-          align={"center"}
-          spacing={8}
-          style={{
-            transform: "translateY(1.5rem)",
-          }}
-        >
-          <Title order={2}>Discover</Title>
-          <Text
-            sx={(theme) => ({
-              color: theme.colors.dimmed[theme.colorScheme],
-            })}
-          >
-            Like posts or come back tomorrow for more!
-          </Text>
-        </Stack>
-      ) : null}
+  const setPost = useCallback((newPost) => {
+    setRecs((prev) => {
+      const newRecs = [...prev];
+      const idx = newRecs.findIndex((r) => r._id === newPost._id);
+      newRecs[idx] = newPost;
+      return newRecs;
+    });
+  }, []);
 
-      {!recommendations?.length ? (
-        <Title order={3}>Nothing to discover yet. Go like some posts!</Title>
-      ) : (
-        <ScrollArea
-          mb={"4.5rem"}
-          w="92%"
-          maw="1050x"
-          style={{
-            transform: "translateY(2.8rem)",
-          }}
-        >
-          <Flex justify={"center"} wrap={"wrap"} gap="1.5rem">
-            {recs?.map((rec, idx) => (
-              <Post
-                key={rec._id}
-                post={rec}
-                setPost={(newPost) => {
-                  setRecs((prev) => {
-                    const newRecs = [...prev];
-                    newRecs[idx] = newPost;
-                    return newRecs;
-                  });
-                }}
-                isDiscover
-                currentlyPlaying={currentlyPlaying}
-                setCurrentlyPlaying={setCurrentlyPlaying}
-                session={session}
-                activePost={activePost}
-                setActivePost={setActivePost}
-                idx={idx}
-              />
-            ))}
-          </Flex>
-        </ScrollArea>
-      )}
-    </Flex>
+  return (
+    <>
+      <NextSeo
+        {...{
+          ...DefaultSEO,
+          title: "Discover | Soundcheck!",
+          canonical: `${process.env.NEXT_PUBLIC_URL}/discover`,
+          openGraph: {
+            ...DefaultSEO.openGraph,
+            title: "Discover | Soundcheck!",
+            url: `${process.env.NEXT_PUBLIC_URL}/discover`,
+          },
+        }}
+      />
+
+      <Flex
+        justify={"center"}
+        align={"center"}
+        direction={"column"}
+        h={"calc(100vh - 5rem)"}
+        w={"100%"}
+        style={{
+          transform: "translateY(5rem)",
+          overflow: "hidden",
+        }}
+      >
+        {recommendations?.length > 0 ? (
+          <Stack
+            align={"center"}
+            spacing={8}
+            style={{
+              transform: "translateY(1.5rem)",
+            }}
+          >
+            <Title order={2}>Discover</Title>
+            <Text
+              sx={(theme) => ({
+                color: theme.colors.dimmed[theme.colorScheme],
+              })}
+            >
+              Like posts or come back tomorrow for more!
+            </Text>
+          </Stack>
+        ) : null}
+
+        {!recommendations?.length ? (
+          <Text fz={"lg"}>Nothing to discover yet...</Text>
+        ) : (
+          <ScrollArea
+            mb={"4.5rem"}
+            w="92%"
+            maw="1050x"
+            style={{
+              transform: "translateY(2.8rem)",
+            }}
+          >
+            <Flex justify={"center"} wrap={"wrap"} gap="1.5rem">
+              {recs?.map((rec, idx) => (
+                <Post
+                  key={rec._id}
+                  post={rec}
+                  setPost={setPost}
+                  isDiscover
+                  currentlyPlaying={currentlyPlaying}
+                  setCurrentlyPlaying={setCurrentlyPlaying}
+                  session={session}
+                  activePost={activePost}
+                  setActivePost={setActivePost}
+                  idx={idx}
+                />
+              ))}
+            </Flex>
+          </ScrollArea>
+        )}
+      </Flex>
+    </>
   );
 }
 

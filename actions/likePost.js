@@ -1,6 +1,16 @@
 import axios from "axios";
 import dayjs from "dayjs";
 
+/**
+ * @param {boolean} isLiked
+ * @param {Function} setIsLikeLoading
+ * @param {Object} post
+ * @param {Function} setPost
+ * @param {Object} session
+ * @param {boolean} isDiscover
+ * @param {number} idx
+ * @description Likes or unlikes a post
+ */
 export default async function likePost({
   isLiked,
   setIsLikeLoading,

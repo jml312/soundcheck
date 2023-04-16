@@ -1,82 +1,70 @@
 import { discoverQuery } from "@/lib/queries";
 import axios from "axios";
+import { formatStats } from "@/utils";
 
-const getMultipleRandom = (arr, n) => {
-  const result = new Set();
-  const len = arr.length;
-  while (result.size < n && result.size < len) {
-    result.add(arr[Math.floor(Math.random() * len)]);
-  }
-  return Array.from(result);
-};
-
+/**
+ * @param {string} userId
+ * @param {string} accessToken
+ * @param {Object} client
+ * @description Gets a list of recommended songs based on the user's listening history
+ */
 export default async function getDiscoverSongs({
   userId,
   accessToken,
   client,
 }) {
+  const MAX_SEEDS = 5;
+
   try {
     const discoverData = await client.fetch(discoverQuery, {
       userId,
     });
 
-    let seedArtists = [],
-      seedGenres = [],
-      seedTracks = [];
-
-    discoverData.forEach((item) => {
-      if (item?.artists?.length > 0) {
-        seedArtists.push(...item.artists);
-      }
-      if (item?.genres?.length > 0) {
-        seedGenres.push(...item.genres);
-      }
-      if (item?.songID) {
-        seedTracks.push(item.songID);
-      }
-    });
-
-    seedArtists = [...new Set(Array.from(seedArtists))].map((item) => ({
-      value: item,
-      type: "artist",
-    }));
-    seedGenres = [...new Set(Array.from(seedGenres))].map((item) => ({
-      value: item,
-      type: "genre",
-    }));
-    seedTracks = [...new Set(Array.from(seedTracks))].map((item) => ({
-      value: item,
-      type: "track",
-    }));
-
-    const mergedSeeds = getMultipleRandom(
-      [...seedArtists, ...seedGenres, ...seedTracks],
-      5
-    ).reduce(
-      (acc, item) => {
-        if (item.type === "artist") {
-          acc["artists"].push(item.value);
-        } else if (item.type === "genre") {
-          acc["genres"].push(item.value);
-        } else if (item.type === "track") {
-          acc["tracks"].push(item.value);
-        }
-        return acc;
-      },
-      {
-        artists: [],
-        genres: [],
-        tracks: [],
-      }
+    const keys = ["songID", "artists", "genres"];
+    const formattedStats = formatStats({
+      stats: discoverData,
+      keys,
+    }).map((item, idx) =>
+      item.slice(0, MAX_SEEDS).map((el) => ({
+        ...el,
+        type: keys[idx],
+      }))
     );
+
+    const seedArtists = [];
+    const seedGenres = [];
+    const seedTracks = [];
+    for (let i = 0; i < MAX_SEEDS * 3; i++) {
+      if (
+        seedArtists.length + seedGenres.length + seedTracks.length >=
+        MAX_SEEDS
+      ) {
+        break;
+      }
+      const statIdx = i % keys.length;
+      if (formattedStats[statIdx].length > 0) {
+        const seed = formattedStats[statIdx].shift();
+        switch (seed.type) {
+          case "songID":
+            seedTracks.push(seed.text);
+            break;
+          case "artists":
+            seedArtists.push(seed.text);
+            break;
+          case "genres":
+            seedGenres.push(seed.text);
+            break;
+        }
+      }
+    }
 
     const { data } = await axios.get(
       "https://api.spotify.com/v1/recommendations?limit=20",
       {
         params: {
-          seed_artists: mergedSeeds.artists.join(","),
-          seed_genres: mergedSeeds.genres.join(","),
-          seed_tracks: mergedSeeds.tracks.join(","),
+          seed_artists: seedArtists.join(","),
+          seed_genres: seedGenres.join(","),
+          seed_tracks: seedTracks.join(","),
         },
         headers: {
           Authorization: `Bearer ${accessToken}`,

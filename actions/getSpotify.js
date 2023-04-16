@@ -2,6 +2,11 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { recentlyPlayedQuery } from "@/lib/queries";
 
+/**
+ * @param {Object} session
+ * @param {Object} client
+ * @description Gets the user's recently played songs
+ */
 export default async function getSpotify({ session, client }) {
   const { accessToken, id } = session.user;
 
@@ -83,7 +88,7 @@ export default async function getSpotify({ session, client }) {
 
     const allData = await Promise.all(
       [...spotifyData, ...filteredRecentlyPlayed]
-        .slice(0, 10)
+        .slice(0, 5)
         .map(async (item) => {
           const genres = await Promise.all(
             item.artists.map(async (artist) => {

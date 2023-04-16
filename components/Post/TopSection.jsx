@@ -19,6 +19,27 @@ import { useState } from "react";
 import dayjs from "dayjs";
 import EmojiPicker from "../EmojiPicker";
 
+/**
+ * @param {boolean} isPostModal - The isPostModal boolean
+ * @param {boolean} isUser - The isUser boolean
+ * @param {boolean} isSelect - The isSelect boolean
+ * @param {boolean} isDiscover - The isDiscover boolean
+ * @param {boolean} isProfile - The isProfile boolean
+ * @param {object} post - The post object
+ * @param {function} setPost - The setPost function
+ * @param {object} session - The session object
+ * @param {boolean} isPosting - The isPosting boolean
+ * @param {string} caption - The caption string
+ * @param {function} setCaption - The setCaption function
+ * @param {object} captionRef - The captionRef object
+ * @param {boolean} isLikeLoading - The isLikeLoading boolean
+ * @param {function} setIsLikeLoading - The setIsLikeLoading function
+ * @param {boolean} isFollowLoading - The isFollowLoading boolean
+ * @param {function} setIsFollowLoading - The setIsFollowLoading function
+ * @param {boolean} isSmall - The isSmall boolean
+ * @param {number} idx - The idx number
+ * @description The top section of a post
+ */
 export default function TopSection({
   isPostModal,
   isUser,
@@ -61,7 +82,7 @@ export default function TopSection({
         <ActionIcon
           variant={"transparent"}
           radius="xl"
-          disabled={true}
+          disabled
           sx={{
             color: post?.isLiked
               ? theme.colors.red[theme.colorScheme === "dark" ? 5 : 7]
@@ -122,8 +143,7 @@ export default function TopSection({
           w={isPostModal ? "100%" : "275px"}
           justify={"space-between"}
           align={"center"}
-          mt={"-.65rem"}
-          pb={".2rem"}
+          mt={"-.75rem"}
           mb={"0.75rem"}
           sx={{
             borderBottom: `1px solid ${
@@ -132,10 +152,10 @@ export default function TopSection({
           }}
         >
           <Tooltip
-            disabled={isSelect || isUser}
+            disabled={isSelect}
             withinPortal
-            offset={isSelect ? 5.25 : 3}
-            position="top"
+            offset={isPostModal ? -3 : -2}
+            position={isPostModal ? "bottom" : "top"}
             label={
               <>
                 <Group mt={4} spacing={"xs"} align={"start"} pl={1} pt={1}>
@@ -197,11 +217,10 @@ export default function TopSection({
               </>
             }
           >
-            {isSelect || isUser ? (
+            {isSelect ? (
               <Button
-                ml={"-.5rem"}
+                ml={"-.75rem"}
                 size={"sm"}
-                compact
                 sx={{
                   marginTop: "0.25rem",
                   cursor: "default",
@@ -218,11 +237,7 @@ export default function TopSection({
                 }}
                 component="div"
                 leftIcon={
-                  <Avatar
-                    size={20}
-                    src={post?.userImage}
-                    alt={`${post?.username}'s profile`}
-                  >
+                  <Avatar size={20} src={post?.userImage}>
                     {getAvatarText(post?.username)}
                   </Avatar>
                 }
@@ -230,23 +245,26 @@ export default function TopSection({
                 {truncateText(post?.username, 19)}
               </Button>
             ) : (
-              <Link href={`/profile/${post?.userId}`} passHref>
+              <Link
+                href={isUser ? "/my-profile" : `/profile/${post?.userId}`}
+                passHref
+              >
                 <Button
-                  ml={"-.5rem"}
-                  compact
+                  ml={"-.75rem"}
                   size={isPostModal ? "md" : "sm"}
                   sx={{
+                    backgroundColor: "transparent !important",
                     zIndex: 1,
                     fontSize: isPostModal ? "0.85rem" : "0.75rem",
                     color:
                       theme.colorScheme === "dark"
                         ? "rgba(255, 255, 255, 0.75)"
                         : "rgba(0, 0, 0, 0.75)",
-                    backgroundColor: "transparent !important",
                     cursor: "pointer",
-                    transform: "translateY(.1rem)",
+                    "&:active": {
+                      transform: "none !important",
+                    },
                   }}
-                  component="a"
                   leftIcon={
                     <Avatar
                       size={20}
@@ -416,7 +434,6 @@ export default function TopSection({
             >
               <Text
                 fw={"bold"}
-                zIndex={999}
                 style={{
                   marginTop: !isSelect ? "-.1rem" : "0",
                 }}
@@ -457,7 +474,7 @@ export default function TopSection({
                 error: "",
               });
             }}
-            placeholder="Add a caption..."
+            placeholder="Song feels?"
             variant={"unstyled"}
             mt="-.8rem"
             error={caption.error}

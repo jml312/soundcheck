@@ -13,6 +13,23 @@ import { BsSpotify, BsPlayCircleFill, BsPauseCircleFill } from "react-icons/bs";
 import { useState, useEffect, useRef } from "react";
 import { useHover } from "@mantine/hooks";
 
+/**
+ * @param {object} post - The post object
+ * @param {boolean} isPostModal - The isPostModal boolean
+ * @param {boolean} isSelect - The isSelect boolean
+ * @param {boolean} isDiscover - The isDiscover boolean
+ * @param {boolean} isSmall - The isSmall boolean
+ * @param {boolean} postModalOpen - The postModalOpen boolean
+ * @param {string} activePost - The activePost string
+ * @param {function} setActivePost - The setActivePost function
+ * @param {string} currentlyPlaying - The currentlyPlaying string
+ * @param {function} setCurrentlyPlaying - The setCurrentlyPlaying function
+ * @param {string} selectedSong - The selectedSong string
+ * @param {function} setSelectedSong - The setSelectedSong function
+ * @param {function} setCaption - The setCaption function
+ * @param {object} captionRef - The captionRef object
+ * @description A middle section component
+ */
 export default function MiddleSection({
   isPostModal,
   isSelect,
@@ -109,7 +126,7 @@ export default function MiddleSection({
       >
         <Image
           onClick={() => {
-            if (currentlyPlaying !== null) return;
+            if (currentlyPlaying !== null && !isSmall) return;
             if (isSelect) {
               setActivePost(activePost === post?._id ? null : post?._id);
             } else if (!activePost) {
@@ -126,12 +143,6 @@ export default function MiddleSection({
           width={!isPostModal ? 275 : isSmall ? "70vw" : 375}
           height={!isPostModal ? 275 : isSmall ? "70vw" : 375}
           withPlaceholder
-          placeholder={
-            <Stack align="center">
-              <Text>{post?.albumName}</Text>
-              <Text>{artists}</Text>
-            </Stack>
-          }
           style={{
             opacity: imageFocused ? 0.3 : 1,
             transition: "opacity 0.2s ease-in-out",

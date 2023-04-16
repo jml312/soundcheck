@@ -7,6 +7,33 @@ import TopSection from "./TopSection";
 import MiddleSection from "./MiddleSection";
 import BottomSection from "./BottomSection";
 
+/**
+ * @param {object} post - The post object
+ * @param {function} setPost - The setPost function
+ * @param {boolean} isUser - The isUser boolean
+ * @param {boolean} isPostModal - The isPostModal boolean
+ * @param {boolean} isSelect - The isSelect boolean
+ * @param {boolean} isDiscover - The isDiscover boolean
+ * @param {boolean} isProfile - The isProfile boolean
+ * @param {object} currentlyPlaying - The currentlyPlaying object
+ * @param {function} setCurrentlyPlaying - The setCurrentlyPlaying function
+ * @param {object} selectedSong - The selectedSong object
+ * @param {function} setSelectedSong - The setSelectedSong function
+ * @param {object} session - The session object
+ * @param {object} comment - The comment object
+ * @param {function} setComment - The setComment function
+ * @param {string} caption - The caption string
+ * @param {function} setCaption - The setCaption function
+ * @param {object} captionRef - The captionRef object
+ * @param {object} badWordsFilter - The badWordsFilter object
+ * @param {boolean} isPosting - The isPosting boolean
+ * @param {array} allUsers - The allUsers array
+ * @param {object} activePost - The activePost object
+ * @param {function} setActivePost - The setActivePost function
+ * @param {boolean} isSmall - The isSmall boolean
+ * @param {number} idx - The idx number
+ * @description A post component
+ */
 function Post({
   post,
   setPost,

@@ -15,7 +15,7 @@ const getRandom9To5 = () => {
 };
 
 export default async function handle(req, res) {
-  if (req.method !== "GET") {
+  if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
@@ -62,9 +62,13 @@ export default async function handle(req, res) {
     await sgMail.sendMultiple({
       to: allUsers.map(({ email }) => email),
       from: process.env.SENDGRID_FROM_EMAIL,
-      subject: "Your daily reminder",
+      subject: "Soundcheck! What are you listening to?",
       text: "Your daily reminder",
-      html: `<strong>Your daily reminder</strong>`,
+      html: `<strong>Go make a post...</strong>
+      <form action="https://soundcheck.vercel.app">
+          <input type="submit" value="Soundcheck!" style="background-color: #1a1b1e; border-radius: 0.5rem; color: #dad9d4; padding: .5rem;" />
+      </form>
+      `,
       ...(testMode !== "true" && { sendAt: getRandom9To5().unix() }),
     });
 

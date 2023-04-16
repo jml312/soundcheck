@@ -7,12 +7,24 @@ import {
   UnstyledButton,
   useMantineTheme,
 } from "@mantine/core";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { truncateText } from "@/utils";
 import dayjs from "dayjs";
 import { clearNotification, viewNotification } from "@/actions";
 import { getAvatarText } from "@/utils";
 
+/**
+ * @param {object} notification - The notification object
+ * @param {array} notifications - The notifications array
+ * @param {function} setNotifications - The setNotifications function
+ * @param {boolean} opened - The opened boolean
+ * @param {object} session - The session object
+ * @param {boolean} isLoading - The isLoading boolean
+ * @param {function} setIsLoading - The setIsLoading function
+ * @param {function} close - The close function
+ * @param {object} router - The router object
+ * @description A notification card component
+ */
 export default function NotificationCard({
   notification,
   notifications,
@@ -32,8 +44,7 @@ export default function NotificationCard({
   } = notification;
   const formattedDate = useMemo(() => dayjs(createdAt).fromNow(), [opened]);
   const theme = useMantineTheme();
-
-  const getNotificationAction = () => {
+  const getNotificationAction = useCallback(() => {
     switch (type) {
       case "like":
         return "liked your post";
@@ -46,7 +57,7 @@ export default function NotificationCard({
       default:
         return "";
     }
-  };
+  }, [type]);
 
   return (
     <Flex

@@ -1,14 +1,25 @@
 import axios from "axios";
 
+/**
+ * @param {Object} session
+ * @param {string} toFollowId
+ * @param {boolean} isFollowing
+ * @param {Function} setIsFollowLoading
+ * @param {Object} post
+ * @param {Function} setPost
+ * @param {Function} setIsFollowing
+ * @param {Function} setFollowers
+ * @description Follows or unfollows a user
+ */
 export default async function followUser({
   session,
   toFollowId,
   isFollowing,
   setIsFollowLoading,
-  // feed
+  // for feed
   post,
   setPost,
-  // profile
+  // for profile
   setIsFollowing,
   setFollowers,
 }) {

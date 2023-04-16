@@ -4,8 +4,11 @@ import { BsSpotify } from "react-icons/bs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { notifications } from "@mantine/notifications";
+import { NextSeo } from "next-seo";
+import { DefaultSEO } from "seo";
+import Logo from "@/components/Logo";
 
-function Index() {
+export default function Index() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasShownError, setHasShownError] = useState(false);
   const router = useRouter();
@@ -47,31 +50,40 @@ function Index() {
   }, [hasShownError]);
 
   return (
-    <Flex
-      justify={"center"}
-      align={"center"}
-      direction={"column"}
-      mih={"100vh"}
-      gap={20}
-    >
-      <Title size="2.5rem" order={1}>
-        Soundcheck!
-      </Title>
-      <Button
-        onClick={(e) => {
-          e.preventDefault();
-          setIsLoading(true);
-          signIn("spotify", {
-            callbackUrl: "/feed",
-          });
+    <>
+      <NextSeo
+        {...{
+          ...DefaultSEO,
+          title: "Soundcheck!",
         }}
-        size="md"
-        leftIcon={<BsSpotify />}
-        loading={isLoading}
+      />
+      <Flex
+        justify={"center"}
+        align={"center"}
+        direction={"column"}
+        mih={"100vh"}
+        gap={20}
       >
-        {isLoading ? "Logging in..." : "Continue with Spotify"}
-      </Button>
-    </Flex>
+        <Flex align={"center"} justify={"center"} gap={".5rem"}>
+          <Logo />
+          <Title order={1}>Soundcheck!</Title>
+        </Flex>
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            setIsLoading(true);
+            signIn("spotify", {
+              callbackUrl: "/feed",
+            });
+          }}
+          size="md"
+          leftIcon={<BsSpotify />}
+          loading={isLoading}
+        >
+          {isLoading ? "Logging in..." : "Continue with Spotify"}
+        </Button>
+      </Flex>
+    </>
   );
 }
 
@@ -91,5 +103,3 @@ export async function getServerSideProps({ req }) {
     props: {},
   };
 }
-
-export default Index;

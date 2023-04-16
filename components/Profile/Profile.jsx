@@ -11,20 +11,27 @@ import {
   Anchor,
   Button,
   useMantineTheme,
+  SegmentedControl,
+  Center,
 } from "@mantine/core";
 import { followUser } from "@/actions";
-import { getAvatarText } from "@/utils";
 import dayjs from "dayjs";
 import { FaUserPlus, FaUserCheck } from "react-icons/fa";
-import { AiFillPieChart, AiFillHeart } from "react-icons/ai";
+import { AiFillHeart } from "react-icons/ai";
 import { useSession } from "next-auth/react";
-import { useState, useMemo } from "react";
-import { BsSpotify, BsHeadphones } from "react-icons/bs";
-import Post from "../Post/Post";
+import { useState, useMemo, useEffect } from "react";
+import { BsSpotify, BsHeadphones, BsFillCloudsFill } from "react-icons/bs";
+import Post from "../Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import StatGraph from "./StatGraph";
 import FollowListModal from "../modals/FollowListModal";
+import { getAvatarText, formatStats } from "@/utils";
+import WordCloud from "./WordCloud";
 
+/**
+ * @param {object} profile - The profile object
+ * @param {boolean} isUser - Whether the profile is the user's
+ * @description A profile component
+ */
 export default function Profile({ isUser, profile }) {
   const {
     _id,
@@ -40,50 +47,23 @@ export default function Profile({ isUser, profile }) {
     playlistID,
   } = profile;
 
-  const { artists, albums, genres } = useMemo(
-    () =>
-      stats.reduce(
-        (acc, stat) => {
-          const { artists, album, genres } = stat;
-          artists.forEach((artist) => {
-            const artistIndex = acc.artists.findIndex(
-              (item) => item.name === artist
-            );
-            if (artistIndex === -1) {
-              acc.artists.push({ name: artist, value: 1 });
-            } else {
-              acc.artists[artistIndex].value++;
-            }
-          });
-          const albumIndex = acc.albums.findIndex(
-            (item) => item.name === album
-          );
-          if (albumIndex === -1) {
-            acc.albums.push({ name: album, value: 1 });
-          } else {
-            acc.albums[albumIndex].value++;
-          }
-          genres.forEach((genre) => {
-            const genreIndex = acc.genres.findIndex(
-              (item) => item.name === genre
-            );
-            if (genreIndex === -1) {
-              acc.genres.push({ name: genre, value: 1 });
-            } else {
-              acc.genres[genreIndex].value++;
-            }
-          });
-          return acc;
-        },
-        {
-          artists: [],
-          albums: [],
-          genres: [],
-        }
-      ),
+  const [selectedTab, setSelectedTab] = useState("posts");
+  const [cloudsTransition, setCloudsTransition] = useState(0);
+  const [artists, albums, genres] = useMemo(
+    () => formatStats({ stats, keys: ["artists", "album", "genres"] }),
     []
   );
-
+  const [selectedStat, setSelectedStat] = useState("artists");
+  const statData = useMemo(() => {
+    switch (selectedStat) {
+      case "artists":
+        return artists;
+      case "albums":
+        return albums;
+      case "genres":
+        return genres;
+    }
+  }, [selectedStat, artists, albums, genres]);
   const theme = useMantineTheme();
   const isSmall = useMediaQuery("(max-width: 470px)");
   const BODY_WIDTH = "87.5%";
@@ -104,6 +84,14 @@ export default function Profile({ isUser, profile }) {
     useDisclosure(false);
   const numFollowers = followers?.length;
   const numFollowing = following?.length;
+
+  useEffect(() => {
+    if (selectedTab === "clouds") {
+      setTimeout(() => setCloudsTransition(200), 200);
+    } else {
+      setCloudsTransition(0);
+    }
+  }, [selectedTab]);
 
   return (
     <Flex
@@ -230,7 +218,7 @@ export default function Profile({ isUser, profile }) {
             <Text fz="xs">{dayjs(createdAt).format("MMM D, YYYY")}</Text>
           </Stack>
         </Group>
-        <Text fz="lg">🔥 {postStreak} day streak</Text>
+        <Text fz={isSmall ? "md" : "lg"}>🔥 {postStreak} day streak</Text>
       </Flex>
 
       <Flex
@@ -330,10 +318,11 @@ export default function Profile({ isUser, profile }) {
           flexGrow: 2,
           transform: "translateY(-.5rem)",
         }}
-        defaultValue="posts"
-        onTabChange={() => {
+        value={selectedTab}
+        onTabChange={(newTab) => {
           setCurrentlyPlaying(null);
           setActivePost(null);
+          setSelectedTab(newTab);
         }}
         styles={{
           tab: {
@@ -363,8 +352,8 @@ export default function Profile({ isUser, profile }) {
           <Tabs.Tab label="Likes" value="likes" icon={<AiFillHeart />}>
             <Text>Likes</Text>
           </Tabs.Tab>
-          <Tabs.Tab label="Stats" value="stats" icon={<AiFillPieChart />}>
-            <Text>Stats</Text>
+          <Tabs.Tab label="Clouds" value="clouds" icon={<BsFillCloudsFill />}>
+            <Text>Clouds</Text>
           </Tabs.Tab>
         </Tabs.List>
 
@@ -455,31 +444,35 @@ export default function Profile({ isUser, profile }) {
           )}
         </Tabs.Panel>
 
-        <Tabs.Panel value="stats">
-          <ScrollArea
-            mt={TAB_MARGIN_TOP}
-            w="100%"
-            maw={BODY_MAX_WIDTH}
+        <Tabs.Panel value="clouds">
+          <Stack
             h={TAB_VIEWPORT_HEIGHT}
+            mt={TAB_MARGIN_TOP}
+            maw={BODY_MAX_WIDTH}
+            align="center"
+            justify="space-between"
           >
-            <Stack spacing={0}>
-              <StatGraph
-                title={"Artists"}
-                data={artists}
-                height={TAB_VIEWPORT_HEIGHT}
-              />
-              <StatGraph
-                title={"Albums"}
-                data={albums}
-                height={TAB_VIEWPORT_HEIGHT}
-              />
-              <StatGraph
-                title={"Genres"}
-                data={genres}
-                height={TAB_VIEWPORT_HEIGHT}
-              />
-            </Stack>
-          </ScrollArea>
+            <Center w={"100%"} h={"100%"}>
+              <WordCloud data={statData} theme={theme} isSmall={isSmall} />
+            </Center>
+            <SegmentedControl
+              w="100%"
+              value={selectedStat}
+              onChange={setSelectedStat}
+              data={[
+                { label: "Artists", value: "artists" },
+                { label: "Albums", value: "albums" },
+                { label: "Genres", value: "genres" },
+              ]}
+              transitionDuration={cloudsTransition}
+              size="md"
+              styles={{
+                root: {
+                  transform: "translateY(-1rem)",
+                },
+              }}
+            />
+          </Stack>
         </Tabs.Panel>
       </Tabs>
     </Flex>

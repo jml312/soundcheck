@@ -1,5 +1,16 @@
 import axios from "axios";
 
+/**
+ * @param {string} userId
+ * @param {string} createdAt
+ * @param {Object} post
+ * @param {Function} setPost
+ * @param {string} text
+ * @param {Function} setComment
+ * @param {Array} allUsers
+ * @param {Object} session
+ * @description Deletes a comment from a post
+ */
 export default async function deleteComment({
   userId,
   createdAt,

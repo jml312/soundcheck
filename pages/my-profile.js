@@ -2,11 +2,30 @@ import { getSession } from "next-auth/react";
 import { clearAuthCookies, getDayInterval } from "@/utils";
 import client from "@/lib/sanity";
 import { hasPostedTodayQuery, profileQuery } from "@/lib/queries";
-import Profile from "@/components/Profile/Profile";
+import Profile from "@/components/Profile";
 import dayjs from "dayjs";
+import { NextSeo } from "next-seo";
+import { DefaultSEO } from "seo";
 
 function MyProfile({ profile }) {
-  return <Profile isUser profile={profile} />;
+  return (
+    <>
+      <NextSeo
+        {...{
+          ...DefaultSEO,
+          title: "My profile | Soundcheck!",
+          canonical: `${process.env.NEXT_PUBLIC_URL}/my-profile`,
+          openGraph: {
+            ...DefaultSEO.openGraph,
+            title: "My profile | Soundcheck!",
+            url: `${process.env.NEXT_PUBLIC_URL}/my-profile`,
+          },
+        }}
+      />
+
+      <Profile isUser profile={profile} />
+    </>
+  );
 }
 
 export async function getServerSideProps({ req, res }) {

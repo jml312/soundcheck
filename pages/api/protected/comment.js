@@ -1,5 +1,4 @@
 import client from "@/lib/sanity";
-// import dayjs from "dayjs";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {

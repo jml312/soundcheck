@@ -1,6 +1,16 @@
 import axios from "axios";
 import { notifications } from "@mantine/notifications";
 
+/**
+ * @param {object} selectedSong
+ * @param {Function} setSelectedSong
+ * @param {object} session
+ * @param {Function} setPost
+ * @param {object} caption
+ * @param {Function} setCurrentlyPlaying
+ * @param {Function} close
+ * @description Posts a song
+ */
 export default async function postSong({
   selectedSong,
   setSelectedSong,

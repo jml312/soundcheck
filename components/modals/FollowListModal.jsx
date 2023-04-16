@@ -2,6 +2,13 @@ import { Modal, Flex, Avatar, Text } from "@mantine/core";
 import { getAvatarText } from "@/utils";
 import Link from "next/link";
 
+/**
+ * @param {boolean} opened - The opened boolean
+ * @param {function} close - The close function
+ * @param {string} title - The title string
+ * @param {array} data - The data array
+ * @description A follow list modal component
+ */
 export default function FollowListModal({ opened, close, title, data }) {
   return (
     <Modal

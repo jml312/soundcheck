@@ -6,8 +6,18 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { VscReactions } from "react-icons/vsc";
-import { useEffect } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 
+/**
+ * @param {boolean} isDisabled - The isDisabled boolean
+ * @param {boolean} isMobileOpen - The isMobileOpen boolean
+ * @param {function} setIsMobileOpen - The setIsMobileOpen function
+ * @param {function} setText - The setText function
+ * @param {object} inputRef - The inputRef object
+ * @param {boolean} isSmall - The isSmall boolean
+ * @param {string} position - The position string
+ * @description A component that renders an emoji picker
+ */
 export default function EmojiPicker({
   isDisabled,
   isMobileOpen,
@@ -18,7 +28,32 @@ export default function EmojiPicker({
   position,
 }) {
   const theme = useMantineTheme();
-  const emojis = ["🔥", "❤️", "👍", "😂", "😍", "🤩", "😭", "🤔"];
+  const emojis = useMemo(
+    () => [
+      { value: "🔥", code: 56613 },
+      { value: "❤️", code: 65039 },
+      { value: "😍", code: 56845 },
+      { value: "😭", code: 56877 },
+      { value: "😂", code: 56834 },
+      { value: "🤦", code: 56614 },
+      { value: "🤔", code: 56596 },
+      { value: "🤷", code: 56631 },
+    ],
+    []
+  );
+  const getNewText = useCallback(
+    (prevText, emoji) => {
+      if (!prevText) return emoji;
+      if (
+        emojis
+          .map(({ code }) => code)
+          .includes(prevText.slice(-1).charCodeAt(0))
+      )
+        return prevText + emoji;
+      return prevText + " " + emoji;
+    },
+    [emojis]
+  );
 
   useEffect(() => {
     if (isDisabled) {
@@ -71,13 +106,13 @@ export default function EmojiPicker({
       </Popover.Target>
       <Popover.Dropdown>
         <Flex wrap={"wrap"} justify={"space-between"} align={"center"}>
-          {emojis.map((emoji, idx) => (
+          {emojis.map(({ value: emoji }, idx) => (
             <ActionIcon
               key={idx}
               onMouseDown={() => {
                 setText((prev) => ({
                   ...prev,
-                  text: prev.text + emoji,
+                  text: getNewText(prev.text, emoji),
                   addedEmoji: true,
                   error: "",
                 }));
@@ -140,13 +175,13 @@ export default function EmojiPicker({
       </HoverCard.Target>
       <HoverCard.Dropdown>
         <Flex wrap={"wrap"} justify={"space-between"} align={"center"}>
-          {emojis.map((emoji, idx) => (
+          {emojis.map(({ value: emoji }, idx) => (
             <ActionIcon
               key={idx}
               onMouseDown={() => {
                 setText((prev) => ({
                   ...prev,
-                  text: prev.text + emoji,
+                  text: getNewText(prev.text, emoji),
                   addedEmoji: true,
                   error: "",
                 }));

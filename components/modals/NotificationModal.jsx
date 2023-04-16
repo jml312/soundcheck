@@ -2,6 +2,16 @@ import NotificationCard from "../cards/NotificationCard";
 import { Modal, ScrollArea, Stack, LoadingOverlay } from "@mantine/core";
 import { useRouter } from "next/router";
 
+/**
+ * @param {boolean} opened - The opened boolean
+ * @param {function} close - The close function
+ * @param {array} notifications - The notifications array
+ * @param {function} setNotifications - The setNotifications function
+ * @param {object} session - The session object
+ * @param {boolean} isLoading - The isLoading boolean
+ * @param {function} setIsLoading - The setIsLoading function
+ * @description A notification modal component
+ */
 export default function NotificationModal({
   opened,
   close,

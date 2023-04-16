@@ -1,5 +1,14 @@
 import axios from "axios";
 
+/**
+ * @param {string} notificationID
+ * @param {Array} notifications
+ * @param {Function} setNotifications
+ * @param {string} userId
+ * @param {Function} setIsLoading
+ * @param {Function} close
+ * @description Removes a notification from the user's notifications array
+ */
 export default async function clearNotification({
   notificationID,
   notifications,

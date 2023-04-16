@@ -1,6 +1,13 @@
 import { UnstyledButton, Avatar, Text, Flex } from "@mantine/core";
 import { getAvatarText } from "@/utils";
 
+/**
+ * @param {object} user - The user object
+ * @param {object} comment - The comment object
+ * @param {function} setComment - The setComment function
+ * @param {object} commentInputRef - The commentInputRef object
+ * @description A mention card component
+ */
 export default function MentionCard({
   user,
   comment,

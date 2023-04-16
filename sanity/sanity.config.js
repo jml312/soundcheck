@@ -6,10 +6,10 @@ import {vercelDeployTool} from 'sanity-plugin-vercel-deploy'
 
 export default defineConfig({
   name: 'default',
-  title: 'Soundcheck!',
+  title: 'soundcheck',
 
-  projectId: 'v9rcob59',
-  dataset: 'production',
+  projectId: '5eg64i0l',
+  dataset: process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' ? 'production' : 'development',
 
   plugins: [deskTool(), visionTool(), vercelDeployTool()],
 

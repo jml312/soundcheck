@@ -70,17 +70,17 @@ export default NextAuth({
           );
 
           // add image to playlist
-          // await axios.put(
-          //   `https://api.spotify.com/v1/playlists/${_playlistID}/images`,
-          //   {
-          //     url: "",
-          //   },
-          //   {
-          //     headers: {
-          //       Authorization: `Bearer ${access_token}`,
-          //     },
-          //   }
-          // );
+          await axios.put(
+            `https://api.spotify.com/v1/playlists/${_playlistID}/images`,
+            {
+              url: `${process.env.NEXT_PUBLIC_URL}/logo/soundcheck.svg`,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${access_token}`,
+              },
+            }
+          );
 
           await client.patch(id).set({ playlistID: newPlaylistID }).commit();
           user.playlistID = newPlaylistID;

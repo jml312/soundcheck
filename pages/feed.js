@@ -1,21 +1,30 @@
 import { getSession, useSession } from "next-auth/react";
 import { clearAuthCookies } from "@/utils";
 import Post from "@/components/Post/Post";
-import { useDisclosure, useMediaQuery, useDidUpdate } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import dayjs from "dayjs";
 import SelectSongModal from "@/components/modals/SelectSongModal";
 import Filter from "bad-words";
-import { Flex, Text, ScrollArea, Stack, SegmentedControl } from "@mantine/core";
-import { useState, useEffect, useRef } from "react";
+import {
+  Flex,
+  Text,
+  ScrollArea,
+  Stack,
+  SegmentedControl,
+  useMantineTheme,
+} from "@mantine/core";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import client from "@/lib/sanity";
 import { allUsersQuery } from "@/lib/queries";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import { getPosts, getSpotify } from "@/actions";
+import { NextSeo } from "next-seo";
+import { DefaultSEO } from "seo";
 
-function Feed({ spotifyData, allUsers }) {
+export default function Feed({ spotifyData, allUsers }) {
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
-  const [posts, setPosts] = useState();
+  const [posts, setPosts] = useState([]);
   const { data: currentPosts } = useQuery({
     queryKey: ["feed", dayjs().format("YYYY-MM-DD")],
     queryFn: () =>
@@ -25,17 +34,10 @@ function Feed({ spotifyData, allUsers }) {
         date: dayjs(),
         userId: session?.user?.id,
       }),
-    onSuccess: (data) => {
-      setPosts({
-        feedPosts: data.feedPosts,
-        userPost: data.userPost,
-        hasPostedToday: data.hasPostedToday,
-      });
-    },
     refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    // refetchInterval: 1000 * 60 * 5, // 5 minutes
+    refetchInterval: 1000 * 60 * 5, // refetch every 5 minutes
   });
   const [caption, setCaption] = useState({
     text: currentPosts?.userPost?.caption || "",
@@ -45,13 +47,13 @@ function Feed({ spotifyData, allUsers }) {
   });
   const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);
-  const [selectSongOpened, { close: closeSelectSong, open: openSelectSong }] =
-    useDisclosure(
-      typeof currentPosts?.hasPostedToday === "boolean" &&
-        !currentPosts?.hasPostedToday
-    );
+  const [selectSongOpened, { close: closeSelectSong }] = useDisclosure(
+    !currentPosts?.hasPostedToday
+  );
+  const [sliderTransition, setSliderTransition] = useState(0);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const badWordsFilter = new Filter();
+  const theme = useMantineTheme();
   const isSmall = useMediaQuery("(max-width: 470px)");
   const isMobile = useMediaQuery("(max-width: 769px)");
   const twoCards = useMediaQuery("(min-width: 1115px) and (max-width: 1460px)");
@@ -60,77 +62,60 @@ function Feed({ spotifyData, allUsers }) {
   );
   const fourCards = useMediaQuery("(min-width: 1805px)");
 
-  const getScrollAreaWidth = () => {
+  const scrollAreaWidth = useMemo(() => {
     if (twoCards) return "705px";
     else if (threeCards) return "1050px";
     else if (fourCards) return "1395px";
     else return "360px";
-  };
+  }, [twoCards, threeCards, fourCards]);
 
-  const setUserPost = (post) =>
-    setPosts({
-      ...posts,
-      userPost: post,
-    });
-
-  const setFeedPost = (post) =>
-    setPosts({
-      ...posts,
-      feedPosts: posts.feedPosts.map((p) => (p._id === post._id ? post : p)),
-    });
-
-  useEffect(() => {
-    if (
-      typeof currentPosts?.hasPostedToday === "boolean" &&
-      !currentPosts?.hasPostedToday
-    ) {
-      openSelectSong();
-    }
-    setPosts({
-      feedPosts: currentPosts?.feedPosts,
-      userPost: currentPosts?.userPost,
-      hasPostedToday: currentPosts?.hasPostedToday,
-    });
-    setCaption({
-      text: currentPosts?.userPost?.caption || "",
-      error: "",
-      isFocused: false,
-      addedEmoji: false,
-    });
-  }, [currentPosts]);
-
-  useDidUpdate(() => {
-    const updatedOriginalPosts = currentPosts?.feedPosts?.map((post) => {
-      const foundPost = posts?.feedPosts?.find((p) => p._id === post._id);
-      if (foundPost) {
-        return {
-          ...post,
-          isFollowing: foundPost.isFollowing,
-          numFollowers: foundPost.numFollowers,
-        };
-      }
-      return post;
-    });
-    setPosts({
-      ...posts,
-      feedPosts:
-        postType === "everyone"
-          ? updatedOriginalPosts
-          : posts?.feedPosts?.filter((post) => post.isFollowing),
-    });
-  }, [postType]);
-
-  useDidUpdate(() => {
-    if (postType === "following") {
+  const setUserPost = useCallback(
+    (post) => {
       setPosts({
         ...posts,
-        feedPosts: posts?.feedPosts?.filter((post) => post.isFollowing),
+        userPost: post,
       });
-    }
-  }, [posts]);
+    },
+    [posts]
+  );
+  const setFeedPost = useCallback(
+    (post) => {
+      setPosts({
+        ...posts,
+        feedPosts: posts.feedPosts.map((p) => (p._id === post._id ? post : p)),
+      });
+    },
+    [posts]
+  );
+
+  const feedPosts = useMemo(
+    () =>
+      posts?.feedPosts?.filter(
+        (post) => postType === "everyone" || post.isFollowing
+      ) || [],
+    [posts, postType]
+  );
+  useEffect(() => setPosts(currentPosts), [currentPosts]);
+
+  useEffect(() => {
+    setTimeout(() => setSliderTransition(200), 200);
+  }, []);
 
   return (
     <>
+      <NextSeo
+        {...{
+          ...DefaultSEO,
+          title: "Feed | Soundcheck!",
+          canonical: `${process.env.NEXT_PUBLIC_URL}/feed`,
+          openGraph: {
+            ...DefaultSEO.openGraph,
+            title: "Feed | Soundcheck!",
+            url: `${process.env.NEXT_PUBLIC_URL}/feed`,
+          },
+        }}
+      />
+
       <SelectSongModal
         opened={selectSongOpened}
         close={closeSelectSong}
@@ -174,62 +159,41 @@ function Feed({ spotifyData, allUsers }) {
             {selectSongOpened ? (
               <Text
                 fz={"lg"}
-                fw={"bold"}
                 style={{
                   cursor: "default",
                   transform: isMobile && "translateY(2.4rem)",
                 }}
-              >{`-`}</Text>
+              >{`...`}</Text>
             ) : (
               <>
                 <Flex
-                  w={getScrollAreaWidth()}
+                  w={scrollAreaWidth}
                   justify="center"
                   align="center"
                   style={{
-                    transform:
-                      posts?.feedPosts?.length > 0
-                        ? "translateY(2.8rem)"
-                        : "translateY(0)",
+                    transform: "translateY(2.8rem)",
                   }}
                 >
                   <SegmentedControl
-                    value={postType}
+                    transitionDuration={sliderTransition}
                     onChange={setPostType}
                     data={[
                       { label: "Everyone", value: "everyone" },
                       { label: "Following", value: "following" },
                     ]}
-                    radius={8}
-                    styles={(theme) => ({
-                      controlActive: {
-                        backgroundColor: theme.colors.spotify.main,
-                      },
-                      label: {
-                        color:
-                          theme.colorScheme === "dark"
-                            ? "rgba(255,255,255,0.5)"
-                            : "rgba(0,0,0,0.5)",
-                        '&[data-active="true"]': {
-                          color: theme.colors.pure[theme.colorScheme],
-                        },
-                        "&:hover": {
-                          color: theme.colors.pure[theme.colorScheme],
-                        },
-                      },
+                    styles={{
                       root: {
-                        backgroundColor:
-                          theme.colors.contrast[theme.colorScheme],
+                        transform: isMobile && "translateY(-2rem)",
                       },
-                    })}
+                    }}
                   />
                 </Flex>
                 {/* feed posts */}
-                {posts?.feedPosts?.length > 0 ? (
+                {feedPosts.length > 0 ? (
                   <Stack spacing={0}>
                     <ScrollArea
                       offsetScrollbars={false}
-                      w={getScrollAreaWidth()}
+                      w={scrollAreaWidth}
                       h={"565px"}
                       mt={isMobile && "1.5rem"}
                       mb={isMobile && "1rem"}
@@ -245,7 +209,7 @@ function Feed({ spotifyData, allUsers }) {
                         wrap={"wrap"}
                         gap="1.5rem"
                       >
-                        {posts?.feedPosts?.map((post) => (
+                        {feedPosts.map((post) => (
                           <Post
                             key={post._id}
                             post={post}
@@ -266,16 +230,24 @@ function Feed({ spotifyData, allUsers }) {
                     </ScrollArea>
                   </Stack>
                 ) : (
-                  <Text
-                    fz={"lg"}
-                    fw={"bold"}
+                  <Stack
+                    h={"565px"}
+                    mt={isMobile && "1.5rem"}
+                    mb={isMobile && "1rem"}
                     style={{
-                      cursor: "default",
-                      transform: isMobile && "translateY(1rem)",
+                      transform: !isMobile && "translateY(2.8rem)",
                     }}
+                    justify="center"
                   >
-                    Nothing yet...
-                  </Text>
+                    <Text
+                      fz={"lg"}
+                      style={{
+                        transform: "translateY(-3.75rem)",
+                      }}
+                    >
+                      Nothing yet...
+                    </Text>
+                  </Stack>
                 )}
               </>
             )}
@@ -283,7 +255,7 @@ function Feed({ spotifyData, allUsers }) {
 
           {/* user post */}
           <Flex
-            sx={(theme) => ({
+            sx={{
               borderBottom:
                 isMobile &&
                 `1px solid ${theme.colors.border[theme.colorScheme]}`,
@@ -291,7 +263,7 @@ function Feed({ spotifyData, allUsers }) {
                 !isMobile &&
                 `1px solid ${theme.colors.border[theme.colorScheme]}`,
               height: "100%",
-            })}
+            }}
             align="center"
             justify="center"
             w={!isMobile ? "375px" : "100%"}
@@ -301,12 +273,11 @@ function Feed({ spotifyData, allUsers }) {
             {selectSongOpened ? (
               <Text
                 fz={"lg"}
-                fw={"bold"}
                 style={{
                   cursor: "default",
                   transform: isMobile && "translateY(2.4rem)",
                 }}
-              >{`-`}</Text>
+              >{`...`}</Text>
             ) : (
               <Stack
                 style={{
@@ -315,10 +286,10 @@ function Feed({ spotifyData, allUsers }) {
               >
                 <Text
                   fz={"lg"}
-                  fw={"bold"}
                   align={"center"}
                   style={{
                     cursor: "default",
+                    transform: "translateY(-.625rem)",
                   }}
                 >{`Your post`}</Text>
                 <Post
@@ -413,5 +384,3 @@ export async function getServerSideProps({ req, res }) {
     };
   }
 }
-
-export default Feed;
