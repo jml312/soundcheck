@@ -460,7 +460,6 @@ export default function TopSection({
                 isFocused: false,
               })
             }
-            data-autoFocus
             ref={captionRef}
             w="100%"
             value={caption.text}

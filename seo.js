@@ -13,7 +13,7 @@ export const DefaultSEO = {
     site_name: "Soundcheck",
     images: [
       {
-        url: `${process.env.NEXT_PUBLIC_URL}/logo/soundcheck.svg`,
+        url: `${process.env.NEXT_PUBLIC_URL}/logo/soundcheck.png`,
         width: 800,
         height: 600,
         alt: "Soundcheck!",

@@ -3,6 +3,7 @@ import { getDayInterval } from "./getDayInterval";
 import { truncateText } from "./truncateText";
 import { getAvatarText } from "./getAvatarText";
 import { formatStats } from "./formatStats";
+import { createPlaylist } from "./createPlaylist";
 
 export {
   clearAuthCookies,
@@ -10,4 +11,5 @@ export {
   truncateText,
   getAvatarText,
   formatStats,
+  createPlaylist,
 };

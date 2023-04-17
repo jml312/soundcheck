@@ -3,12 +3,14 @@ import SpotifyProvider from "next-auth/providers/spotify";
 import client from "@/lib/sanity";
 import axios from "axios";
 import dayjs from "dayjs";
+import { createPlaylist } from "@/utils/createPlaylist";
 
 export default NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 60 * 60, // 1 hour
   },
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async signIn({ account, user }) {
       if (account.provider !== "spotify") return false;
@@ -52,36 +54,10 @@ export default NextAuth({
         if (followsSoundcheck) {
           user.playlistID = playlistID;
         } else {
-          const {
-            data: { id: newPlaylistID },
-          } = await axios.post(
-            `https://api.spotify.com/v1/users/${id}/playlists`,
-            {
-              name: "Soundcheck!",
-              public: false,
-              collaborative: false,
-              description: "Liked songs from Soundcheck!",
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${access_token}`,
-              },
-            }
-          );
-
-          // add image to playlist
-          await axios.put(
-            `https://api.spotify.com/v1/playlists/${_playlistID}/images`,
-            {
-              url: `${process.env.NEXT_PUBLIC_URL}/logo/soundcheck.svg`,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${access_token}`,
-              },
-            }
-          );
-
+          const newPlaylistID = await createPlaylist({
+            id,
+            accessToken: access_token,
+          });
           await client.patch(id).set({ playlistID: newPlaylistID }).commit();
           user.playlistID = newPlaylistID;
         }
@@ -110,6 +86,7 @@ export default NextAuth({
     },
   },
   pages: {
+    signIn: process.env.NEXT_PUBLIC_URL,
     error: process.env.NEXT_PUBLIC_URL,
   },
   providers: [

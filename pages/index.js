@@ -15,7 +15,7 @@ export default function Index() {
   const { error } = router.query;
 
   useEffect(() => {
-    if (error === "AccessDenied") {
+    if (error) {
       setHasShownError(true);
       window.history.replaceState(null, "", `${process.env.NEXT_PUBLIC_URL}`);
     }
