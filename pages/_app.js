@@ -100,17 +100,7 @@ export default function App({
 
   return (
     <>
-      <DefaultSeo
-        title="Soundcheck!"
-        description={SEO.description}
-        openGraph={{
-          ...SEO.openGraph,
-          images: [],
-        }}
-        twitter={SEO.twitter}
-        additionalLinkTags={SEO.additionalLinkTags}
-        additionalMetaTags={SEO.additionalMetaTags}
-      />
+      <DefaultSeo {...SEO} />
 
       <SessionProvider session={session}>
         <QueryClientProvider client={queryClient}>
