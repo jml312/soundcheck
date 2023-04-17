@@ -13,9 +13,9 @@ const SEO = {
     site_name: "Soundcheck",
     images: [
       {
-        url: `${process.env.NEXT_PUBLIC_URL}/logo/soundcheck.png`,
-        width: 800,
-        height: 600,
+        url: `${process.env.NEXT_PUBLIC_URL}/logo/soundcheck-seo.png`,
+        width: 1200,
+        height: 628,
         alt: "Soundcheck!",
       },
     ],

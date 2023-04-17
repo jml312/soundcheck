@@ -36,7 +36,7 @@ export const createPlaylist = async ({ id, accessToken, client }) => {
   );
 
   const base64Image = await toBase64(
-    `${process.env.NEXT_PUBLIC_URL}/logo/soundcheck.png`
+    `${process.env.NEXT_PUBLIC_URL}/logo/soundcheck-spotify.png`
   );
   await axios.put(
     `https://api.spotify.com/v1/playlists/${newPlaylistID}/images`,
