@@ -7,7 +7,7 @@ import client from "@/lib/sanity";
 import { userDiscoverQuery, hasPostedTodayQuery } from "@/lib/queries";
 import dayjs from "dayjs";
 import { NextSeo } from "next-seo";
-import { DefaultSEO } from "seo";
+import SEO from "seo";
 
 function Discover({ recommendations }) {
   const { data: session } = useSession();
@@ -30,11 +30,11 @@ function Discover({ recommendations }) {
     <>
       <NextSeo
         {...{
-          ...DefaultSEO,
+          ...SEO,
           title: "Discover | Soundcheck!",
           canonical: `${process.env.NEXT_PUBLIC_URL}/discover`,
           openGraph: {
-            ...DefaultSEO.openGraph,
+            ...SEO.openGraph,
             title: "Discover | Soundcheck!",
             url: `${process.env.NEXT_PUBLIC_URL}/discover`,
           },

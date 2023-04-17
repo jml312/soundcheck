@@ -16,6 +16,8 @@ import dayjs from "dayjs";
 import { getCookie, setCookie } from "cookies-next";
 import NextApp from "next/app";
 import { getMantineTheme } from "@/mantineTheme";
+import { DefaultSeo } from "next-seo";
+import SEO from "seo";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -97,27 +99,41 @@ export default function App({
   }, [router.events]);
 
   return (
-    <SessionProvider session={session}>
-      <QueryClientProvider client={queryClient}>
-        <Hydrate state={pageProps.dehydratedState}>
-          <ColorSchemeProvider
-            colorScheme={colorScheme}
-            toggleColorScheme={toggleColorScheme}
-          >
-            <MantineProvider
-              withGlobalStyles
-              withNormalizeCSS
-              theme={getMantineTheme(colorScheme)}
+    <>
+      <DefaultSeo
+        title="Soundcheck!"
+        description={SEO.description}
+        openGraph={{
+          ...SEO.openGraph,
+          images: [],
+        }}
+        twitter={SEO.twitter}
+        additionalLinkTags={SEO.additionalLinkTags}
+        additionalMetaTags={SEO.additionalMetaTags}
+      />
+
+      <SessionProvider session={session}>
+        <QueryClientProvider client={queryClient}>
+          <Hydrate state={pageProps.dehydratedState}>
+            <ColorSchemeProvider
+              colorScheme={colorScheme}
+              toggleColorScheme={toggleColorScheme}
             >
-              <Notifications />
-              <Auth isRouteLoading={isRouteLoading}>
-                <Component {...pageProps} />
-              </Auth>
-            </MantineProvider>
-          </ColorSchemeProvider>
-        </Hydrate>
-      </QueryClientProvider>
-    </SessionProvider>
+              <MantineProvider
+                withGlobalStyles
+                withNormalizeCSS
+                theme={getMantineTheme(colorScheme)}
+              >
+                <Notifications />
+                <Auth isRouteLoading={isRouteLoading}>
+                  <Component {...pageProps} />
+                </Auth>
+              </MantineProvider>
+            </ColorSchemeProvider>
+          </Hydrate>
+        </QueryClientProvider>
+      </SessionProvider>
+    </>
   );
 }
 

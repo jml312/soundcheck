@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { notifications } from "@mantine/notifications";
 import { NextSeo } from "next-seo";
-import { DefaultSEO } from "seo";
+import SEO from "seo";
 import Logo from "@/components/Logo";
 
 export default function Index() {
@@ -53,7 +53,7 @@ export default function Index() {
     <>
       <NextSeo
         {...{
-          ...DefaultSEO,
+          ...SEO,
           title: "Soundcheck!",
         }}
       />

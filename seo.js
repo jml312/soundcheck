@@ -1,5 +1,5 @@
 /** Default App SEO */
-export const DefaultSEO = {
+const SEO = {
   description:
     "Soundcheck is a social music app that allows you to share your favorite songs with friends and discover new music.",
   openGraph: {
@@ -80,3 +80,5 @@ export const DefaultSEO = {
     },
   ],
 };
+
+export default SEO;

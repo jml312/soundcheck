@@ -5,7 +5,7 @@ import { hasPostedTodayQuery, profileQuery } from "@/lib/queries";
 import Profile from "@/components/Profile";
 import dayjs from "dayjs";
 import { NextSeo } from "next-seo";
-import { DefaultSEO } from "seo";
+import SEO from "seo";
 
 function UserProfile({ profile }) {
   const displayName = profile.name.endsWith("s")
@@ -15,11 +15,11 @@ function UserProfile({ profile }) {
     <>
       <NextSeo
         {...{
-          ...DefaultSEO,
+          ...SEO,
           title: `${displayName} profile | Soundcheck!`,
           canonical: `${process.env.NEXT_PUBLIC_URL}/profile/${profile.name}`,
           openGraph: {
-            ...DefaultSEO.openGraph,
+            ...SEO.openGraph,
             title: `${displayName} Profile | Soundcheck!`,
             url: `${process.env.NEXT_PUBLIC_URL}/profile/${profile.name}`,
           },

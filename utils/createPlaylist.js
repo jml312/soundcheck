@@ -14,9 +14,10 @@ const toBase64 = async (url) => {
 /**
  * @param {string} id
  * @param {string} accessToken
+ * @param {any} client
  * @description Creates a new playlist for the user and returns the playlist ID
  */
-export const createPlaylist = async ({ id, accessToken }) => {
+export const createPlaylist = async ({ id, accessToken, client }) => {
   const {
     data: { id: newPlaylistID },
   } = await axios.post(
@@ -47,6 +48,8 @@ export const createPlaylist = async ({ id, accessToken }) => {
       },
     }
   );
+
+  await client.patch(id).set({ playlistID: newPlaylistID }).commit();
 
   return newPlaylistID;
 };

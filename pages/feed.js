@@ -19,7 +19,7 @@ import { allUsersQuery } from "@/lib/queries";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import { getPosts, getSpotify } from "@/actions";
 import { NextSeo } from "next-seo";
-import { DefaultSEO } from "seo";
+import SEO from "seo";
 
 export default function Feed({ spotifyData, allUsers }) {
   const { data: session } = useSession();
@@ -105,11 +105,11 @@ export default function Feed({ spotifyData, allUsers }) {
     <>
       <NextSeo
         {...{
-          ...DefaultSEO,
+          ...SEO,
           title: "Feed | Soundcheck!",
           canonical: `${process.env.NEXT_PUBLIC_URL}/feed`,
           openGraph: {
-            ...DefaultSEO.openGraph,
+            ...SEO.openGraph,
             title: "Feed | Soundcheck!",
             url: `${process.env.NEXT_PUBLIC_URL}/feed`,
           },

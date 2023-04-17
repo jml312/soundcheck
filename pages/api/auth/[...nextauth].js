@@ -1,9 +1,8 @@
 import NextAuth from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 import client from "@/lib/sanity";
-import axios from "axios";
 import dayjs from "dayjs";
-import { createPlaylist } from "@/utils/createPlaylist";
+import { createPlaylist, checkFollowsSoundcheck, deleteUser } from "@/utils";
 
 export default NextAuth({
   session: {
@@ -14,9 +13,11 @@ export default NextAuth({
   callbacks: {
     async signIn({ account, user }) {
       if (account.provider !== "spotify") return false;
+
       const { id, name, email, image } = user;
       const { access_token } = account;
       let newUserId;
+
       try {
         const { _id, playlistID } = await client.createIfNotExists({
           _type: "user",
@@ -38,40 +39,22 @@ export default NextAuth({
         });
         newUserId = _id;
 
-        let followsSoundcheck = false;
-        try {
-          const { data } = await axios.get(
-            `https://api.spotify.com/v1/playlists/${playlistID}/followers/contains?ids=${id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${access_token}`,
-              },
-            }
-          );
-          followsSoundcheck = data[0];
-        } catch {}
+        const followsSoundcheck = await checkFollowsSoundcheck({
+          id,
+          accessToken: access_token,
+          playlistID,
+        });
 
-        if (followsSoundcheck) {
-          user.playlistID = playlistID;
-        } else {
-          const newPlaylistID = await createPlaylist({
-            id,
-            accessToken: access_token,
-          });
-          await client.patch(id).set({ playlistID: newPlaylistID }).commit();
-          user.playlistID = newPlaylistID;
-        }
+        user.playlistID = followsSoundcheck
+          ? playlistID
+          : await createPlaylist({ id, accessToken: access_token, client });
 
         user.accessToken = access_token;
 
         return true;
       } catch {
-        try {
-          await client.delete(newUserId).commit();
-        } catch {
-        } finally {
-          return false;
-        }
+        await deleteUser({ client, newUserId });
+        return false;
       }
     },
     async jwt({ token, user }) {

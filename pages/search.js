@@ -18,7 +18,7 @@ import Link from "next/link";
 import { AiOutlineSearch } from "react-icons/ai";
 import dayjs from "dayjs";
 import { NextSeo } from "next-seo";
-import { DefaultSEO } from "seo";
+import SEO from "seo";
 
 export default function Search({ allUsers }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,11 +46,11 @@ export default function Search({ allUsers }) {
     <>
       <NextSeo
         {...{
-          ...DefaultSEO,
+          ...SEO,
           title: "Search | Soundcheck!",
           canonical: `${process.env.NEXT_PUBLIC_URL}/search`,
           openGraph: {
-            ...DefaultSEO.openGraph,
+            ...SEO.openGraph,
             title: "Search | Soundcheck!",
             url: `${process.env.NEXT_PUBLIC_URL}/search`,
           },
