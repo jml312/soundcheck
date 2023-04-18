@@ -40,6 +40,14 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
     refetchOnReconnect: true,
     refetchInterval: 1000 * 60 * 5, // refetch every 5 minutes
   });
+  const feedPosts = useMemo(
+    () =>
+      posts?.feedPosts?.filter(
+        (post) => postType === "everyone" || post.isFollowing
+      ) || [],
+    [posts, postType]
+  );
+  const userPost = useMemo(() => posts?.userPost, [posts]);
   const [caption, setCaption] = useState({
     text: currentPosts?.userPost?.caption || "",
     error: "",
@@ -48,7 +56,8 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
   });
   const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);
-  const [selectSongOpened, setSelectSongOpened] = useState(false);
+  const isOpen = !isFetching && !userPost;
+  const [selectSongOpened, setSelectSongOpened] = useState(isOpen);
   const [sliderTransition, setSliderTransition] = useState(0);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const badWordsFilter = new Filter();
@@ -87,22 +96,12 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
     [posts]
   );
 
-  const feedPosts = useMemo(
-    () =>
-      posts?.feedPosts?.filter(
-        (post) => postType === "everyone" || post.isFollowing
-      ) || [],
-    [posts, postType]
-  );
-  const userPost = useMemo(() => posts?.userPost, [posts]);
-
   useEffect(() => {
-    const isOpen = !isFetching && !userPost;
     if (isOpen) {
       setSelectSongOpened(true);
     }
-  }, [isFetching, userPost]);
-
+  }, [isOpen]);
+  
   useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
   }, []);
