@@ -83,7 +83,6 @@ export default function App({
   };
 
   useHotkeys([["mod + M", toggleColorScheme]]);
-
   useEffect(() => {
     router.events.on("routeChangeStart", (_, { shallow }) => {
       if (!shallow) {

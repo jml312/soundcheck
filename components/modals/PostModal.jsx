@@ -1,6 +1,8 @@
 import Post from "../Post/Post";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Modal, LoadingOverlay } from "@mantine/core";
+import { useQuery } from "react-query";
+import { clearNotification } from "@/actions";
 
 /**
  * @param {boolean} opened - The opened boolean
@@ -57,6 +59,34 @@ export default function PostModal({
     isFocused: false,
   });
   const [activePost, setActivePost] = useState(null);
+
+  // const { data: notifications } = useQuery({
+  //   queryKey: "notifications",
+  //   queryFn: undefined,
+  //   enabled: false,
+  // });
+
+  // const clearPostNotifications = useCallback(async (notificationsToClear) => {
+  //   await Promise.all(
+  //     notificationsToClear.map((notification) => clearNotification({
+  //       notificationId: notification._id,
+  //       notifications,
+  //       // setNotifications: undefined,
+  //       userId: session?.user?.id,
+  //     }))
+  //   );
+  // }, []);
+
+  // useEffect(() => {
+  //   if (opened) {
+  //     const notificationsToClear = notifications.filter(
+  //       (notification) => notification.post._ref === post._id
+  //     );
+  //     if (notificationsToClear.length > 0) {
+  //       clearPostNotifications(notificationsToClear);
+  //     }
+  //   }
+  // }, [opened]);
 
   return (
     <Modal

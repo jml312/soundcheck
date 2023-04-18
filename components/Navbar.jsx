@@ -47,8 +47,8 @@ export default function Navbar({ children }) {
   const [menuOpened, setMenuOpened] = useState(false);
   const isMobile = useMediaQuery("(max-width: 480px)");
   const theme = useMantineTheme();
-  const [notifications, setNotifications] = useState([]);
   const { toggleColorScheme } = useMantineColorScheme();
+  const [notifications, setNotifications] = useState([]);
   useQuery({
     queryKey: "notifications",
     queryFn: () =>
