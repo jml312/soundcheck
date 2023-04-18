@@ -6,17 +6,13 @@ import dayjs from "dayjs";
 const getDayIntervalParams = (date) => {
   const { startDate: todayStart, endDate: todayEnd } = getDayInterval(date);
   return {
-    todayStart: todayStart.toISOString(),
-    todayEnd: todayEnd.toISOString(),
+    todayStart: todayStart.utc().format(),
+    todayEnd: todayEnd.utc().format(),
   };
 };
 
 const getServerPosts = async (client, params) => {
-  const currentPosts = await client.fetch(postsQuery, {
-    userId: params.userId,
-    todayStart: params.todayStart,
-    todayEnd: params.todayEnd,
-  });
+  const currentPosts = await client.fetch(postsQuery, params);
   return currentPosts;
 };
 

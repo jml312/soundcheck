@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   } = req.body;
 
   try {
-    const today = dayjs().toISOString();
+    const today = dayjs().utc().format();
     const { _id } = await client.create({
       _type: "post",
       songName,
@@ -51,13 +51,14 @@ export default async function handler(req, res) {
       client,
     });
 
-    const { postStreak } = await client
+    const results = await client
       .transaction()
       .patch(userId, (p) => p.inc({ postStreak: 1 }))
       .patch(userId, (p) => {
         if (recommendations.length > 0) {
           p.set({ discoverSongs: recommendations });
         }
+        return p;
       })
       .patch(userId, (p) => p.unset(["recentlyPlayed"]))
       .patch(userId, (p) =>
@@ -65,9 +66,12 @@ export default async function handler(req, res) {
       )
       .commit({
         returnDocuments: true,
+        visibility: "async",
       });
 
-    return res.status(200).json({ message: "Success", _id, postStreak });
+    return res
+      .status(200)
+      .json({ message: "Success", _id, postStreak: results[0].postStreak });
   } catch {
     return res.status(500).json({ message: "Internal server error" });
   }
