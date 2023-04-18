@@ -1,6 +1,5 @@
 import { Flex, useMantineTheme, LoadingOverlay } from "@mantine/core";
-import { useEffect, useState } from "react";
-import { useDisclosure } from "@mantine/hooks";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import PostModal from "../modals/PostModal";
 import TopSection from "./TopSection";
@@ -67,16 +66,36 @@ function Post({
     type,
   } = router.query;
   const theme = useMantineTheme();
-  const [postModalOpen, { open: openPostModal, close: closePostModal }] =
-    useDisclosure(
-      !isPostModal &&
-        !isSelect &&
-        !isDiscover &&
-        notificationPostId === post?._id &&
-        type === "like"
-    );
+  // const [postModalOpen, { open: openPostModal, close: closePostModal }] =
+  //   useDisclosure(
+  //     !isPostModal &&
+  //       !isSelect &&
+  //       !isDiscover &&
+  //       notificationPostId === post?._id &&
+  //       type === "like"
+  //   );
+  const [postModalOpen, setPostModalOpen] = useState(false);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
+
+  const closePostModal = useCallback(() => {
+    setPostModalOpen(false);
+    setCurrentlyPlaying(null);
+  }, []);
+  const openPostModal = useCallback(() => {
+    setPostModalOpen(true);
+    setCurrentlyPlaying(null);
+  }, []);
+
+  useEffect(() => {
+    const isOpen =
+      !isPostModal &&
+      !isSelect &&
+      !isDiscover &&
+      notificationPostId === post?._id &&
+      type === "like";
+    setPostModalOpen(isOpen);
+  }, []);
 
   useEffect(() => {
     setActivePost(null);

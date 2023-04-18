@@ -8,12 +8,13 @@ import {
   TextInput,
   Avatar,
   useMantineTheme,
+  FocusTrap,
 } from "@mantine/core";
 import client from "@/lib/sanity";
 import { clearAuthCookies, getAvatarText, getDayInterval } from "@/utils";
 import { searchQuery, hasPostedTodayQuery } from "@/lib/queries";
 import Fuse from "fuse.js";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { AiOutlineSearch } from "react-icons/ai";
 import dayjs from "dayjs";
@@ -23,7 +24,6 @@ import SEO from "seo";
 export default function Search({ allUsers }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
-  const inputRef = useRef(null);
   const noSearchTerm = searchTerm === "";
   const noResults = filteredUsers.length === 0;
   const theme = useMantineTheme();
@@ -37,12 +37,6 @@ export default function Search({ allUsers }) {
     includeScore: true,
     keys: ["username"],
   });
-
-  useEffect(() => {
-    setTimeout(() => {
-      inputRef.current.focus();
-    }, 0);
-  }, []);
 
   return (
     <>
@@ -72,35 +66,36 @@ export default function Search({ allUsers }) {
       >
         <Title order={2}>Search</Title>
         <Stack align="start" w="280px">
-          <TextInput
-            icon={<AiOutlineSearch />}
-            ref={inputRef}
-            mt={"1rem"}
-            w="100%"
-            placeholder="Search by username"
-            onChange={(e) => {
-              const value = e.target.value;
-              setSearchTerm(value);
-              const results = fuse.search(value);
-              setFilteredUsers(results.map((r) => r.item));
-            }}
-            styles={{
-              input: {
-                transition: "none",
-                backgroundColor: theme.colors.contrast[theme.colorScheme],
-                border: `1px solid ${theme.colors.border[theme.colorScheme]}`,
-                "&::placeholder": {
-                  color: theme.colors.dimmed[theme.colorScheme],
+          <FocusTrap active>
+            <TextInput
+              icon={<AiOutlineSearch />}
+              mt={"1rem"}
+              w="100%"
+              placeholder="Search by username"
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchTerm(value);
+                const results = fuse.search(value);
+                setFilteredUsers(results.map((r) => r.item));
+              }}
+              styles={{
+                input: {
+                  transition: "none",
+                  backgroundColor: theme.colors.contrast[theme.colorScheme],
+                  border: `1px solid ${theme.colors.border[theme.colorScheme]}`,
+                  "&::placeholder": {
+                    color: theme.colors.dimmed[theme.colorScheme],
+                  },
+                  "&:focus": {
+                    border: `1px solid ${theme.colors.spotify.main}`,
+                  },
                 },
-                "&:focus": {
-                  border: `1px solid ${theme.colors.spotify.main}`,
+                icon: {
+                  color: theme.colors.pure[theme.colorScheme],
                 },
-              },
-              icon: {
-                color: theme.colors.pure[theme.colorScheme],
-              },
-            }}
-          />
+              }}
+            />
+          </FocusTrap>
           <ScrollArea
             w={"100%"}
             h={"calc(100vh - 14.5rem)"}
