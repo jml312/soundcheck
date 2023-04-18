@@ -1,7 +1,7 @@
 import { getSession, useSession } from "next-auth/react";
 import { clearAuthCookies } from "@/utils";
 import Post from "@/components/Post/Post";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useMediaQuery } from "@mantine/hooks";
 import dayjs from "dayjs";
 import SelectSongModal from "@/components/modals/SelectSongModal";
 import Filter from "bad-words";
@@ -47,10 +47,7 @@ export default function Feed({ spotifyData, allUsers }) {
   });
   const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);
-  const [selectSongOpened, { close: closeSelectSong }] = useDisclosure(
-    typeof currentPosts?.hasPostedToday === "boolean" &&
-      !currentPosts?.hasPostedToday
-  );
+  const [selectSongOpened, setSelectSongOpened] = useState(false);
   const [sliderTransition, setSliderTransition] = useState(0);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const badWordsFilter = new Filter();
@@ -99,6 +96,13 @@ export default function Feed({ spotifyData, allUsers }) {
   useEffect(() => setPosts(currentPosts), [currentPosts]);
 
   useEffect(() => {
+    setSelectSongOpened(
+      typeof currentPosts?.hasPostedToday === "boolean" &&
+        !currentPosts?.hasPostedToday
+    );
+  }, [currentPosts]);
+
+  useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
   }, []);
 
@@ -119,7 +123,10 @@ export default function Feed({ spotifyData, allUsers }) {
 
       <SelectSongModal
         opened={selectSongOpened}
-        close={closeSelectSong}
+        close={() => {
+          setSelectSongOpened(false);
+          setCurrentlyPlaying(null);
+        }}
         spotifyData={spotifyData}
         currentlyPlaying={currentlyPlaying}
         setCurrentlyPlaying={setCurrentlyPlaying}
@@ -177,7 +184,10 @@ export default function Feed({ spotifyData, allUsers }) {
                 >
                   <SegmentedControl
                     transitionDuration={sliderTransition}
-                    onChange={setPostType}
+                    onChange={(value) => {
+                      setPostType(value);
+                      setCurrentlyPlaying(null);
+                    }}
                     data={[
                       { label: "Everyone", value: "everyone" },
                       { label: "Following", value: "following" },

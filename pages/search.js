@@ -39,7 +39,9 @@ export default function Search({ allUsers }) {
   });
 
   useEffect(() => {
-    inputRef.current.focus();
+    setTimeout(() => {
+      inputRef.current.focus();
+    }, 0);
   }, []);
 
   return (
