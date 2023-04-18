@@ -12,15 +12,19 @@ const getDayIntervalParams = (date) => {
 };
 
 const getServerPosts = async (client, params) => {
-  const data = await client.fetch(postsQuery, {
-    ...params,
+  const currentPosts = await client.fetch(postsQuery, {
+    userId: params.userId,
+    todayStart: params.todayStart,
+    todayEnd: params.todayEnd,
   });
-  return data;
+  return currentPosts;
 };
 
 const getClientPosts = async (params) => {
-  const { data } = await axios.get("/api/protected/posts", { params });
-  return data;
+  const { data: currentPosts } = await axios.get("/api/protected/posts", {
+    params,
+  });
+  return currentPosts;
 };
 
 /**
