@@ -79,16 +79,6 @@ function Post({
     setCurrentlyPlaying(null);
   }, []);
 
-  // useEffect(() => {
-  //   const isInitiallyOpen =
-  //     !isPostModal &&
-  //     !isSelect &&
-  //     !isDiscover &&
-  //     notificationPostId === post?._id &&
-  //     type === "like";
-  //   setPostModalOpen(isInitiallyOpen);
-  // }, [post, notificationPostId, type, isPostModal, isSelect, isDiscover]);
-
   useEffect(() => {
     setActivePost(null);
   }, [postModalOpen]);

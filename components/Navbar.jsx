@@ -116,6 +116,9 @@ export default function Navbar({ children }) {
                 color={theme.colors.pure[theme.colorScheme]}
                 variant="transparent"
                 onClick={toggleColorScheme}
+                style={{
+                  transform: "translateX(.15rem)",
+                }}
               >
                 {theme.colorScheme === "dark" ? (
                   <CgSun size="1.125rem" />
@@ -125,7 +128,12 @@ export default function Navbar({ children }) {
               </ActionIcon>
             </Tooltip>
 
-            <Group position="center">
+            <Group
+              position="center"
+              style={{
+                transform: "translateX(.15rem)",
+              }}
+            >
               <Tooltip
                 disabled={!notifications || notifications.length === 0}
                 position="bottom-end"

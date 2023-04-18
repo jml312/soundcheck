@@ -13,7 +13,7 @@ import client from "@/lib/sanity";
 import { clearAuthCookies, getAvatarText, getDayInterval } from "@/utils";
 import { searchQuery, hasPostedTodayQuery } from "@/lib/queries";
 import Fuse from "fuse.js";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { AiOutlineSearch } from "react-icons/ai";
 import dayjs from "dayjs";
@@ -26,6 +26,7 @@ export default function Search({ allUsers }) {
   const noSearchTerm = searchTerm === "";
   const noResults = filteredUsers.length === 0;
   const theme = useMantineTheme();
+  const inputRef = useRef(null);
 
   const fuse = new Fuse(allUsers, {
     threshold: 0.35,
@@ -36,6 +37,14 @@ export default function Search({ allUsers }) {
     includeScore: true,
     keys: ["username"],
   });
+
+  useEffect(() => {
+    if (inputRef.current) {
+      setTimeout(() => {
+        inputRef.current.focus();
+      }, 0);
+    }
+  }, []);
 
   return (
     <>
@@ -66,6 +75,7 @@ export default function Search({ allUsers }) {
         <Title order={2}>Search</Title>
         <Stack align="start" w="280px">
           <TextInput
+            ref={inputRef}
             autoFocus
             icon={<AiOutlineSearch />}
             mt={"1rem"}
