@@ -84,12 +84,13 @@ function Post({
   }, [postModalOpen]);
 
   useEffect(() => {
-    if (
+    const isOpen =
+      !!post &&
       !isPostModal &&
       !isDiscover &&
       !isSelect &&
-      notificationPostId === post?._id
-    ) {
+      notificationPostId === post?._id;
+    if (isOpen) {
       openPostModal();
       if (["like", "comment", "mention"].includes(type)) {
         router.replace(

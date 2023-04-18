@@ -25,7 +25,7 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
   const [posts, setPosts] = useState(initialCurrentPosts);
-  const { data: currentPosts } = useQuery({
+  const { data: currentPosts, isFetching } = useQuery({
     queryKey: ["feed", dayjs().format("YYYY-MM-DD")],
     queryFn: () =>
       getPosts({
@@ -35,9 +35,7 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
         userId: session?.user?.id,
       }),
     initialData: initialCurrentPosts,
-    onSuccess: (data) => {
-      setPosts(data);
-    },
+    onSuccess: setPosts,
     refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
@@ -51,9 +49,7 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
   });
   const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);
-  const [selectSongOpened, setSelectSongOpened] = useState(
-    !currentPosts?.userPost
-  );
+  const [selectSongOpened, setSelectSongOpened] = useState(false);
   const [sliderTransition, setSliderTransition] = useState(0);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const badWordsFilter = new Filter();
@@ -103,6 +99,13 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
   useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
   }, []);
+
+  useEffect(() => {
+    const isOpen = !isFetching && !currentPosts?.userPost;
+    if (isOpen) {
+      setSelectSongOpened(true);
+    }
+  }, [currentPosts, isFetching]);
 
   return (
     <>
