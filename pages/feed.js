@@ -21,10 +21,10 @@ import { getPosts, getSpotify } from "@/actions";
 import { NextSeo } from "next-seo";
 import SEO from "seo";
 
-export default function Feed({ spotifyData, allUsers }) {
+export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
-  const [posts, setPosts] = useState();
+  const [posts, setPosts] = useState(initialCurrentPosts);
   const { data: currentPosts } = useQuery({
     queryKey: ["feed", dayjs().format("YYYY-MM-DD")],
     queryFn: () =>
@@ -34,6 +34,10 @@ export default function Feed({ spotifyData, allUsers }) {
         date: dayjs(),
         userId: session?.user?.id,
       }),
+    initialData: initialCurrentPosts,
+    onSuccess: (data) => {
+      setPosts(data);
+    },
     refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
@@ -95,7 +99,7 @@ export default function Feed({ spotifyData, allUsers }) {
       ) || [],
     [posts, postType]
   );
-  useEffect(() => setPosts(currentPosts), [currentPosts]);
+  // useEffect(() => setPosts(currentPosts), [currentPosts]);
 
   useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
@@ -357,6 +361,7 @@ export async function getServerSideProps({ req, res }) {
           dehydratedState: dehydrate(queryClient),
           allUsers,
           spotifyData: [],
+          initialCurrentPosts: currentPosts,
         },
       };
     }
@@ -378,6 +383,7 @@ export async function getServerSideProps({ req, res }) {
         dehydratedState: dehydrate(queryClient),
         allUsers,
         spotifyData,
+        initialCurrentPosts: currentPosts,
       },
     };
   } catch {
