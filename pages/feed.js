@@ -21,11 +21,16 @@ import { getPosts, getSpotify } from "@/actions";
 import { NextSeo } from "next-seo";
 import SEO from "seo";
 
-export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
+export default function Feed({
+  spotifyData,
+  allUsers,
+  initialCurrentPosts,
+  hasPosted,
+}) {
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
   const [posts, setPosts] = useState(initialCurrentPosts);
-  const { data: currentPosts, isFetching } = useQuery({
+  const { data: currentPosts } = useQuery({
     queryKey: ["feed", dayjs().format("YYYY-MM-DD")],
     queryFn: () =>
       getPosts({
@@ -56,8 +61,7 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
   });
   const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);
-  const isOpen = !isFetching && !!posts && !userPost;
-  const [selectSongOpened, setSelectSongOpened] = useState(isOpen);
+  const [selectSongOpened, setSelectSongOpened] = useState(!hasPosted);
   const [sliderTransition, setSliderTransition] = useState(0);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const badWordsFilter = new Filter();
@@ -95,12 +99,6 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
     },
     [posts]
   );
-
-  useEffect(() => {
-    if (isOpen) {
-      setSelectSongOpened(true);
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
@@ -352,12 +350,15 @@ export async function getServerSideProps({ req, res }) {
       userId: session?.user?.id,
     });
 
-    if (!!currentPosts?.userPost) {
+    const hasPosted = !!currentPosts?.userPost;
+
+    if (hasPosted) {
       return {
         props: {
           allUsers,
           spotifyData: [],
           initialCurrentPosts: currentPosts,
+          hasPosted,
         },
       };
     }
@@ -379,6 +380,7 @@ export async function getServerSideProps({ req, res }) {
         allUsers,
         spotifyData,
         initialCurrentPosts: currentPosts,
+        hasPosted,
       },
     };
   } catch {

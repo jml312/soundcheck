@@ -11,14 +11,14 @@ const getDayIntervalParams = (date) => {
   };
 };
 
-const getClientPosts = async (client, params) => {
+const getServerPosts = async (client, params) => {
   const data = await client.fetch(postsQuery, {
     ...params,
   });
   return data;
 };
 
-const getApiPosts = async (params) => {
+const getClientPosts = async (params) => {
   const { data } = await axios.get("/api/protected/posts", { params });
   return data;
 };
@@ -35,11 +35,9 @@ export default async function getPosts({ isClient, client, userId }) {
     const params = { userId, ...getDayIntervalParams(dayjs()) };
 
     if (isClient) {
-      console.log("isClient");
-      return await getApiPosts(params);
+      return await getClientPosts(params);
     } else {
-      console.log("isServer");
-      return await getClientPosts(client, params);
+      return await getServerPosts(client, params);
     }
   } catch {
     return {
