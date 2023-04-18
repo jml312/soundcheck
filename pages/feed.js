@@ -95,17 +95,18 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
       ) || [],
     [posts, postType]
   );
+  const userPost = useMemo(() => posts?.userPost, [posts]);
+
+  useEffect(() => {
+    const isOpen = !isFetching && !userPost;
+    if (isOpen) {
+      setSelectSongOpened(true);
+    }
+  }, [isFetching, userPost]);
 
   useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
   }, []);
-
-  useEffect(() => {
-    const isOpen = !isFetching && !currentPosts?.userPost;
-    if (isOpen) {
-      setSelectSongOpened(true);
-    }
-  }, [currentPosts, isFetching]);
 
   return (
     <>
@@ -284,7 +285,7 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
             pb={isMobile && "3rem"}
             mb={isMobile && "3rem"}
           >
-            {selectSongOpened ? (
+            {!userPost ? (
               <Text
                 fz={"lg"}
                 style={{
@@ -307,9 +308,9 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
                   }}
                 >{`Your post`}</Text>
                 <Post
-                  key={posts?.userPost?._id}
+                  key={userPost?._id}
                   isUser
-                  post={posts?.userPost}
+                  post={userPost}
                   setPost={setUserPost}
                   currentlyPlaying={currentlyPlaying}
                   setCurrentlyPlaying={setCurrentlyPlaying}
