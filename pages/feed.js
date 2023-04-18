@@ -24,7 +24,7 @@ import SEO from "seo";
 export default function Feed({ spotifyData, allUsers }) {
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState();
   const { data: currentPosts } = useQuery({
     queryKey: ["feed", dayjs().format("YYYY-MM-DD")],
     queryFn: () =>
@@ -47,7 +47,9 @@ export default function Feed({ spotifyData, allUsers }) {
   });
   const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);
-  const [selectSongOpened, setSelectSongOpened] = useState(false);
+  const [selectSongOpened, setSelectSongOpened] = useState(
+    currentPosts?.hasPostedToday === false
+  );
   const [sliderTransition, setSliderTransition] = useState(0);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const badWordsFilter = new Filter();
@@ -94,10 +96,6 @@ export default function Feed({ spotifyData, allUsers }) {
     [posts, postType]
   );
   useEffect(() => setPosts(currentPosts), [currentPosts]);
-
-  useEffect(() => {
-    setSelectSongOpened(currentPosts?.hasPostedToday === false);
-  }, []);
 
   useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
