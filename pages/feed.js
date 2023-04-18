@@ -16,7 +16,7 @@ import {
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import client from "@/lib/sanity";
 import { allUsersQuery } from "@/lib/queries";
-import { dehydrate, QueryClient, useQuery } from "react-query";
+import { useQuery } from "react-query";
 import { getPosts, getSpotify } from "@/actions";
 import { NextSeo } from "next-seo";
 import SEO from "seo";
@@ -56,7 +56,7 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
   });
   const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);
-  const isOpen = !isFetching && !userPost;
+  const isOpen = !isFetching && !!posts && !userPost;
   const [selectSongOpened, setSelectSongOpened] = useState(isOpen);
   const [sliderTransition, setSliderTransition] = useState(0);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
@@ -101,7 +101,7 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
       setSelectSongOpened(true);
     }
   }, [isOpen]);
-  
+
   useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
   }, []);
@@ -346,21 +346,15 @@ export async function getServerSideProps({ req, res }) {
   try {
     const allUsers = await client.fetch(allUsersQuery);
 
-    const queryClient = new QueryClient();
-    const currentPosts = await queryClient.fetchQuery({
-      queryKey: ["feed", dayjs().format("YYYY-MM-DD")],
-      queryFn: () =>
-        getPosts({
-          isClient: false,
-          client,
-          userId: session?.user?.id,
-        }),
+    const currentPosts = await getPosts({
+      isClient: false,
+      client,
+      userId: session?.user?.id,
     });
 
     if (!!currentPosts?.userPost) {
       return {
         props: {
-          dehydratedState: dehydrate(queryClient),
           allUsers,
           spotifyData: [],
           initialCurrentPosts: currentPosts,
@@ -382,7 +376,6 @@ export async function getServerSideProps({ req, res }) {
 
     return {
       props: {
-        dehydratedState: dehydrate(queryClient),
         allUsers,
         spotifyData,
         initialCurrentPosts: currentPosts,

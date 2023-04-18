@@ -10,7 +10,7 @@ import { Notifications } from "@mantine/notifications";
 import { useHotkeys } from "@mantine/hooks";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "react-query";
 import dayjs from "dayjs";
 import { getCookie, setCookie } from "cookies-next";
 import NextApp from "next/app";
@@ -102,23 +102,21 @@ export default function App({
 
       <SessionProvider session={session}>
         <QueryClientProvider client={queryClient}>
-          <Hydrate state={pageProps.dehydratedState}>
-            <ColorSchemeProvider
-              colorScheme={colorScheme}
-              toggleColorScheme={toggleColorScheme}
+          <ColorSchemeProvider
+            colorScheme={colorScheme}
+            toggleColorScheme={toggleColorScheme}
+          >
+            <MantineProvider
+              withGlobalStyles
+              withNormalizeCSS
+              theme={getMantineTheme(colorScheme)}
             >
-              <MantineProvider
-                withGlobalStyles
-                withNormalizeCSS
-                theme={getMantineTheme(colorScheme)}
-              >
-                <Notifications />
-                <Auth isRouteLoading={isRouteLoading}>
-                  <Component {...pageProps} />
-                </Auth>
-              </MantineProvider>
-            </ColorSchemeProvider>
-          </Hydrate>
+              <Notifications />
+              <Auth isRouteLoading={isRouteLoading}>
+                <Component {...pageProps} />
+              </Auth>
+            </MantineProvider>
+          </ColorSchemeProvider>
         </QueryClientProvider>
       </SessionProvider>
     </>

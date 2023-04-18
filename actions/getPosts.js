@@ -35,8 +35,10 @@ export default async function getPosts({ isClient, client, userId }) {
     const params = { userId, ...getDayIntervalParams(dayjs()) };
 
     if (isClient) {
+      console.log("isClient");
       return await getApiPosts(params);
     } else {
+      console.log("isServer");
       return await getClientPosts(client, params);
     }
   } catch {

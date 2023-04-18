@@ -8,11 +8,11 @@ export default async function handler(req, res) {
   }
 
   const {
-    caption,
     songName,
     songUrl,
-    previewUrl,
+    caption,
     artists,
+    previewUrl,
     genres,
     albumName,
     albumUrl,
@@ -63,7 +63,9 @@ export default async function handler(req, res) {
       .patch(userId, (p) =>
         p.append("posts", [{ _type: "reference", _ref: _id, _key: today }])
       )
-      .commit();
+      .commit({
+        returnDocuments: true,
+      });
 
     return res.status(200).json({ message: "Success", _id, postStreak });
   } catch {
