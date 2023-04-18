@@ -26,6 +26,7 @@ export default function Feed({
   allUsers,
   initialCurrentPosts,
   hasPosted,
+  curr,
 }) {
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
@@ -162,6 +163,7 @@ export default function Feed({
             justify="center"
             w={isMobile ? "100%" : "calc(100% - 375px)"}
           >
+            {curr}
             {selectSongOpened ? (
               <Text
                 fz={"lg"}
@@ -359,6 +361,7 @@ export async function getServerSideProps({ req, res }) {
           spotifyData: [],
           initialCurrentPosts: currentPosts,
           hasPosted,
+          curr: dayjs().format("dddd, MMMM D, h:mm:ss A"),
         },
       };
     }
