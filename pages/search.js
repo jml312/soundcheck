@@ -8,7 +8,6 @@ import {
   TextInput,
   Avatar,
   useMantineTheme,
-  FocusTrap,
 } from "@mantine/core";
 import client from "@/lib/sanity";
 import { clearAuthCookies, getAvatarText, getDayInterval } from "@/utils";
@@ -66,36 +65,35 @@ export default function Search({ allUsers }) {
       >
         <Title order={2}>Search</Title>
         <Stack align="start" w="280px">
-          <FocusTrap active>
-            <TextInput
-              icon={<AiOutlineSearch />}
-              mt={"1rem"}
-              w="100%"
-              placeholder="Search by username"
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchTerm(value);
-                const results = fuse.search(value);
-                setFilteredUsers(results.map((r) => r.item));
-              }}
-              styles={{
-                input: {
-                  transition: "none",
-                  backgroundColor: theme.colors.contrast[theme.colorScheme],
-                  border: `1px solid ${theme.colors.border[theme.colorScheme]}`,
-                  "&::placeholder": {
-                    color: theme.colors.dimmed[theme.colorScheme],
-                  },
-                  "&:focus": {
-                    border: `1px solid ${theme.colors.spotify.main}`,
-                  },
+          <TextInput
+            autoFocus
+            icon={<AiOutlineSearch />}
+            mt={"1rem"}
+            w="100%"
+            placeholder="Search by username"
+            onChange={(e) => {
+              const value = e.target.value;
+              setSearchTerm(value);
+              const results = fuse.search(value);
+              setFilteredUsers(results.map((r) => r.item));
+            }}
+            styles={{
+              input: {
+                transition: "none",
+                backgroundColor: theme.colors.contrast[theme.colorScheme],
+                border: `1px solid ${theme.colors.border[theme.colorScheme]}`,
+                "&::placeholder": {
+                  color: theme.colors.dimmed[theme.colorScheme],
                 },
-                icon: {
-                  color: theme.colors.pure[theme.colorScheme],
+                "&:focus": {
+                  border: `1px solid ${theme.colors.spotify.main}`,
                 },
-              }}
-            />
-          </FocusTrap>
+              },
+              icon: {
+                color: theme.colors.pure[theme.colorScheme],
+              },
+            }}
+          />
           <ScrollArea
             w={"100%"}
             h={"calc(100vh - 14.5rem)"}

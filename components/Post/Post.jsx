@@ -66,14 +66,6 @@ function Post({
     type,
   } = router.query;
   const theme = useMantineTheme();
-  // const [postModalOpen, { open: openPostModal, close: closePostModal }] =
-  //   useDisclosure(
-  //     !isPostModal &&
-  //       !isSelect &&
-  //       !isDiscover &&
-  //       notificationPostId === post?._id &&
-  //       type === "like"
-  //   );
   const [postModalOpen, setPostModalOpen] = useState(false);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
@@ -88,14 +80,14 @@ function Post({
   }, []);
 
   useEffect(() => {
-    const isOpen =
+    const isInitiallyOpen =
       !isPostModal &&
       !isSelect &&
       !isDiscover &&
       notificationPostId === post?._id &&
       type === "like";
-    setPostModalOpen(isOpen);
-  }, []);
+    setPostModalOpen(isInitiallyOpen);
+  }, [post, notificationPostId, type, isPostModal, isSelect, isDiscover]);
 
   useEffect(() => {
     setActivePost(null);
