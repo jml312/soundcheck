@@ -26,7 +26,6 @@ export default function Search({ allUsers }) {
   const noSearchTerm = searchTerm === "";
   const noResults = filteredUsers.length === 0;
   const theme = useMantineTheme();
-  const inputRef = useRef(null);
 
   const fuse = new Fuse(allUsers, {
     threshold: 0.35,
@@ -37,14 +36,6 @@ export default function Search({ allUsers }) {
     includeScore: true,
     keys: ["username"],
   });
-
-  useEffect(() => {
-    if (inputRef.current) {
-      setTimeout(() => {
-        inputRef.current.focus();
-      }, 0);
-    }
-  }, []);
 
   return (
     <>
@@ -75,7 +66,6 @@ export default function Search({ allUsers }) {
         <Title order={2}>Search</Title>
         <Stack align="start" w="280px">
           <TextInput
-            ref={inputRef}
             autoFocus
             icon={<AiOutlineSearch />}
             mt={"1rem"}

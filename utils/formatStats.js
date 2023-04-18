@@ -4,6 +4,7 @@
  * @returns {Array} formatted stats sorted by value
  */
 export const formatStats = ({ stats, keys }) => {
+  const maxWordLength = 20;
   return stats
     .reduce(
       (acc, stat) => {
@@ -15,7 +16,13 @@ export const formatStats = ({ stats, keys }) => {
                 (item2) => item2.text === item
               );
               if (itemIndex === -1) {
-                acc[idx].push({ text: item, value: 1 });
+                acc[idx].push({
+                  text:
+                    item.length > maxWordLength
+                      ? `${item.substring(0, maxWordLength)}...`
+                      : item,
+                  value: 1,
+                });
               } else {
                 acc[idx][itemIndex].value++;
               }

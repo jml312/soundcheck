@@ -38,7 +38,7 @@ function WordCloud({ data, theme, isSmall }) {
     );
   }
 
-  if (!data.length) return "No data to display...";
+  if (!data.length) return "Nothing to show yet...";
 
   return <ReactWordcloud words={data} options={options} maxWords={25} />;
 }

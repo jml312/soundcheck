@@ -99,7 +99,6 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
       ) || [],
     [posts, postType]
   );
-  // useEffect(() => setPosts(currentPosts), [currentPosts]);
 
   useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
