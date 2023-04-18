@@ -114,7 +114,7 @@ export const getMantineTheme = (colorScheme) => {
         },
         styles: (theme) => ({
           root: {
-            outline: `1px solid ${theme.colors.cardDivider[colorScheme]}`,
+            border: `1px solid ${theme.colors.cardDivider[colorScheme]}`,
           },
           placeholder: {
             color: themeValues("#161310", "#e9ecef"),
@@ -135,8 +135,7 @@ export const getMantineTheme = (colorScheme) => {
         styles: (theme) => ({
           tooltip: {
             color: theme.colors.pure[colorScheme],
-            border: "none",
-            outline: `1px solid ${theme.colors.border[colorScheme]}`,
+            border: `1px solid ${theme.colors.border[colorScheme]}`,
           },
         }),
       },

@@ -48,7 +48,8 @@ export default function Feed({ spotifyData, allUsers }) {
   const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);
   const [selectSongOpened, { close: closeSelectSong }] = useDisclosure(
-    !currentPosts?.hasPostedToday
+    typeof currentPosts?.hasPostedToday === "boolean" &&
+      !currentPosts?.hasPostedToday
   );
   const [sliderTransition, setSliderTransition] = useState(0);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);

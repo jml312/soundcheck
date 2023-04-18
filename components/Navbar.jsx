@@ -110,7 +110,7 @@ export default function Navbar({ children }) {
               )}
             </Flex>
           </Link>
-          <Group spacing={3}>
+          <Group spacing={2}>
             <Tooltip position="bottom-end" label="theme">
               <ActionIcon
                 color={theme.colors.pure[theme.colorScheme]}

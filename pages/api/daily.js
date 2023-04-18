@@ -64,8 +64,8 @@ export default async function handle(req, res) {
       from: process.env.SENDGRID_FROM_EMAIL,
       subject: "Soundcheck! What are you listening to?",
       text: "Your daily reminder",
-      html: `<strong>Go make a post...</strong>
-      <form action="https://soundcheck.vercel.app">
+      html: `<strong>Make a post...</strong>
+      <form action=${process.env.NEXT_PUBLIC_URL}>
           <input type="submit" value="Soundcheck!" style="background-color: #1a1b1e; border-radius: 0.5rem; color: #dad9d4; padding: .5rem;" />
       </form>
       `,
