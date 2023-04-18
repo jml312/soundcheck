@@ -31,7 +31,6 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
       getPosts({
         isClient: true,
         client,
-        date: dayjs(),
         userId: session?.user?.id,
       }),
     initialData: initialCurrentPosts,
@@ -355,7 +354,6 @@ export async function getServerSideProps({ req, res }) {
         getPosts({
           isClient: false,
           client,
-          date: dayjs(),
           userId: session?.user?.id,
         }),
     });
