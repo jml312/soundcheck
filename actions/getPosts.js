@@ -1,29 +1,42 @@
-import dayjs from "dayjs";
 import { getDayInterval } from "@/utils";
 import { postsQuery } from "@/lib/queries";
 import axios from "axios";
 
+const getDayIntervalParams = (date) => {
+  const { startDate: todayStart, endDate: todayEnd } = getDayInterval(date);
+  return {
+    todayStart: todayStart.toISOString(),
+    todayEnd: todayEnd.toISOString(),
+  };
+};
+
+const getClientPosts = async (client, params) => {
+  const data = await client.fetch(postsQuery, {
+    ...params,
+  });
+  return data;
+};
+
+const getApiPosts = async (params) => {
+  const { data } = await axios.get("/api/protected/posts", { params });
+  return data;
+};
+
 /**
- * @param {boolean} isClient
- * @param {Object} client
- * @param {string} date
- * @param {string} userId
- * @description Gets the user's posts for a given day
+ * @param {object} isClient - whether the function is being called on the client or server
+ * @param {object} client - sanity client
+ * @param {object} date - date to get posts for
+ * @param {string} userId - user id
+ * @description - gets posts for a given user and date
  */
 export default async function getPosts({ isClient, client, date, userId }) {
   try {
-    const { startDate: todayStart, endDate: todayEnd } = getDayInterval(date);
-    const params = {
-      userId,
-      todayStart: todayStart.toISOString(),
-      todayEnd: todayEnd.toISOString(),
-    };
+    const params = { userId, ...getDayIntervalParams(date) };
+
     if (isClient) {
-      const { data } = await axios.get("/api/protected/posts", { params });
-      return data;
+      return await getApiPosts(params);
     } else {
-      const data = await client.fetch(postsQuery, params);
-      return data;
+      return await getClientPosts(client, params);
     }
   } catch {
     return {};
