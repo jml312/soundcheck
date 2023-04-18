@@ -96,11 +96,8 @@ export default function Feed({ spotifyData, allUsers }) {
   useEffect(() => setPosts(currentPosts), [currentPosts]);
 
   useEffect(() => {
-    setSelectSongOpened(
-      typeof currentPosts?.hasPostedToday === "boolean" &&
-        !currentPosts?.hasPostedToday
-    );
-  }, [currentPosts]);
+    setSelectSongOpened(currentPosts?.hasPostedToday === false);
+  }, []);
 
   useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
