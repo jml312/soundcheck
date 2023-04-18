@@ -26,7 +26,6 @@ export default async function handler(req, res) {
     const today = dayjs().toISOString();
     const { _id } = await client.create({
       _type: "post",
-      caption,
       songName,
       songUrl,
       previewUrl,
@@ -36,36 +35,34 @@ export default async function handler(req, res) {
       albumUrl,
       albumImage,
       songID,
-      likes: [],
-      comments: [],
       createdAt: today,
+      caption,
       user: {
         _type: "reference",
         _ref: userId,
       },
+      likes: [],
+      comments: [],
     });
 
-    let recommendations;
-    try {
-      recommendations = await getDiscoverSongs({
-        userId,
-        accessToken,
-        client,
-      });
-    } catch {}
+    const recommendations = await getDiscoverSongs({
+      userId,
+      accessToken,
+      client,
+    });
 
     const { postStreak } = await client
-      .patch(userId)
-      .inc({ postStreak: 1 })
-      .set(recommendations?.length > 0 && { discoverSongs: recommendations })
-      .unset(["recentlyPlayed"])
-      .append("posts", [
-        {
-          _type: "reference",
-          _ref: _id,
-          _key: today,
-        },
-      ])
+      .transaction()
+      .patch(userId, (p) => p.inc({ postStreak: 1 }))
+      .patch(userId, (p) => {
+        if (recommendations.length > 0) {
+          p.set({ discoverSongs: recommendations });
+        }
+      })
+      .patch(userId, (p) => p.unset(["recentlyPlayed"]))
+      .patch(userId, (p) =>
+        p.append("posts", [{ _type: "reference", _ref: _id, _key: today }])
+      )
       .commit();
 
     return res.status(200).json({ message: "Success", _id, postStreak });

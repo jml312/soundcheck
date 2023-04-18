@@ -192,7 +192,9 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
                     ]}
                     styles={{
                       root: {
-                        transform: isMobile && "translateY(-2rem)",
+                        transform: isMobile
+                          ? "translateY(-2rem)"
+                          : "translateY(.25rem)",
                       },
                     }}
                   />
@@ -207,7 +209,7 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
                       mt={isMobile && "1.5rem"}
                       mb={isMobile && "1rem"}
                       style={{
-                        transform: !isMobile && "translateY(2.8rem)",
+                        transform: !isMobile && "translateY(2.6rem)",
                       }}
                     >
                       <Flex
