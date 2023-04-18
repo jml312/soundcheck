@@ -52,7 +52,7 @@ export default function Feed({ spotifyData, allUsers, initialCurrentPosts }) {
   const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);
   const [selectSongOpened, setSelectSongOpened] = useState(
-    currentPosts?.hasPostedToday === false
+    !currentPosts?.userPost
   );
   const [sliderTransition, setSliderTransition] = useState(0);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
@@ -354,7 +354,7 @@ export async function getServerSideProps({ req, res }) {
         }),
     });
 
-    if (currentPosts?.hasPostedToday) {
+    if (!!currentPosts?.userPost) {
       return {
         props: {
           dehydratedState: dehydrate(queryClient),
