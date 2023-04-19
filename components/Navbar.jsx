@@ -47,8 +47,14 @@ export default function Navbar({ children }) {
   const isMobile = useMediaQuery("(max-width: 480px)");
   const theme = useMantineTheme();
   const { toggleColorScheme } = useMantineColorScheme();
-  const { notifications, setNotifications } = useNotifications();
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    notifications,
+    setNotifications,
+    isNotificationLoading,
+    setIsNotificationLoading,
+  } = useNotifications();
+  const isNotificationsDisabled =
+    !notifications || notifications.length === 0 || isNotificationLoading;
   const [
     notificationOpen,
     { open: openNotification, close: closeNotification },
@@ -62,8 +68,8 @@ export default function Navbar({ children }) {
         notifications={notifications}
         setNotifications={setNotifications}
         session={session}
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
+        isLoading={isNotificationLoading}
+        setIsLoading={setIsNotificationLoading}
       />
       <MantineNavbar
         width="100%"
@@ -119,23 +125,25 @@ export default function Navbar({ children }) {
             <Group
               position="center"
               style={{
-                transform: "translateX(.15rem)",
+                transform: isNotificationsDisabled
+                  ? "translateX(.15rem)"
+                  : "translateX(.075rem)",
               }}
             >
               <Tooltip
-                disabled={!notifications || notifications.length === 0}
+                disabled={isNotificationsDisabled}
                 position="bottom-end"
                 label={"notifications"}
               >
                 <Indicator
-                  disabled={!notifications || notifications.length === 0}
+                  disabled={isNotificationsDisabled}
                   size={".475rem"}
                   color={theme.colors.spotify.main}
                   offset={3.5}
                 >
                   <ActionIcon
                     onClick={openNotification}
-                    disabled={!notifications || notifications.length === 0}
+                    disabled={isNotificationsDisabled}
                     color={theme.colors.pure[theme.colorScheme]}
                     variant="transparent"
                     sx={{

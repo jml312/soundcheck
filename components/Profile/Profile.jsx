@@ -227,8 +227,8 @@ export default function Profile({ isUser, profile }) {
         my={10}
         justify="space-evenly"
         style={{
-          flexGrow: 0,
-          transform: isSmall ? "translateY(-.6rem)" : "translateY(1rem)",
+          flexGrow: 10,
+          transform: "translateY(-.5rem)",
         }}
       >
         {/* followers */}
@@ -318,7 +318,7 @@ export default function Profile({ isUser, profile }) {
         style={{
           flexGrow: 2,
         }}
-        mt={isSmall && "-2.2rem"}
+        mt={isSmall ? "-2.2rem" : "-1.8rem"}
         value={selectedTab}
         onTabChange={(newTab) => {
           setCurrentlyPlaying(null);

@@ -2,7 +2,7 @@ import Post from "../Post/Post";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Modal, LoadingOverlay } from "@mantine/core";
 import { useNotifications } from "@/contexts/NotificationsContext";
-import { clearNotification } from "@/actions";
+import { clearNotifications } from "@/actions";
 
 /**
  * @param {boolean} opened - The opened boolean
@@ -59,26 +59,31 @@ export default function PostModal({
     isFocused: false,
   });
   const [activePost, setActivePost] = useState(null);
-  const { notifications, setNotifications } = useNotifications();
+  const { notifications, setNotifications, setIsNotificationLoading } =
+    useNotifications();
   const notificationsToClear = useMemo(() => {
     return notifications.filter(
-      (notification) => notification.post._ref === post._id
+      (notification) => notification?.post?._ref === post._id
     );
   }, [notifications, post._id]);
   const clearPostNotifications = useCallback(
     async (notificationsToClear) => {
-      await Promise.all(
-        notificationsToClear.map((notification) =>
-          clearNotification({
-            notificationId: notification._id,
-            notifications,
-            setNotifications,
-            userId: session?.user?.id,
-          })
-        )
-      );
+      await clearNotifications({
+        notificationIDs: notificationsToClear.map(
+          (notification) => notification._key
+        ),
+        notifications,
+        setNotifications,
+        userId: session?.user?.id,
+        setIsLoading: setIsNotificationLoading,
+      });
     },
-    [notifications, setNotifications, session?.user?.id]
+    [
+      notifications,
+      setNotifications,
+      session?.user?.id,
+      setIsNotificationLoading,
+    ]
   );
 
   useEffect(() => {

@@ -8,7 +8,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useMemo, useCallback } from "react";
-import { clearNotification, viewNotification } from "@/actions";
+import { clearNotifications, viewNotification } from "@/actions";
 import { getAvatarText, truncateText } from "@/utils";
 import dayjs from "dayjs";
 
@@ -99,7 +99,7 @@ export default function NotificationCard({
           >
             {truncateText(notificationUsername, 12)}
           </Text>
-          <Space w={6} />
+          <Space w={7} />
           <Text
             color={theme.colorScheme === "dark" ? "#C0C0C0" : "#3f3f3f"}
             fz={".84rem"}
@@ -129,8 +129,8 @@ export default function NotificationCard({
               zIndex: 100,
             }}
             onClick={() =>
-              clearNotification({
-                notificationID: notification._key,
+              clearNotifications({
+                notificationIDs: [notification._key],
                 notifications,
                 setNotifications,
                 userId: session?.user?.id,

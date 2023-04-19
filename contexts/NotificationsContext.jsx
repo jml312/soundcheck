@@ -6,6 +6,7 @@ const NotificationsContext = createContext(null);
 
 export function NotificationsProvider({ children, status, session }) {
   const [notifications, setNotifications] = useState([]);
+  const [isNotificationLoading, setIsNotificationLoading] = useState(false);
   useQuery({
     queryKey: "notifications",
     queryFn: () =>
@@ -16,7 +17,14 @@ export function NotificationsProvider({ children, status, session }) {
     onSuccess: setNotifications,
   });
   return (
-    <NotificationsContext.Provider value={{ notifications, setNotifications }}>
+    <NotificationsContext.Provider
+      value={{
+        notifications,
+        setNotifications,
+        isNotificationLoading,
+        setIsNotificationLoading,
+      }}
+    >
       {children}
     </NotificationsContext.Provider>
   );

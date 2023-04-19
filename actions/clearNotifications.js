@@ -9,19 +9,19 @@ import axios from "axios";
  * @param {Function} close
  * @description Removes a notification from the user's notifications array
  */
-export default async function clearNotification({
-  notificationID,
+export default async function clearNotifications({
+  notificationIDs,
   notifications,
   setNotifications,
   userId,
-  setIsLoading = () => {},
+  setIsLoading,
   close = () => {},
 }) {
   const originalNotifications = notifications;
   setIsLoading(true);
   try {
     const newNotifications = notifications.filter(
-      (n) => n._key !== notificationID
+      (notification) => !notificationIDs.includes(notification._key)
     );
     await axios.post("/api/protected/notification", {
       userId,

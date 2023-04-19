@@ -5,7 +5,7 @@ import deleteComment from "./deleteComment";
 import followUser from "./followUser";
 import getDiscoverSongs from "./getDiscoverSongs";
 import getNotifications from "./getNotifications";
-import clearNotification from "./clearNotification";
+import clearNotifications from "./clearNotifications";
 import viewNotification from "./viewNotification";
 import getPosts from "./getPosts";
 import getSpotify from "./getSpotify";
@@ -18,7 +18,7 @@ export {
   followUser,
   getDiscoverSongs,
   getNotifications,
-  clearNotification,
+  clearNotifications,
   viewNotification,
   getPosts,
   getSpotify,

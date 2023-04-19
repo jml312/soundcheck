@@ -1,15 +1,51 @@
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { clearAuthCookies, getDayInterval } from "@/utils";
 import client from "@/lib/sanity";
 import { hasPostedTodayQuery, profileQuery } from "@/lib/queries";
 import Profile from "@/components/Profile";
 import { NextSeo } from "next-seo";
 import DefaultSEO from "seo";
+import { useEffect, useMemo, useCallback } from "react";
+import { useNotifications } from "@/contexts/NotificationsContext";
+import { clearNotifications } from "@/actions";
 
 function UserProfile({ profile }) {
   const displayName = profile.name.endsWith("s")
     ? `${profile.name}'`
     : `${profile.name}'s`;
+
+  const { data: session } = useSession();
+  const { notifications, setNotifications, setIsNotificationLoading } =
+    useNotifications();
+  const notificationsToClear = useMemo(
+    () =>
+      notifications.filter(
+        (notification) =>
+          notification?.user?._ref === profile._id &&
+          notification?.type === "follow"
+      ),
+    [notifications, profile]
+  );
+  const clearFollowNotifications = useCallback(
+    async (notificationsToClear) => {
+      await clearNotifications({
+        notificationIDs: notificationsToClear.map(
+          (notification) => notification._key
+        ),
+        notifications,
+        setNotifications,
+        userId: session?.user?.id,
+        setIsLoading: setIsNotificationLoading,
+      });
+    },
+    [notifications, setNotifications, session, setIsNotificationLoading]
+  );
+  useEffect(() => {
+    if (notificationsToClear.length > 0) {
+      clearFollowNotifications(notificationsToClear);
+    }
+  }, [notificationsToClear, clearFollowNotifications]);
+
   return (
     <>
       <NextSeo
@@ -70,19 +106,6 @@ export async function getServerSideProps({ req, res, params }) {
         permanent: false,
       },
     };
-  }
-
-  const hasNotification = profile.notifications.some(
-    (notification) =>
-      notification.type === "follow" && notification.user._ref === profileUserId
-  );
-  if (hasNotification) {
-    await client
-      .patch(session.user.id)
-      .unset([
-        `notifications[type == \"follow\" && user._ref == \"${profileUserId}\"]`,
-      ])
-      .commit();
   }
 
   return {
