@@ -24,9 +24,8 @@ import Link from "next/link";
 import { MdOutlineNotifications } from "react-icons/md";
 import { AiOutlineHome } from "react-icons/ai";
 import NotificationModal from "./modals/NotificationModal";
-import { useQuery } from "react-query";
-import { getNotifications } from "@/actions";
 import { getAvatarText } from "@/utils";
+import { useNotifications } from "@/contexts/NotificationsContext";
 import Logo from "./Logo";
 
 const useStyles = createStyles((theme) => ({
@@ -48,18 +47,7 @@ export default function Navbar({ children }) {
   const isMobile = useMediaQuery("(max-width: 480px)");
   const theme = useMantineTheme();
   const { toggleColorScheme } = useMantineColorScheme();
-  const [notifications, setNotifications] = useState([]);
-  useQuery({
-    queryKey: "notifications",
-    queryFn: () =>
-      getNotifications({
-        userId: session?.user?.id,
-      }),
-    enabled: !!session?.user?.id,
-    onSuccess: (data) => {
-      setNotifications(data);
-    },
-  });
+  const { notifications, setNotifications } = useNotifications();
   const [isLoading, setIsLoading] = useState(false);
   const [
     notificationOpen,

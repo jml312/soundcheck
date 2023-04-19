@@ -3,14 +3,18 @@ import { hasPostedYesterdayQuery, userQuery } from "@/lib/queries";
 import dayjs from "dayjs";
 import { getDayInterval } from "@/utils";
 import { getDiscoverSongs } from "@/actions";
+import { TimeZone } from "@/constants";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const getRandom9To5 = () => {
-  const today = dayjs();
+  const today = dayjs.tz(dayjs(), TimeZone);
   const start = today.hour(9).minute(0).second(0);
   const end = today.hour(17).minute(0).second(0);
-  const random = dayjs(start + Math.random() * (end - start));
+  const random = dayjs.tz(
+    dayjs(start + Math.random() * (end - start)),
+    TimeZone
+  );
   return random;
 };
 

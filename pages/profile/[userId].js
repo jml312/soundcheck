@@ -73,14 +73,18 @@ export async function getServerSideProps({ req, res, params }) {
     };
   }
 
-  try {
+  const hasNotification = profile.notifications.some(
+    (notification) =>
+      notification.type === "follow" && notification.user._ref === profileUserId
+  );
+  if (hasNotification) {
     await client
       .patch(session.user.id)
       .unset([
         `notifications[type == \"follow\" && user._ref == \"${profileUserId}\"]`,
       ])
       .commit();
-  } catch (error) {}
+  }
 
   return {
     props: { profile },

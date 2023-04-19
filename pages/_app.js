@@ -6,6 +6,7 @@ import {
   ColorSchemeProvider,
 } from "@mantine/core";
 import Navbar from "@/components/Navbar";
+import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { Notifications } from "@mantine/notifications";
 import { useHotkeys } from "@mantine/hooks";
 import { useRouter } from "next/router";
@@ -15,7 +16,6 @@ import dayjs from "dayjs";
 import { getCookie, setCookie } from "cookies-next";
 import NextApp from "next/app";
 import { getMantineTheme } from "@/mantineTheme";
-import { TimeZone } from "@/constants";
 import { DefaultSeo } from "next-seo";
 import SEO from "seo";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -69,7 +69,6 @@ dayjs.extend(customParseFormat);
 dayjs.extend(isBetween);
 dayjs.extend(utc);
 dayjs.extend(timeZone);
-dayjs.tz.setDefault(TimeZone);
 
 export default function App({
   Component,
@@ -89,12 +88,12 @@ export default function App({
   };
 
   useHotkeys([["mod + M", toggleColorScheme]]);
+
   useEffect(() => {
-    router.events.on("routeChangeStart", (_, { shallow }) => {
-      if (!shallow) {
-        setIsRouteLoading(true);
-      }
-    });
+    router.events.on(
+      "routeChangeStart",
+      (_, { shallow }) => !shallow && setIsRouteLoading(true)
+    );
     router.events.on("routeChangeComplete", () => setIsRouteLoading(false));
     return () => {
       router.events.off("routeChangeStart", () => {});
@@ -130,7 +129,7 @@ export default function App({
 }
 
 function Auth({ children, isRouteLoading }) {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   if (status === "loading")
     return (
       <Flex mih={"100vh"} align="center" justify="center" direction="column">
@@ -138,34 +137,36 @@ function Auth({ children, isRouteLoading }) {
       </Flex>
     );
   return status === "authenticated" ? (
-    <Navbar>
-      {isRouteLoading ? (
-        <Flex
-          style={{
-            height: "calc(100vh - 5rem)",
-          }}
-          justify={"space-between"}
-          align={"stretch"}
-          direction={"column"}
-        >
+    <NotificationsProvider session={session} status={status}>
+      <Navbar>
+        {isRouteLoading ? (
           <Flex
-            w={"100%"}
-            h="100%"
-            justify={"center"}
-            align={"center"}
             style={{
-              transform: "translateY(5rem)",
+              height: "calc(100vh - 5rem)",
             }}
+            justify={"space-between"}
+            align={"stretch"}
             direction={"column"}
-            mt={"2.25rem"}
           >
-            <Loader size="xl" />
+            <Flex
+              w={"100%"}
+              h="100%"
+              justify={"center"}
+              align={"center"}
+              style={{
+                transform: "translateY(5rem)",
+              }}
+              direction={"column"}
+              mt={"2.25rem"}
+            >
+              <Loader size="xl" />
+            </Flex>
           </Flex>
-        </Flex>
-      ) : (
-        children
-      )}
-    </Navbar>
+        ) : (
+          children
+        )}
+      </Navbar>
+    </NotificationsProvider>
   ) : (
     children
   );

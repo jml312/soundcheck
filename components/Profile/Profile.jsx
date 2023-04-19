@@ -242,7 +242,7 @@ export default function Profile({ isUser, profile }) {
             size="md"
             variant="light"
             color="gray"
-            title={numFollowers > 0 && "View Followers"}
+            title={numFollowers > 0 ? "View Followers" : ""}
             disabled={numFollowers === 0}
             onClick={openFollowers}
             p={10}
@@ -282,7 +282,7 @@ export default function Profile({ isUser, profile }) {
             size="md"
             variant="light"
             color="gray"
-            title={numFollowing > 0 && "View Following"}
+            title={numFollowing > 0 ? "View Following" : ""}
             disabled={numFollowing === 0}
             onClick={openFollowing}
             p={10}

@@ -1,7 +1,7 @@
 import Post from "../Post/Post";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Modal, LoadingOverlay } from "@mantine/core";
-import { useQuery } from "react-query";
+import { useNotifications } from "@/contexts/NotificationsContext";
 import { clearNotification } from "@/actions";
 
 /**
@@ -59,34 +59,35 @@ export default function PostModal({
     isFocused: false,
   });
   const [activePost, setActivePost] = useState(null);
+  const { notifications, setNotifications } = useNotifications();
+  const notificationsToClear = useMemo(() => {
+    return notifications.filter(
+      (notification) => notification.post._ref === post._id
+    );
+  }, [notifications, post._id]);
+  const clearPostNotifications = useCallback(
+    async (notificationsToClear) => {
+      await Promise.all(
+        notificationsToClear.map((notification) =>
+          clearNotification({
+            notificationId: notification._id,
+            notifications,
+            setNotifications,
+            userId: session?.user?.id,
+          })
+        )
+      );
+    },
+    [notifications, setNotifications, session?.user?.id]
+  );
 
-  // const { data: notifications } = useQuery({
-  //   queryKey: "notifications",
-  //   queryFn: undefined,
-  //   enabled: false,
-  // });
-
-  // const clearPostNotifications = useCallback(async (notificationsToClear) => {
-  //   await Promise.all(
-  //     notificationsToClear.map((notification) => clearNotification({
-  //       notificationId: notification._id,
-  //       notifications,
-  //       // setNotifications: undefined,
-  //       userId: session?.user?.id,
-  //     }))
-  //   );
-  // }, []);
-
-  // useEffect(() => {
-  //   if (opened) {
-  //     const notificationsToClear = notifications.filter(
-  //       (notification) => notification.post._ref === post._id
-  //     );
-  //     if (notificationsToClear.length > 0) {
-  //       clearPostNotifications(notificationsToClear);
-  //     }
-  //   }
-  // }, [opened]);
+  useEffect(() => {
+    if (opened) {
+      if (notificationsToClear.length > 0) {
+        clearPostNotifications(notificationsToClear);
+      }
+    }
+  }, [opened, notificationsToClear, clearPostNotifications]);
 
   return (
     <Modal

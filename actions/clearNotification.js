@@ -14,8 +14,8 @@ export default async function clearNotification({
   notifications,
   setNotifications,
   userId,
-  setIsLoading,
-  close,
+  setIsLoading = () => {},
+  close = () => {},
 }) {
   const originalNotifications = notifications;
   setIsLoading(true);

@@ -27,6 +27,7 @@ export default function Feed({
   allUsers,
   initialCurrentPosts,
   hasPosted,
+  currentDay,
 }) {
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
@@ -104,6 +105,15 @@ export default function Feed({
   useEffect(() => {
     setTimeout(() => setSliderTransition(200), 200);
   }, []);
+
+  useEffect(() => {
+    const reloadPage =
+      !selectSongOpened &&
+      currentDay !== dayjs.tz(dayjs(), TimeZone).format("YYYY-MM-DD");
+    if (reloadPage) {
+      window.location.reload();
+    }
+  }, [currentPosts, selectSongOpened, currentDay]);
 
   return (
     <>
@@ -360,6 +370,7 @@ export async function getServerSideProps({ req, res }) {
           spotifyData: [],
           initialCurrentPosts: currentPosts,
           hasPosted,
+          currentDay: dayjs.tz(dayjs(), TimeZone).format("YYYY-MM-DD"),
         },
       };
     }
@@ -382,6 +393,7 @@ export async function getServerSideProps({ req, res }) {
         spotifyData,
         initialCurrentPosts: currentPosts,
         hasPosted,
+        currentDay: dayjs.tz(dayjs(), TimeZone).format("YYYY-MM-DD"),
       },
     };
   } catch {
