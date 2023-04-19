@@ -70,7 +70,7 @@ export default async function handle(req, res) {
       </form>
       `,
       ...(testMode !== "true" && {
-        sendAt: getRandom9To5().utc().local().unix(),
+        sendAt: getRandom9To5().unix(),
       }),
     });
 

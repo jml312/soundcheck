@@ -22,6 +22,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isBetween from "dayjs/plugin/isBetween";
+import utc from "dayjs/plugin/utc";
 import timeZone from "dayjs/plugin/timezone";
 
 dayjs.extend(relativeTime, {
@@ -66,8 +67,8 @@ dayjs.updateLocale("en", {
 });
 dayjs.extend(customParseFormat);
 dayjs.extend(isBetween);
+dayjs.extend(utc);
 dayjs.extend(timeZone);
-
 dayjs.tz.setDefault(TimeZone);
 
 export default function App({

@@ -2,9 +2,10 @@ import { getDayInterval } from "@/utils";
 import { postsQuery } from "@/lib/queries";
 import axios from "axios";
 import dayjs from "dayjs";
+import { TimeZone } from "@/constants";
 
 const getDayIntervalParams = (date) => {
-  const { startDate: todayStart, endDate: todayEnd } = getDayInterval(date);
+  const { startDate: todayStart, endDate: todayEnd } = getDayInterval();
   return {
     todayStart: todayStart.toISOString(),
     todayEnd: todayEnd.toISOString(),
@@ -32,7 +33,10 @@ const getClientPosts = async (params) => {
  */
 export default async function getPosts({ isClient, client, userId }) {
   try {
-    const params = { userId, ...getDayIntervalParams(dayjs()) };
+    const params = {
+      userId,
+      ...getDayIntervalParams(),
+    };
 
     if (isClient) {
       return await getClientPosts(params);

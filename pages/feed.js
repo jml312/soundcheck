@@ -20,6 +20,7 @@ import { useQuery } from "react-query";
 import { getPosts, getSpotify } from "@/actions";
 import { NextSeo } from "next-seo";
 import SEO from "seo";
+import { TimeZone } from "@/constants";
 
 export default function Feed({
   spotifyData,
@@ -31,7 +32,7 @@ export default function Feed({
   const [postType, setPostType] = useState("everyone");
   const [posts, setPosts] = useState(initialCurrentPosts);
   const { data: currentPosts } = useQuery({
-    queryKey: ["feed", dayjs().format("YYYY-MM-DD")],
+    queryKey: ["feed", dayjs.tz(dayjs(), TimeZone).format("YYYY-MM-DD")],
     queryFn: () =>
       getPosts({
         isClient: true,

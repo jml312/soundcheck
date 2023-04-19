@@ -44,7 +44,7 @@ export async function getServerSideProps({ req, res, params }) {
     };
   }
 
-  const { startDate: todayStart, endDate: todayEnd } = getDayInterval(dayjs());
+  const { startDate: todayStart, endDate: todayEnd } = getDayInterval();
   const hasPostedToday = await client.fetch(hasPostedTodayQuery, {
     userId: session.user.id,
     todayStart: todayStart.toISOString(),
