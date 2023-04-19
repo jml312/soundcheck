@@ -15,7 +15,6 @@ import {
   Center,
 } from "@mantine/core";
 import { followUser } from "@/actions";
-import dayjs from "dayjs";
 import { FaUserPlus, FaUserCheck } from "react-icons/fa";
 import { AiFillHeart } from "react-icons/ai";
 import { useSession } from "next-auth/react";
@@ -24,7 +23,7 @@ import { BsSpotify, BsHeadphones, BsFillCloudsFill } from "react-icons/bs";
 import Post from "../Post";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import FollowListModal from "../modals/FollowListModal";
-import { getAvatarText, formatStats } from "@/utils";
+import { getAvatarText, formatStats, getTZDate } from "@/utils";
 import WordCloud from "./WordCloud";
 
 /**
@@ -215,7 +214,7 @@ export default function Profile({ isUser, profile }) {
                 </Tooltip>
               )}
             </Group>
-            <Text fz="xs">{dayjs(createdAt).format("MMM D, YYYY")}</Text>
+            <Text fz="xs">{getTZDate(createdAt).format("MMM D, YYYY")}</Text>
           </Stack>
         </Group>
         <Text fz={isSmall ? "md" : "lg"}>🔥 {postStreak} day streak</Text>

@@ -82,10 +82,8 @@ export default function PostModal({
   );
 
   useEffect(() => {
-    if (opened) {
-      if (notificationsToClear.length > 0) {
-        clearPostNotifications(notificationsToClear);
-      }
+    if (opened && notificationsToClear.length > 0) {
+      clearPostNotifications(notificationsToClear);
     }
   }, [opened, notificationsToClear, clearPostNotifications]);
 

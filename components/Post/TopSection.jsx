@@ -12,11 +12,10 @@ import {
 } from "@mantine/core";
 import { FaHeart, FaUserPlus, FaUserCheck } from "react-icons/fa";
 import Link from "next/link";
-import { truncateText, getAvatarText } from "@/utils";
+import { truncateText, getAvatarText, getTZDate } from "@/utils";
 import { likePost, followUser } from "@/actions";
 import { CAPTION_MAX_LENGTH } from "@/constants";
 import { useState } from "react";
-import dayjs from "dayjs";
 import EmojiPicker from "../EmojiPicker";
 
 /**
@@ -188,7 +187,7 @@ export default function TopSection({
                         size="xs"
                         sx={{ lineHeight: 1, cursor: "default" }}
                       >
-                        {dayjs(post?.joined).format("MMM D, YYYY")}
+                        {getTZDate(post?.joined).format("MMM D, YYYY")}
                       </Text>
                     </Group>
                   </Stack>

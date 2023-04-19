@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { getTZDate } from "@/utils";
 import axios from "axios";
 
 /**
@@ -51,7 +51,7 @@ export default async function postComment({
           )
       ),
     ];
-    const now = dayjs().toISOString();
+    const now = getTZDate().toISOString();
     await axios.post("/api/protected/comment", {
       postID: post?._id,
       userId: session?.user?.id,

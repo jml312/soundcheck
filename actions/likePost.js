@@ -1,5 +1,5 @@
 import axios from "axios";
-import dayjs from "dayjs";
+import { getTZDate } from "@/utils";
 
 /**
  * @param {boolean} isLiked
@@ -47,7 +47,7 @@ export default async function likePost({
         userId: session?.user?.id,
         postUserId: post?.userId,
         type: isLiked ? "unlike" : "like",
-        createdAt: dayjs().toISOString(),
+        createdAt: getTZDate().toISOString(),
         playlistID: session?.user?.playlistID,
         songID: post?.songID,
         accessToken: session?.user?.accessToken,

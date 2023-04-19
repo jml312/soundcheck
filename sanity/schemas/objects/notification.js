@@ -1,5 +1,3 @@
-import dayjs from 'dayjs'
-
 export default {
   name: 'notification',
   title: 'Notification',
@@ -54,7 +52,6 @@ export default {
       name: 'createdAt',
       title: 'Created At',
       type: 'datetime',
-      initialValue: dayjs().toISOString(),
       validation: (Rule) => Rule.required(),
     },
   ],

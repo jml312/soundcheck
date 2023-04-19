@@ -1,8 +1,12 @@
 import NextAuth from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 import client from "@/lib/sanity";
-import dayjs from "dayjs";
-import { createPlaylist, checkFollowsSoundcheck, deleteUser } from "@/utils";
+import {
+  createPlaylist,
+  checkFollowsSoundcheck,
+  deleteUser,
+  getTZDate,
+} from "@/utils";
 
 export default NextAuth({
   session: {
@@ -25,7 +29,7 @@ export default NextAuth({
           name,
           email,
           image,
-          createdAt: dayjs().toISOString(),
+          createdAt: getTZDate().toISOString(),
           postStreak: 0,
           playlistID: "",
           recentlyPlayed: [],

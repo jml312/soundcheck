@@ -1,7 +1,7 @@
 import client from "@/lib/sanity";
 import axios from "axios";
 import { getDiscoverSongs } from "@/actions";
-import dayjs from "dayjs";
+import { getTZDate } from "@/utils";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -68,7 +68,7 @@ export default async function handler(req, res) {
               _type: "reference",
               _ref: userId,
             },
-            createdAt: dayjs().toISOString(),
+            createdAt: getTZDate().toISOString(),
           },
         ])
         .commit();

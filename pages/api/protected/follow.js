@@ -1,5 +1,5 @@
 import client from "@/lib/sanity";
-import dayjs from "dayjs";
+import { getTZDate } from "@/utils";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
   try {
     if (type === "follow") {
-      const createdAt = dayjs().toISOString();
+      const createdAt = getTZDate().toISOString();
       await client
         .patch(userId)
         .append("following", [

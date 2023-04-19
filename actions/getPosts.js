@@ -1,8 +1,6 @@
 import { getDayInterval } from "@/utils";
 import { postsQuery } from "@/lib/queries";
 import axios from "axios";
-import dayjs from "dayjs";
-import { TimeZone } from "@/constants";
 
 const getDayIntervalParams = (date) => {
   const { startDate: todayStart, endDate: todayEnd } = getDayInterval();

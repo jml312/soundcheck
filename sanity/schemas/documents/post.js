@@ -1,5 +1,3 @@
-import dayjs from 'dayjs'
-
 export default {
   name: 'post',
   title: 'Post',
@@ -87,7 +85,6 @@ export default {
       name: 'createdAt',
       title: 'Created At',
       type: 'datetime',
-      initialValue: dayjs().toISOString(),
     },
     {
       name: 'caption',

@@ -1,5 +1,5 @@
+import { getTZDate } from "./getTZDate";
 import dayjs from "dayjs";
-import { TimeZone } from "@/constants";
 
 /**
  * @param {dayjs} dayjsDate - dayjs date object
@@ -7,7 +7,7 @@ import { TimeZone } from "@/constants";
  */
 export const getDayInterval = (dayjsDate = dayjs()) => {
   return {
-    startDate: dayjs.tz(dayjsDate, TimeZone).startOf("day"),
-    endDate: dayjs.tz(dayjsDate, TimeZone).endOf("day"),
+    startDate: getTZDate(dayjsDate).startOf("day"),
+    endDate: getTZDate(dayjsDate).endOf("day"),
   };
 };

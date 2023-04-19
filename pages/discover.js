@@ -5,7 +5,6 @@ import Post from "@/components/Post/Post";
 import { useState, useCallback } from "react";
 import client from "@/lib/sanity";
 import { userDiscoverQuery, hasPostedTodayQuery } from "@/lib/queries";
-import dayjs from "dayjs";
 import { NextSeo } from "next-seo";
 import SEO from "seo";
 

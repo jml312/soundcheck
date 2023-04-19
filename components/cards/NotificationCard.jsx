@@ -8,10 +8,9 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useMemo, useCallback } from "react";
-import { truncateText } from "@/utils";
-import dayjs from "dayjs";
 import { clearNotification, viewNotification } from "@/actions";
-import { getAvatarText } from "@/utils";
+import { getAvatarText, truncateText } from "@/utils";
+import dayjs from "dayjs";
 
 /**
  * @param {object} notification - The notification object

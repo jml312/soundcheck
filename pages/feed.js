@@ -1,8 +1,7 @@
 import { getSession, useSession } from "next-auth/react";
-import { clearAuthCookies } from "@/utils";
+import { clearAuthCookies, getTZDate } from "@/utils";
 import Post from "@/components/Post/Post";
 import { useMediaQuery } from "@mantine/hooks";
-import dayjs from "dayjs";
 import SelectSongModal from "@/components/modals/SelectSongModal";
 import Filter from "bad-words";
 import {
@@ -20,7 +19,6 @@ import { useQuery } from "react-query";
 import { getPosts, getSpotify } from "@/actions";
 import { NextSeo } from "next-seo";
 import SEO from "seo";
-import { TimeZone } from "@/constants";
 
 export default function Feed({
   spotifyData,
@@ -33,7 +31,7 @@ export default function Feed({
   const [postType, setPostType] = useState("everyone");
   const [posts, setPosts] = useState(initialCurrentPosts);
   const { data: currentPosts } = useQuery({
-    queryKey: ["feed", dayjs.tz(dayjs(), TimeZone).format("YYYY-MM-DD")],
+    queryKey: ["feed", getTZDate().format("YYYY-MM-DD")],
     queryFn: () =>
       getPosts({
         isClient: true,
@@ -41,7 +39,16 @@ export default function Feed({
         userId: session?.user?.id,
       }),
     initialData: initialCurrentPosts,
-    onSuccess: setPosts,
+    onSuccess: (data) => {
+      setPosts(data);
+      if (
+        !selectSongOpened &&
+        !data?.userPost &&
+        typeof window !== "undefined"
+      ) {
+        window.location.reload();
+      }
+    },
     refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
@@ -109,7 +116,8 @@ export default function Feed({
   useEffect(() => {
     const reloadPage =
       !selectSongOpened &&
-      currentDay !== dayjs.tz(dayjs(), TimeZone).format("YYYY-MM-DD");
+      currentDay !== getTZDate().format("YYYY-MM-DD") &&
+      typeof window !== "undefined";
     if (reloadPage) {
       window.location.reload();
     }
@@ -353,6 +361,8 @@ export async function getServerSideProps({ req, res }) {
   }
 
   try {
+    const currentDay = getTZDate().format("YYYY-MM-DD");
+
     const allUsers = await client.fetch(allUsersQuery);
 
     const currentPosts = await getPosts({
@@ -370,7 +380,7 @@ export async function getServerSideProps({ req, res }) {
           spotifyData: [],
           initialCurrentPosts: currentPosts,
           hasPosted,
-          currentDay: dayjs.tz(dayjs(), TimeZone).format("YYYY-MM-DD"),
+          currentDay,
         },
       };
     }
@@ -393,7 +403,7 @@ export async function getServerSideProps({ req, res }) {
         spotifyData,
         initialCurrentPosts: currentPosts,
         hasPosted,
-        currentDay: dayjs.tz(dayjs(), TimeZone).format("YYYY-MM-DD"),
+        currentDay,
       },
     };
   } catch {

@@ -3,7 +3,6 @@ import { clearAuthCookies, getDayInterval } from "@/utils";
 import client from "@/lib/sanity";
 import { hasPostedTodayQuery, profileQuery } from "@/lib/queries";
 import Profile from "@/components/Profile";
-import dayjs from "dayjs";
 import { NextSeo } from "next-seo";
 import DefaultSEO from "seo";
 

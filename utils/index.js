@@ -6,6 +6,7 @@ import { formatStats } from "./formatStats";
 import { createPlaylist } from "./createPlaylist";
 import { checkFollowsSoundcheck } from "./checkFollowsSoundcheck";
 import { deleteUser } from "./deleteUser";
+import { getTZDate } from "./getTZDate";
 
 export {
   clearAuthCookies,
@@ -16,4 +17,5 @@ export {
   createPlaylist,
   checkFollowsSoundcheck,
   deleteUser,
+  getTZDate,
 };

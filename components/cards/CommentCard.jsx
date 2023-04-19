@@ -9,8 +9,8 @@ import {
 } from "@mantine/core";
 import { truncateText, getAvatarText } from "@/utils";
 import { deleteComment } from "@/actions";
-import { useMemo, useEffect, useRef } from "react";
 import dayjs from "dayjs";
+import { useMemo, useEffect, useRef } from "react";
 
 /**
  * @param {string} text - The comment text

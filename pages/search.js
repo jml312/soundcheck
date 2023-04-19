@@ -13,10 +13,9 @@ import client from "@/lib/sanity";
 import { clearAuthCookies, getAvatarText, getDayInterval } from "@/utils";
 import { searchQuery, hasPostedTodayQuery } from "@/lib/queries";
 import Fuse from "fuse.js";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { AiOutlineSearch } from "react-icons/ai";
-import dayjs from "dayjs";
 import { NextSeo } from "next-seo";
 import SEO from "seo";
 

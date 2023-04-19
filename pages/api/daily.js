@@ -1,20 +1,16 @@
 import client from "@/lib/sanity";
 import { hasPostedYesterdayQuery, userQuery } from "@/lib/queries";
 import dayjs from "dayjs";
-import { getDayInterval } from "@/utils";
+import { getDayInterval, getTZDate } from "@/utils";
 import { getDiscoverSongs } from "@/actions";
-import { TimeZone } from "@/constants";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const getRandom9To5 = () => {
-  const today = dayjs.tz(dayjs(), TimeZone);
+  const today = getTZDate();
   const start = today.hour(9).minute(0).second(0);
   const end = today.hour(17).minute(0).second(0);
-  const random = dayjs.tz(
-    dayjs(start + Math.random() * (end - start)),
-    TimeZone
-  );
+  const random = getTZDate(start + Math.random() * (end - start));
   return random;
 };
 
@@ -35,7 +31,7 @@ export default async function handle(req, res) {
     allUsers.forEach(async ({ _id, notifications }) => {
       // check if user posted yesterday
       const { startDate: yesterdayStart, endDate: yesterdayEnd } =
-        getDayInterval(dayjs().subtract(1, "day"));
+        getDayInterval(getTZDate().subtract(1, "day"));
       const hasPostedYesterday = await client.fetch(hasPostedYesterdayQuery, {
         userId: _id,
         yesterdayStart: yesterdayStart.toISOString(),
@@ -63,6 +59,7 @@ export default async function handle(req, res) {
     });
 
     // send emails to all users at random time between 9am and 5pm
+    const sendAt = getRandom9To5().unix();
     await sgMail.sendMultiple({
       to: allUsers.map(({ email }) => email),
       from: process.env.SENDGRID_FROM_EMAIL,
@@ -74,11 +71,14 @@ export default async function handle(req, res) {
       </form>
       `,
       ...(testMode !== "true" && {
-        sendAt: getRandom9To5().unix(),
+        sendAt,
       }),
     });
 
-    return res.status(200).json({ message: "Success" });
+    return res.status(200).json({
+      message: "Success",
+      sendAt: dayjs.unix(sendAt).format("YYYY-MM-DD HH:mm:ss"),
+    });
   } catch {
     return res.status(500).json({ message: "Internal server error" });
   }
