@@ -7,7 +7,7 @@ function WordCloud({ data, theme, isSmall }) {
     () => ({
       colors: [theme.colorScheme === "dark" ? theme.white : theme.black],
       deterministic: true,
-      fontSizes: isSmall ? [20, 60] : [25, 65],
+      fontSizes: isSmall ? [15, 55] : [20, 60],
       fontStyle: "normal",
       fontWeight: "normal",
       padding: 3,

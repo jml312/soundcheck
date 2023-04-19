@@ -19,7 +19,7 @@ export const formatStats = ({ stats, keys }) => {
                 acc[idx].push({
                   text:
                     item.length > maxWordLength
-                      ? `${item.substring(0, maxWordLength)}...`
+                      ? `${item.substring(0, maxWordLength - 3)}...`
                       : item,
                   value: 1,
                 });

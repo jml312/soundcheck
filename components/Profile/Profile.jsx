@@ -67,7 +67,7 @@ export default function Profile({ isUser, profile }) {
   const isSmall = useMediaQuery("(max-width: 470px)");
   const BODY_WIDTH = "87.5%";
   const BODY_MAX_WIDTH = "1050px";
-  const TAB_VIEWPORT_HEIGHT = "438px";
+  const TAB_VIEWPORT_HEIGHT = !isSmall ? "479px" : "475px";
   const TAB_MARGIN_TOP = "1.4rem";
   const { data: session } = useSession();
   const [activePost, setActivePost] = useState(null);
@@ -101,6 +101,7 @@ export default function Profile({ isUser, profile }) {
       gap={40}
       style={{
         transform: "translateY(5rem)",
+        overflow: "hidden",
       }}
     >
       <Flex
@@ -227,6 +228,7 @@ export default function Profile({ isUser, profile }) {
         justify="space-evenly"
         style={{
           flexGrow: 0,
+          transform: isSmall ? "translateY(-.6rem)" : "translateY(1rem)",
         }}
       >
         {/* followers */}
@@ -315,8 +317,8 @@ export default function Profile({ isUser, profile }) {
         maw={BODY_MAX_WIDTH}
         style={{
           flexGrow: 2,
-          transform: "translateY(-.5rem)",
         }}
+        mt={isSmall && "-2.2rem"}
         value={selectedTab}
         onTabChange={(newTab) => {
           setCurrentlyPlaying(null);
@@ -386,6 +388,7 @@ export default function Profile({ isUser, profile }) {
                     currentlyPlaying={currentlyPlaying}
                     setCurrentlyPlaying={setCurrentlyPlaying}
                     isProfile
+                    isUser
                     isSmall={isSmall}
                   />
                 ))}
