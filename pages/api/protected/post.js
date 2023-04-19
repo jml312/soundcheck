@@ -1,6 +1,7 @@
 import client from "@/lib/sanity";
 import dayjs from "dayjs";
 import { getDiscoverSongs } from "@/actions";
+import { TimeZone } from "@/constants";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -23,7 +24,7 @@ export default async function handler(req, res) {
   } = req.body;
 
   try {
-    const today = dayjs().utc().format();
+    const today = dayjs.tz(dayjs(), TimeZone).toISOString();
     const { _id } = await client.create({
       _type: "post",
       songName,

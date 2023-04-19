@@ -69,7 +69,9 @@ export default async function handle(req, res) {
           <input type="submit" value="Soundcheck!" style="background-color: #1a1b1e; border-radius: 0.5rem; color: #dad9d4; padding: .5rem;" />
       </form>
       `,
-      ...(testMode !== "true" && { sendAt: getRandom9To5().unix() }),
+      ...(testMode !== "true" && {
+        sendAt: getRandom9To5().utc().local().unix(),
+      }),
     });
 
     return res.status(200).json({ message: "Success" });

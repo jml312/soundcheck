@@ -6,8 +6,8 @@ import dayjs from "dayjs";
 const getDayIntervalParams = (date) => {
   const { startDate: todayStart, endDate: todayEnd } = getDayInterval(date);
   return {
-    todayStart: todayStart.utc().format(),
-    todayEnd: todayEnd.utc().format(),
+    todayStart: todayStart.toISOString(),
+    todayEnd: todayEnd.toISOString(),
   };
 };
 

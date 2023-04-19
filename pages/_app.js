@@ -15,6 +15,7 @@ import dayjs from "dayjs";
 import { getCookie, setCookie } from "cookies-next";
 import NextApp from "next/app";
 import { getMantineTheme } from "@/mantineTheme";
+import { TimeZone } from "@/constants";
 import { DefaultSeo } from "next-seo";
 import SEO from "seo";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -22,6 +23,7 @@ import updateLocale from "dayjs/plugin/updateLocale";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isBetween from "dayjs/plugin/isBetween";
 import utc from "dayjs/plugin/utc";
+import timeZone from "dayjs/plugin/timeZone";
 
 dayjs.extend(relativeTime, {
   thresholds: [
@@ -66,6 +68,9 @@ dayjs.updateLocale("en", {
 dayjs.extend(customParseFormat);
 dayjs.extend(isBetween);
 dayjs.extend(utc);
+dayjs.extend(timeZone);
+
+dayjs.tz.setDefault(TimeZone);
 
 export default function App({
   Component,
