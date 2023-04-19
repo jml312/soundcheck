@@ -2,7 +2,6 @@ import client from "@/lib/sanity";
 import { hasPostedYesterdayQuery, userQuery } from "@/lib/queries";
 import dayjs from "dayjs";
 import { getDayInterval, getTZDate } from "@/utils";
-import { getDiscoverSongs } from "@/actions";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -38,13 +37,6 @@ export default async function handle(req, res) {
         yesterdayEnd: yesterdayEnd.toISOString(),
       });
 
-      // get new recommendations for discover page
-      const recommendations = await getDiscoverSongs({
-        userId: _id,
-        accessToken: session.user.accessToken,
-        client,
-      });
-
       // set user streak to 0 if they didn't post yesterday
       // update discover songs
       // remove notifications that are not follows
@@ -52,7 +44,6 @@ export default async function handle(req, res) {
         .patch(_id)
         .set({
           ...(!hasPostedYesterday && { postStreak: 0 }),
-          discoverSongs: recommendations,
           notifications: notifications.filter(({ type }) => type === "follow"),
         })
         .commit();

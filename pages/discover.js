@@ -65,7 +65,7 @@ function Discover({ recommendations }) {
                 color: theme.colors.dimmed[theme.colorScheme],
               })}
             >
-              Like posts or come back tomorrow for more!
+              Like posts or post a song tomorrow for more!
             </Text>
           </Stack>
         ) : null}
