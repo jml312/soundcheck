@@ -24,6 +24,7 @@ export default async function getDiscoverSongs({
     const formattedStats = formatStats({
       stats: discoverData,
       keys,
+      truncateText: false,
     }).map((item, idx) =>
       item.slice(0, MAX_SEEDS).map((el) => ({
         ...el,

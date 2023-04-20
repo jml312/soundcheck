@@ -46,7 +46,9 @@ export default function Feed({
         !data?.userPost &&
         typeof window !== "undefined"
       ) {
-        window.location.reload();
+        try {
+          window.location.reload();
+        } catch {}
       }
     },
     refetchOnMount: false,
@@ -379,7 +381,7 @@ export async function getServerSideProps({ req, res }) {
           allUsers,
           spotifyData: [],
           initialCurrentPosts: currentPosts,
-          hasPosted,
+          hasPosted: true,
           currentDay,
         },
       };
@@ -402,7 +404,7 @@ export async function getServerSideProps({ req, res }) {
         allUsers,
         spotifyData,
         initialCurrentPosts: currentPosts,
-        hasPosted,
+        hasPosted: false,
         currentDay,
       },
     };

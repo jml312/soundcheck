@@ -55,9 +55,6 @@ dependencies:
   next-seo:
     specifier: ^6.0.0
     version: 6.0.0(next@13.3.0)(react-dom@18.2.0)(react@18.2.0)
-  next-sitemap:
-    specifier: ^4.0.7
-    version: 4.0.7(@next/env@13.3.0)(next@13.3.0)
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -123,10 +120,6 @@ packages:
       '@babel/helper-string-parser': 7.19.4
       '@babel/helper-validator-identifier': 7.19.1
       to-fast-properties: 2.0.0
-    dev: false
-
-  /@corex/deepmerge@4.0.43:
-    resolution: {integrity: sha512-N8uEMrMPL0cu/bdboEWpQYb/0i2K5Qn8eCsxzOmxSggJbbQte7ljMRoXm917AbntqTGOzdTu+vP3KOOzoC70HQ==}
     dev: false
 
   /@emotion/babel-plugin@11.10.6:
@@ -2623,20 +2616,6 @@ packages:
       next: 13.3.0(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
-  /next-sitemap@4.0.7(@next/env@13.3.0)(next@13.3.0):
-    resolution: {integrity: sha512-S2g5IwJeO0+ecmFq981fb+Mw9YWmntOuN/qTCxclSkUibOJ8qKIOye0vn6NEJ1S4tKhbY+MTYKgJpNdFZYxLoA==}
-    engines: {node: '>=14.18'}
-    hasBin: true
-    peerDependencies:
-      '@next/env': '*'
-      next: '*'
-    dependencies:
-      '@corex/deepmerge': 4.0.43
-      '@next/env': 13.3.0
-      minimist: 1.2.8
-      next: 13.3.0(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
   /next@13.3.0(react-dom@18.2.0)(react@18.2.0):

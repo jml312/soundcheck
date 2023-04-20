@@ -8,6 +8,8 @@ import { userDiscoverQuery, hasPostedTodayQuery } from "@/lib/queries";
 import { NextSeo } from "next-seo";
 import SEO from "seo";
 
+import { getDiscoverSongs } from "@/actions";
+
 function Discover({ recommendations }) {
   const { data: session } = useSession();
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
@@ -133,6 +135,12 @@ export async function getServerSideProps({ req, res }) {
         },
       };
     }
+
+    await getDiscoverSongs({
+      userId: session.user.id,
+      accessToken: session.user.accessToken,
+      client,
+    });
 
     const recommendations = await client.fetch(userDiscoverQuery, {
       userId: session.user.id,

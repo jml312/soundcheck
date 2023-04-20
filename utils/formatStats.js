@@ -1,9 +1,10 @@
 /**
  * @param {Object} stats - Array of objects with stats
  * @param {Array} keys - Array of keys to format
+ * @param {Boolean} truncateText - Whether to truncate text
  * @returns {Array} formatted stats sorted by value
  */
-export const formatStats = ({ stats, keys }) => {
+export const formatStats = ({ stats, keys, truncateText = true }) => {
   const maxWordLength = 20;
   return stats
     .reduce(
@@ -17,10 +18,11 @@ export const formatStats = ({ stats, keys }) => {
               );
               if (itemIndex === -1) {
                 acc[idx].push({
-                  text:
-                    item.length > maxWordLength
+                  text: truncateText
+                    ? item.length > maxWordLength
                       ? `${item.substring(0, maxWordLength - 3)}...`
-                      : item,
+                      : item
+                    : item,
                   value: 1,
                 });
               } else {
