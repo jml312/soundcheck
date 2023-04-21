@@ -294,7 +294,6 @@ export default function BottomSection({
                                 withinPortal
                               >
                                 <ActionIcon
-                                  // mr={"-1rem"}
                                   disabled={
                                     !!comment.error ||
                                     comment.isLoading ||

@@ -1,7 +1,7 @@
 import client from "@/lib/sanity";
 import { hasPostedYesterdayQuery, userQuery } from "@/lib/queries";
 import dayjs from "dayjs";
-import {  getTZDate } from "@/utils";
+import { getTZDate } from "@/utils";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -33,7 +33,6 @@ export default async function handle(req, res) {
         userId: _id,
         currentDate: getTZDate().subtract(1, "day").format("YYYY-MM-DD"),
       });
-
       // set user streak to 0 if they didn't post yesterday
       // update discover songs
       // remove notifications that are not follows
@@ -47,25 +46,71 @@ export default async function handle(req, res) {
     });
 
     // send emails to all users at random time between 9am and 5pm
+    const subject = "Soundcheck! What are you listening to?";
+
+    const text = `
+      Hey there,
+
+      It's time to log in to Soundcheck! and share what you listen to with the world. You never know, you might just stumble upon your next all-time favorite tune! Login and Post a Song ( ${process.env.NEXT_PUBLIC_URL} )
+
+      © 2023 Soundcheck!. All rights reserved.
+    `;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+            <title>
+              ${subject}
+            </title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse;">
+              <tr>
+                  <td align="center" style="padding: 40px 0 0 0;">
+                    <img src="${process.env.NEXT_PUBLIC_URL}/logo/soundcheck-seo.png" alt="Soundcheck! Logo" width="300" style="display: block;">
+                  </td>
+              </tr>
+              <tr>
+                  <td style="padding: 30px 30px 40px 30px;">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                          <td style="font-family: Arial, sans-serif; font-size: 16px; line-height: 20px; padding: 20px 0; color: #000;">
+                              Hey there,
+                              <br>
+                              <br>
+                              It's time to log in to Soundcheck! and share what you listen to with the world. You never know, you might just stumble upon your next all-time favorite tune!
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="text-align: center; padding: 30px 0 0 0;">
+                              <a href="${process.env.NEXT_PUBLIC_URL}" target="_blank" style="font-size: 18px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; background-color: #1a1b1e; padding: 12px 20px; border-radius: 4px;">
+                              Login and Post a Song
+                              </a>
+                          </td>
+                        </tr>
+                    </table>
+                  </td>
+              </tr>
+            </table>
+        </body>
+      </html>
+    `;
+
     const sendAt = getRandom9To5().unix();
+
     await sgMail.sendMultiple({
       to: allUsers.map(({ email }) => email),
       from: process.env.SENDGRID_FROM_EMAIL,
-      subject: "Soundcheck! What are you listening to?",
-      text: "Your daily reminder",
-      html: `<strong>Make a post...</strong>
-      <form action=${process.env.NEXT_PUBLIC_URL}>
-          <input type="submit" value="Soundcheck!" style="background-color: #1a1b1e; border-radius: 0.5rem; color: #dad9d4; padding: .5rem;" />
-      </form>
-      `,
-      ...(testMode !== "true" && {
-        sendAt,
-      }),
+      subject,
+      text,
+      html,
+      ...(testMode !== "true" && { sendAt }),
     });
 
     return res.status(200).json({
       message: "Success",
-      sendAt: dayjs.unix(sendAt).format("YYYY-MM-DD HH:mm:ss"),
+      sendAt: dayjs.unix(sendAt).format("YYYY-MM-DD HH:mm:ssa"),
     });
   } catch {
     return res.status(500).json({ message: "Internal server error" });
