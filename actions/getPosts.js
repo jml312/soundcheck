@@ -1,14 +1,5 @@
-import { getDayInterval } from "@/utils";
 import { postsQuery } from "@/lib/queries";
 import axios from "axios";
-
-const getDayIntervalParams = () => {
-  const { startDate: todayStart, endDate: todayEnd } = getDayInterval();
-  return {
-    todayStart: todayStart.toISOString(),
-    todayEnd: todayEnd.toISOString(),
-  };
-};
 
 const getServerPosts = async (client, params) => {
   const currentPosts = await client.fetch(postsQuery, params);
@@ -27,13 +18,19 @@ const getClientPosts = async (params) => {
  * @param {object} client - sanity client
  * @param {object} date - date to get posts for
  * @param {string} userId - user id
+ * @param {string} currentDate - current day
  * @description - gets posts for a given user and date
  */
-export default async function getPosts({ isClient, client, userId }) {
+export default async function getPosts({
+  isClient,
+  client,
+  userId,
+  currentDate,
+}) {
   try {
     const params = {
       userId,
-      ...getDayIntervalParams(),
+      currentDate,
     };
 
     if (isClient) {

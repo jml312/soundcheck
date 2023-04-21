@@ -7,12 +7,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { userId, todayStart, todayEnd } = req.query;
+    const { userId, currentDate } = req.query;
 
     const currentPosts = await client.fetch(postsQuery, {
       userId,
-      todayStart,
-      todayEnd,
+      currentDate,
     });
 
     return res.status(200).send(currentPosts);

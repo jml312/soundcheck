@@ -1,6 +1,6 @@
 import { getSession, useSession } from "next-auth/react";
 import { Flex, ScrollArea, Title, Text, Stack } from "@mantine/core";
-import { getDayInterval, clearAuthCookies } from "@/utils";
+import { clearAuthCookies, getTZDate } from "@/utils";
 import Post from "@/components/Post/Post";
 import { useState, useCallback } from "react";
 import client from "@/lib/sanity";
@@ -118,11 +118,9 @@ export async function getServerSideProps({ req, res }) {
   }
 
   try {
-    const { startDate: todayStart, endDate: todayEnd } = getDayInterval();
     const hasPostedToday = await client.fetch(hasPostedTodayQuery, {
       userId: session.user.id,
-      todayStart: todayStart.toISOString(),
-      todayEnd: todayEnd.toISOString(),
+      currentDate: getTZDate().format("YYYY-MM-DD"),
     });
 
     if (!hasPostedToday) {

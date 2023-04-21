@@ -1,5 +1,5 @@
 import { getSession, useSession } from "next-auth/react";
-import { clearAuthCookies, getDayInterval } from "@/utils";
+import { clearAuthCookies, getTZDate } from "@/utils";
 import client from "@/lib/sanity";
 import { hasPostedTodayQuery, profileQuery } from "@/lib/queries";
 import Profile from "@/components/Profile";
@@ -79,11 +79,9 @@ export async function getServerSideProps({ req, res, params }) {
     };
   }
 
-  const { startDate: todayStart, endDate: todayEnd } = getDayInterval();
   const hasPostedToday = await client.fetch(hasPostedTodayQuery, {
     userId: session.user.id,
-    todayStart: todayStart.toISOString(),
-    todayEnd: todayEnd.toISOString(),
+    currentDate: getTZDate().format("YYYY-MM-DD"),
   });
   if (!hasPostedToday) {
     return {

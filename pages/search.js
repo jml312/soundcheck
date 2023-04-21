@@ -10,7 +10,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import client from "@/lib/sanity";
-import { clearAuthCookies, getAvatarText, getDayInterval } from "@/utils";
+import { clearAuthCookies, getAvatarText, getTZDate } from "@/utils";
 import { searchQuery, hasPostedTodayQuery } from "@/lib/queries";
 import Fuse from "fuse.js";
 import { useState } from "react";
@@ -165,11 +165,9 @@ export async function getServerSideProps({ req, res }) {
   }
 
   try {
-    const { startDate: todayStart, endDate: todayEnd } = getDayInterval();
     const hasPostedToday = await client.fetch(hasPostedTodayQuery, {
       userId: session.user.id,
-      todayStart: todayStart.toISOString(),
-      todayEnd: todayEnd.toISOString(),
+      currentDate: getTZDate().format("YYYY-MM-DD"),
     });
 
     if (!hasPostedToday) {

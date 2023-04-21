@@ -1,7 +1,7 @@
 import client from "@/lib/sanity";
 import { hasPostedYesterdayQuery, userQuery } from "@/lib/queries";
 import dayjs from "dayjs";
-import { getDayInterval, getTZDate } from "@/utils";
+import {  getTZDate } from "@/utils";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -29,12 +29,9 @@ export default async function handle(req, res) {
     const allUsers = await client.fetch(userQuery);
     allUsers.forEach(async ({ _id, notifications }) => {
       // check if user posted yesterday
-      const { startDate: yesterdayStart, endDate: yesterdayEnd } =
-        getDayInterval(getTZDate().subtract(1, "day"));
       const hasPostedYesterday = await client.fetch(hasPostedYesterdayQuery, {
         userId: _id,
-        yesterdayStart: yesterdayStart.toISOString(),
-        yesterdayEnd: yesterdayEnd.toISOString(),
+        currentDate: getTZDate().subtract(1, "day").format("YYYY-MM-DD"),
       });
 
       // set user streak to 0 if they didn't post yesterday

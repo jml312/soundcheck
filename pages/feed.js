@@ -25,18 +25,19 @@ export default function Feed({
   allUsers,
   initialCurrentPosts,
   hasPosted,
-  currentDay,
+  currentDate,
 }) {
   const { data: session } = useSession();
   const [postType, setPostType] = useState("everyone");
   const [posts, setPosts] = useState(initialCurrentPosts);
   const { data: currentPosts } = useQuery({
-    queryKey: ["feed", getTZDate().format("YYYY-MM-DD")],
+    queryKey: ["feed", currentDate],
     queryFn: () =>
       getPosts({
         isClient: true,
         client,
         userId: session?.user?.id,
+        currentDate,
       }),
     initialData: initialCurrentPosts,
     onSuccess: (data) => {
@@ -118,12 +119,14 @@ export default function Feed({
   useEffect(() => {
     const reloadPage =
       !selectSongOpened &&
-      currentDay !== getTZDate().format("YYYY-MM-DD") &&
+      currentDate !== getTZDate().format("YYYY-MM-DD") &&
       typeof window !== "undefined";
     if (reloadPage) {
-      window.location.reload();
+      try {
+        window.location.reload();
+      } catch {}
     }
-  }, [currentPosts, selectSongOpened, currentDay]);
+  }, [currentPosts, selectSongOpened, currentDate]);
 
   return (
     <>
@@ -363,7 +366,7 @@ export async function getServerSideProps({ req, res }) {
   }
 
   try {
-    const currentDay = getTZDate().format("YYYY-MM-DD");
+    const currentDate = getTZDate().format("YYYY-MM-DD");
 
     const allUsers = await client.fetch(allUsersQuery);
 
@@ -371,6 +374,7 @@ export async function getServerSideProps({ req, res }) {
       isClient: false,
       client,
       userId: session?.user?.id,
+      currentDate,
     });
 
     const hasPosted = !!currentPosts?.userPost;
@@ -382,7 +386,7 @@ export async function getServerSideProps({ req, res }) {
           spotifyData: [],
           initialCurrentPosts: currentPosts,
           hasPosted: true,
-          currentDay,
+          currentDate,
         },
       };
     }
@@ -405,7 +409,7 @@ export async function getServerSideProps({ req, res }) {
         spotifyData,
         initialCurrentPosts: currentPosts,
         hasPosted: false,
-        currentDay,
+        currentDate,
       },
     };
   } catch {
