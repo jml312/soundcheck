@@ -2,7 +2,7 @@ import { getDayInterval } from "@/utils";
 import { postsQuery } from "@/lib/queries";
 import axios from "axios";
 
-const getDayIntervalParams = (date) => {
+const getDayIntervalParams = () => {
   const { startDate: todayStart, endDate: todayEnd } = getDayInterval();
   return {
     todayStart: todayStart.toISOString(),

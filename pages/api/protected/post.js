@@ -1,7 +1,6 @@
 import client from "@/lib/sanity";
 import { getDiscoverSongs } from "@/actions";
 import { getTZDate } from "@/utils";
-import days from "dayjs";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -24,8 +23,9 @@ export default async function handler(req, res) {
   } = req.body;
 
   try {
-    const today = getTZDate().toISOString();
-    const postID = `post-${userId}-${days(today).format("YYYY-MM-DD")}`;
+    const date = getTZDate();
+    const today = date.toISOString();
+    const postID = `post-${userId}-${date.format("YYYY-MM-DD")}`;
     const { _id } = await client.createIfNotExists({
       _id: postID,
       _type: "post",

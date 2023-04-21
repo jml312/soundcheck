@@ -82,6 +82,11 @@ export default {
       type: 'string',
     },
     {
+      name: 'postedAt',
+      title: 'Posted At',
+      type: 'date',
+    },
+    {
       name: 'createdAt',
       title: 'Created At',
       type: 'datetime',
