@@ -25,7 +25,8 @@ export default async function handler(req, res) {
   try {
     const date = getTZDate();
     const today = date.toISOString();
-    const postID = `post-${userId}-${date.format("YYYY-MM-DD")}`;
+    const formattedDate = date.format("YYYY-MM-DD");
+    const postID = `post-${userId}-${formattedDate}`;
     const { _id } = await client.createIfNotExists({
       _id: postID,
       _type: "post",
@@ -38,6 +39,7 @@ export default async function handler(req, res) {
       albumUrl,
       albumImage,
       songID,
+      postedAt: formattedDate,
       createdAt: today,
       caption,
       user: {
