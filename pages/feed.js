@@ -69,7 +69,6 @@ export default function Feed({
     text: currentPosts?.userPost?.caption || "",
     error: "",
     isFocused: false,
-    addedEmoji: false,
   });
   const captionRef = useRef(null);
   const [activePost, setActivePost] = useState(null);

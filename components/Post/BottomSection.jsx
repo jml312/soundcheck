@@ -18,7 +18,6 @@ import { postComment } from "@/actions";
 import { COMMENT_MAX_LENGTH } from "@/constants";
 import { useState, useEffect, useRef, useMemo } from "react";
 import dayjs from "dayjs";
-import EmojiPicker from "../EmojiPicker";
 import MentionCard from "../cards/MentionCard";
 
 /**
@@ -258,7 +257,6 @@ export default function BottomSection({
                           })
                         }
                         onBlur={() =>
-                          !comment.addedEmoji &&
                           !isMobileOpen &&
                           setComment({
                             ...comment,
@@ -284,21 +282,10 @@ export default function BottomSection({
                               align={"center"}
                               style={{
                                 zIndex: 100,
-                                transform: "translateX(-.25rem)",
+                                transform: "translateX(.3rem)",
                                 borderRadius: "0.5rem",
                               }}
                             >
-                              <EmojiPicker
-                                isDisabled={
-                                  comment.text.length >= COMMENT_MAX_LENGTH
-                                }
-                                isMobileOpen={isMobileOpen}
-                                setIsMobileOpen={setIsMobileOpen}
-                                setText={setComment}
-                                position={"top-start"}
-                                inputRef={commentInputRef}
-                                isSmall={isSmall}
-                              />
                               <Tooltip
                                 disabled={comment.text.length === 0}
                                 offset={-2}
@@ -307,7 +294,7 @@ export default function BottomSection({
                                 withinPortal
                               >
                                 <ActionIcon
-                                  mr={"-0.3rem"}
+                                  // mr={"-1rem"}
                                   disabled={
                                     !!comment.error ||
                                     comment.isLoading ||

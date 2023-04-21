@@ -16,7 +16,6 @@ import { truncateText, getAvatarText, getTZDate } from "@/utils";
 import { likePost, followUser } from "@/actions";
 import { CAPTION_MAX_LENGTH } from "@/constants";
 import { useState } from "react";
-import EmojiPicker from "../EmojiPicker";
 
 /**
  * @param {boolean} isPostModal - The isPostModal boolean
@@ -443,7 +442,6 @@ export default function TopSection({
               })
             }
             onBlur={() =>
-              !caption.addedEmoji &&
               !isMobileOpen &&
               setCaption({
                 ...caption,
@@ -484,19 +482,6 @@ export default function TopSection({
                 transform: "translateY(-.5rem)",
               },
             }}
-            rightSection={
-              caption.isFocused && (
-                <EmojiPicker
-                  isDisabled={caption.text.length >= CAPTION_MAX_LENGTH}
-                  isMobileOpen={isMobileOpen}
-                  setIsMobileOpen={setIsMobileOpen}
-                  setText={setCaption}
-                  position="bottom-end"
-                  inputRef={captionRef}
-                  isSmall={isSmall}
-                />
-              )
-            }
           />
         )}
       </Flex>

@@ -56,7 +56,7 @@ const SEO = {
     },
     {
       rel: "manifest",
-      href: "/site.webmanifest",
+      href: "/logo/site.webmanifest",
     },
     {
       name: "msapplication-TileColor",
