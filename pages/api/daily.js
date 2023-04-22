@@ -1,9 +1,13 @@
 import client from "@/lib/sanity";
 import { hasPostedTodayQuery, userQuery } from "@/lib/queries";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timeZone from "dayjs/plugin/timezone";
 import { getTZDate } from "@/utils";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+dayjs.extend(utc);
+dayjs.extend(timeZone);
 
 const getRandom9To5 = () => {
   const today = getTZDate();
@@ -28,37 +32,38 @@ export default async function handle(req, res) {
     // get all users
     const allUsers = await client.fetch(userQuery);
 
-    if (allUsers?.length > 0) {
-      allUsers.forEach(async ({ _id, notifications }) => {
-        // check if user posted yesterday
-        const hasPostedToday = await client.fetch(hasPostedTodayQuery, {
-          userId: _id,
-          currentDate: getTZDate().format("YYYY-MM-DD"),
-        });
-        // set user streak to 0 if they didn't post yesterday
-        // update discover songs
-        // remove notifications that are not follows
-        await client
-          .patch(_id)
-          .set({
-            ...(!hasPostedToday && { postStreak: 0 }),
-            notifications: notifications.filter(
-              ({ type }) => type === "follow"
-            ),
-          })
-          .commit();
-      });
+    if (allUsers?.length === 0) {
+      return res.status(200).json({ message: "No users found" });
+    }
 
-      // send emails to all users at random time between 9am and 5pm
-      const subject = "Soundcheck! What are you listening to?";
-      const text = `
+    allUsers.forEach(async ({ _id: userId, notifications }) => {
+      // check if user posted yesterday
+      const hasPostedToday = await client.fetch(hasPostedTodayQuery, {
+        userId,
+        currentDate: getTZDate().format("YYYY-MM-DD"),
+      });
+      // set user streak to 0 if they didn't post yesterday
+      // update discover songs
+      // remove notifications that are not follows
+      await client
+        .patch(userId)
+        .set({
+          ...(!hasPostedToday && { postStreak: 0 }),
+          notifications: notifications.filter(({ type }) => type === "follow"),
+        })
+        .commit();
+    });
+
+    // send emails to all users at random time between 9am and 5pm
+    const subject = "Soundcheck! What are you listening to?";
+    const text = `
       Hey there,
 
       It's time to log in to Soundcheck! and share what you listen to with the world. You never know, you might just stumble upon your next all-time favorite tune! Login and Post a Song ( ${process.env.NEXT_PUBLIC_URL} )
 
       © 2023 Soundcheck!. All rights reserved.
     `;
-      const html = `
+    const html = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -98,24 +103,23 @@ export default async function handle(req, res) {
         </body>
       </html>
     `;
-      const sendAt = getRandom9To5().unix();
+    const sendAt = getRandom9To5().unix();
 
-      await sgMail.sendMultiple({
-        to: allUsers.map(({ email }) => email),
-        from: process.env.SENDGRID_FROM_EMAIL,
-        subject,
-        text,
-        html,
-        ...(testMode !== "true" && { sendAt }),
-      });
+    await sgMail.send({
+      to: allUsers.map(({ email }) => email),
+      from: process.env.SENDGRID_FROM_EMAIL,
+      subject,
+      text,
+      html,
+      isMultiple: allUsers?.length > 1,
+      ...(testMode !== "true" && { sendAt }),
+    });
 
-      return res.status(200).json({
-        message: "Success",
-        sendAt: dayjs.unix(sendAt).format("YYYY-MM-DD HH:mm:ssa"),
-      });
-    }
-
-    return res.status(200).json({ message: "No users found" });
+    return res.status(200).json({
+      message: "Success",
+      sendAt,
+      sendAtFormatted: dayjs.unix(sendAt).format("YYYY-MM-DD hh:mm:ssa"),
+    });
   } catch (error) {
     return res
       .status(500)
