@@ -3,18 +3,20 @@ import { hasPostedTodayQuery, userQuery } from "@/lib/queries";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timeZone from "dayjs/plugin/timezone";
-import { getTZDate } from "@/utils";
+import { TimeZone } from "@/constants";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 dayjs.extend(utc);
 dayjs.extend(timeZone);
 
+dayjs.tz.setDefault(TimeZone);
+
 const getRandom9To5 = () => {
-  const today = getTZDate();
-  const start = today.hour(9).minute(0).second(0);
-  const end = today.hour(17).minute(0).second(0);
-  const random = getTZDate(start + Math.random() * (end - start));
-  return random;
+  const tomorrow = dayjs.tz().add(1, "d").startOf("day");
+  const startHour = 9;
+  const endHour = 17;
+  const randomMinutes = Math.floor(Math.random() * (endHour - startHour) * 60);
+  return tomorrow.add(startHour, "hour").add(randomMinutes, "minute");
 };
 
 export default async function handle(req, res) {
@@ -40,7 +42,7 @@ export default async function handle(req, res) {
       // check if user posted yesterday
       const hasPostedToday = await client.fetch(hasPostedTodayQuery, {
         userId,
-        currentDate: getTZDate().format("YYYY-MM-DD"),
+        currentDate: dayjs.tz().format("YYYY-MM-DD"),
       });
       // set user streak to 0 if they didn't post yesterday
       // update discover songs
