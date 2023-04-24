@@ -1,16 +1,17 @@
 diff --git a/node_modules/next-auth/providers/spotify.js b/node_modules/next-auth/providers/spotify.js
-index 89989d0..e06c8b0 100644
+index 89989d0..6dc96d0 100644
 --- a/node_modules/next-auth/providers/spotify.js
 +++ b/node_modules/next-auth/providers/spotify.js
-@@ -6,11 +6,19 @@ Object.defineProperty(exports, "__esModule", {
+@@ -6,11 +6,20 @@ Object.defineProperty(exports, "__esModule", {
  exports.default = Spotify;
  
  function Spotify(options) {
-+    const scopes = [
++  const scopes = [
 +    "user-read-email",
 +    "user-read-recently-played",
 +    "user-read-currently-playing",
 +    "playlist-modify-private",
++    "playlist-modify-public",
 +    "playlist-read-private",
 +    "ugc-image-upload",
 +  ].join("%20");
