@@ -9,7 +9,7 @@
     "lint": "next lint",
     "sanity-dev": "cd sanity && pnpm run dev",
     "sanity-deploy": "cd sanity && pnpm run deploy",
-    "postinstall": "npx patch-package && cd sanity && pnpm install && cd .."
+    "postinstall": "patch-package && cd sanity && pnpm install && cd .."
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -28,12 +28,15 @@
     "eslint-config-next": "13.2.3",
     "fuse.js": "^6.6.2",
     "next": "latest",
-    "next-auth": "4.20.0",
+    "next-auth": "^4.20.0",
     "next-seo": "^6.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.7.1",
     "react-query": "^3.39.3",
     "react-wordcloud": "^1.2.7"
+  },
+  "devDependencies": {
+    "patch-package": "^6.5.1"
   }
 }
