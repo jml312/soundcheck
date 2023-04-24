@@ -35,5 +35,8 @@
     "react-icons": "^4.7.1",
     "react-query": "^3.39.3",
     "react-wordcloud": "^1.2.7"
+  },
+  "devDependencies": {
+    "cypress": "^12.10.0"
   }
 }

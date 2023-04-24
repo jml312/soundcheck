@@ -2,6 +2,7 @@ import client from "@/lib/sanity";
 import { hasPostedTodayQuery, userQuery } from "@/lib/queries";
 import dayjs from "dayjs";
 import { getTZDate } from "@/utils";
+import { TimeZone } from "@/constants";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -114,7 +115,10 @@ export default async function handle(req, res) {
     return res.status(200).json({
       message: "Success",
       sendAt,
-      sendAtFormatted: dayjs.unix(sendAt).format("YYYY-MM-DD hh:mm:ssa"),
+      sendAtFormatted: dayjs
+        .unix(sendAt)
+        .tz(TimeZone)
+        .format("YYYY-MM-DD hh:mm:ssa"),
     });
   } catch (error) {
     return res
