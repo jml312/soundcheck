@@ -56,7 +56,8 @@ export default NextAuth({
         user.accessToken = access_token;
 
         return true;
-      } catch {
+      } catch (e) {
+        console.log(e.message, e);
         await deleteUser({ client, newUserId });
         return false;
       }
