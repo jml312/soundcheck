@@ -29,7 +29,7 @@ Soundcheck is a social music app that allows you to share your favorite songs wi
 3. Install dependencies
 
 ```bash
-  pnpm install
+  npm install
 ```
 
 4. Populate *.env.local*
@@ -37,6 +37,6 @@ Soundcheck is a social music app that allows you to share your favorite songs wi
 5. Start the server
 
 ```bash
-  pnpm run dev
+  npm run dev
 ```
 

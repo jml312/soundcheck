@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sanity-dev": "cd sanity && pnpm run dev",
-    "sanity-deploy": "cd sanity && pnpm run deploy",
-    "postinstall": "patch-package && cd sanity && pnpm install && cd .."
+    "sanity-dev": "cd sanity && npm run dev",
+    "sanity-deploy": "cd sanity && npm run deploy",
+    "postinstall": "npx patch-package && cd sanity && npm install && cd .."
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -35,8 +35,5 @@
     "react-icons": "^4.7.1",
     "react-query": "^3.39.3",
     "react-wordcloud": "^1.2.7"
-  },
-  "devDependencies": {
-    "patch-package": "^6.5.1"
   }
 }
