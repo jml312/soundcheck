@@ -33,7 +33,7 @@ export default async function handle(req, res) {
       return res.status(200).json({ message: "No users found" });
     }
 
-    allUsers.forEach(async ({ _id: userId, notifications }) => {
+    allUsers.forEach(async ({ _id: userId, notifications, postStreak }) => {
       // check if user posted yesterday
       const hasPostedToday = await client.fetch(hasPostedTodayQuery, {
         userId,
@@ -45,7 +45,7 @@ export default async function handle(req, res) {
       await client
         .patch(userId)
         .set({
-          ...(!hasPostedToday && { postStreak: 0 }),
+          postStreak: hasPostedToday ? postStreak : 0,
           notifications: notifications.filter(({ type }) => type === "follow"),
         })
         .commit();

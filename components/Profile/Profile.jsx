@@ -106,7 +106,6 @@ export default function Profile({ isUser, profile }) {
       gap={40}
       style={{
         transform: "translateY(5rem)",
-        overflow: "hidden",
       }}
     >
       <Flex
