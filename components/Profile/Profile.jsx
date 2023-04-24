@@ -49,7 +49,12 @@ export default function Profile({ isUser, profile }) {
   const [selectedTab, setSelectedTab] = useState("posts");
   const [cloudsTransition, setCloudsTransition] = useState(0);
   const [artists, albums, genres] = useMemo(
-    () => formatStats({ stats, keys: ["artists", "album", "genres"] }),
+    () =>
+      formatStats({
+        stats,
+        keys: ["artists", "album", "genres"],
+        truncate: true,
+      }),
     []
   );
   const [selectedStat, setSelectedStat] = useState("artists");

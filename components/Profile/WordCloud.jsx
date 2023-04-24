@@ -7,7 +7,7 @@ function WordCloud({ data, theme, isSmall }) {
     () => ({
       colors: [theme.colorScheme === "dark" ? theme.white : theme.black],
       deterministic: true,
-      fontSizes: isSmall ? [17, 57] : [22, 62],
+      fontSizes: isSmall ? [15, 55] : [20, 60],
       fontStyle: "normal",
       fontWeight: "normal",
       padding: 3,
@@ -38,7 +38,7 @@ function WordCloud({ data, theme, isSmall }) {
     );
   }
 
-  if (!data.length) return "Nothing to show yet...";
+  if (data?.length === 0) return "Nothing to show yet...";
 
   return <ReactWordcloud words={data} options={options} maxWords={25} />;
 }

@@ -1,10 +1,12 @@
+import { truncateText } from "./truncateText";
+
 /**
  * @param {Object} stats - Array of objects with stats
  * @param {Array} keys - Array of keys to format
- * @param {Boolean} truncateText - Whether to truncate text
+ * @param {Boolean} truncate - Whether to truncate text
  * @returns {Array} formatted stats sorted by value
  */
-export const formatStats = ({ stats, keys, truncateText = true }) => {
+export const formatStats = ({ stats, keys, truncate = true }) => {
   const maxWordLength = 20;
   return stats
     .reduce(
@@ -18,11 +20,7 @@ export const formatStats = ({ stats, keys, truncateText = true }) => {
               );
               if (itemIndex === -1) {
                 acc[idx].push({
-                  text: truncateText
-                    ? item.length > maxWordLength
-                      ? `${item.substring(0, maxWordLength - 3)}...`
-                      : item
-                    : item,
+                  text: truncate ? truncateText(item, maxWordLength) : item,
                   value: 1,
                 });
               } else {
@@ -34,7 +32,10 @@ export const formatStats = ({ stats, keys, truncateText = true }) => {
               (item2) => item2.text === curr
             );
             if (itemIndex === -1) {
-              acc[idx].push({ text: curr, value: 1 });
+              acc[idx].push({
+                text: truncate ? truncateText(curr, maxWordLength) : curr,
+                value: 1,
+              });
             } else {
               acc[idx][itemIndex].value++;
             }

@@ -54,6 +54,6 @@ export const createPlaylist = async ({ id, accessToken, client }) => {
 
     return newPlaylistID;
   } catch {
-    return null;
+    throw new Error("Failed to create playlist");
   }
 };
