@@ -9,7 +9,9 @@
     "lint": "next lint",
     "sanity-dev": "cd sanity && npm run dev",
     "sanity-deploy": "cd sanity && npm run deploy",
-    "postinstall": "npx patch-package && cd sanity && npm install && cd .."
+    "postinstall": "npx patch-package && cd sanity && npm install && cd ..",
+    "test": "start-server-and-test dev http://localhost:3000 \"cypress open --e2e\"",
+    "test:headless": "start-server-and-test dev http://localhost:3000 \"cypress run --e2e\""
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -37,6 +39,7 @@
     "react-wordcloud": "^1.2.7"
   },
   "devDependencies": {
-    "cypress": "^12.10.0"
+    "cypress": "^12.11.0",
+    "start-server-and-test": "^2.0.0"
   }
 }
