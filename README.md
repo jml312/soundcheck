@@ -5,6 +5,7 @@ Soundcheck is a social music app that allows you to share your favorite songs wi
 __Due to the current Spotify API limit of 25 users, no additional users can be added as the maximum number of sign-ups has been reached.__
 
 [Soundcheck Website](https://onetwosoundcheck.vercel.app)
+
 [Soundcheck App](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://apps.apple.com/tr/app/soundcheck/id6463963681&ved=2ahUKEwiUvYm2_9SLAxX1tokEHVkNHFIQFnoECBUQAQ&usg=AOvVaw3UoiZsOlaXxbtyrWKdOiLG)
 
 ## Tech Stack
